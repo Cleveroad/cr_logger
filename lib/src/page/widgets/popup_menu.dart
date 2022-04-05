@@ -58,11 +58,12 @@ class PopupMenuState extends State<PopupMenu> {
       icon: Icons.design_services_outlined,
       onTap: _toggleInspector,
     ),
-    _PopupMenuItem(
-      title: const Text('Set Charlies proxy'),
-      icon: Icons.important_devices,
-      onTap: _showIpInput,
-    ),
+    if (!kIsWeb)
+      _PopupMenuItem(
+        title: const Text('Set Charlies proxy'),
+        icon: Icons.important_devices,
+        onTap: _showIpInput,
+      ),
     _PopupMenuItem(
       title: const Text('Search'),
       icon: Icons.search,

@@ -4,6 +4,7 @@ import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/page/log_local_detail_page.dart';
 import 'package:cr_logger/src/page/widgets/search/search_item.dart';
 import 'package:cr_logger/src/utils/local_log_managed.dart';
+import 'package:cr_logger/src/utils/pair.dart';
 import 'package:cr_logger/src/widget/cr_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +19,7 @@ class LogSearchPage extends StatefulWidget {
 class _LogSearchPageState extends State<LogSearchPage> {
   final _searchCtrl = TextEditingController();
 
-  final _results = <LogBean>[];
+  final _results = <Pair<LogType, LogBean>>[];
 
   final _logMng = LocalLogManager.instance;
 
@@ -75,8 +76,8 @@ class _LogSearchPageState extends State<LogSearchPage> {
               : ListView.builder(
                   itemCount: _results.length,
                   itemBuilder: (_, index) => SearchItem(
-                    logBean: _results[index],
-                    onTap: _onItemTap,
+                    logBean: _results[index].second,
+                    onTap: (bean) => _onItemTap(bean, _results[index].first),
                     onLongTap: _onItemLongTap,
                   ),
                 ),
@@ -97,22 +98,44 @@ class _LogSearchPageState extends State<LogSearchPage> {
       setState(() {
         _results
           ..clear()
-          ..addAll(_logMng.logDebug.reversed
-              .where((log) => log.message.toLowerCase().contains(query)))
-          ..addAll(_logMng.logInfo.reversed
-              .where((log) => log.message.toLowerCase().contains(query)))
-          ..addAll(_logMng.logError.reversed
-              .where((log) => log.message.toLowerCase().contains(query)))
-          ..sort((a, b) => a.compareTo(b));
+          ..addAll(
+            _logMng.logDebug.reversed
+                .where(
+                  (log) => log.message.toString().toLowerCase().contains(query),
+                )
+                .map(
+                  (e) => Pair(first: LogType.debug, second: e),
+                ),
+          )
+          ..addAll(
+            _logMng.logInfo.reversed
+                .where((log) =>
+                    log.message.toString().toLowerCase().contains(query))
+                .map(
+                  (e) => Pair(first: LogType.info, second: e),
+                ),
+          )
+          ..addAll(
+            _logMng.logError.reversed
+                .where((log) =>
+                    log.message.toString().toLowerCase().contains(query))
+                .map(
+                  (e) => Pair(first: LogType.error, second: e),
+                ),
+          )
+          ..sort((a, b) => a.second.compareTo(b.second));
       });
     }
   }
 
-  Future<void> _onItemTap(LogBean bean) async {
+  Future<void> _onItemTap(LogBean bean, LogType type) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (ctx) => LogLocalDetailPage(logBean: bean),
+        builder: (ctx) => LogLocalDetailPage(
+          logBean: bean,
+          logType: type,
+        ),
       ),
     );
   }
