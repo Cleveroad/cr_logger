@@ -1,0 +1,3 @@
+class LoggerStyle {
+  LoggerStyle._();
+}
