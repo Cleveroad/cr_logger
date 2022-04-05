@@ -34,21 +34,22 @@ class RestClient {
   void enableDioProxyForCharles(ProxyModel proxyModel) {
     final proxyStr = 'PROXY ${proxyModel.ip}:${proxyModel.port}; '
         'PROXY localhost:${proxyModel.port}; DIRECT';
+    final adapter = dio.httpClientAdapter;
+    if (adapter is DefaultHttpClientAdapter) {
+      adapter.onHttpClientCreate = (HttpClient client) {
+        client
+          ..findProxy = (uri) {
+            return proxyStr;
+          }
+          ..badCertificateCallback = (
+            X509Certificate cert,
+            String host,
+            int port,
+          ) =>
+              true;
 
-    (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-        (HttpClient client) {
-      client
-        ..findProxy = (uri) {
-          return proxyStr;
-        }
-        ..badCertificateCallback = (
-          X509Certificate cert,
-          String host,
-          int port,
-        ) =>
-            true;
-
-      return null;
-    };
+        return null;
+      };
+    }
   }
 }

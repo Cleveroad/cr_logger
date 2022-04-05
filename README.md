@@ -2,6 +2,8 @@
 
 <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/banner.png" width="100%">
 
+Web [example](https://cleveroad.github.io/cr_logger)
+
 **Flutter plugin for logging**
 
 * Simple logging to logcat.
@@ -21,7 +23,7 @@
 1. Add plugin to the project:
     ```yaml
     dependencies:
-        cr_logger: ^0.9.10
+        cr_logger: ^0.9.12
     ```
 
 2. Initialize the logger. main.dart:

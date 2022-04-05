@@ -17,7 +17,7 @@ class SearchItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(
-        logBean.message,
+        logBean.message.toString(),
         style: TextStyle(color: logBean.color),
       ),
       subtitle: Text('${logBean.time}'),

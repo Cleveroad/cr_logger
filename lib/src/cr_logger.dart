@@ -59,6 +59,7 @@ class CRLoggerInitializer {
   List<String> endpoints = [];
   List<String> hiddenFields = [];
 
+  /// Called only when [kIsWeb] is false
   /// When proxy ip and port changed, this callback will return new proxy,
   /// for saving it on the app side to DB or shared preferences.
   ValueChanged<ProxyModel>? onProxyChanged;
