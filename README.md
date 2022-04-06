@@ -1,6 +1,6 @@
 # cr_logger
 
-<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/banner.png" width="100%">
+<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/plugin_banner.png" width="100%">
 
 Web [example](https://cleveroad.github.io/cr_logger)
 
@@ -23,7 +23,7 @@ Web [example](https://cleveroad.github.io/cr_logger)
 1. Add plugin to the project:
     ```yaml
     dependencies:
-        cr_logger: ^0.9.12
+        cr_logger: ^0.9.13
     ```
 
 2. Initialize the logger. main.dart:

@@ -1,6 +1,7 @@
 name: cr_logger
-description: Flutter plugin for logging.
-version: 0.9.12
+description: Powerful logging plugin. Supports android, ios and web platforms.
+
+version: 0.9.13
 homepage: https://github.com/Cleveroad/cr_logger
 
 environment:
