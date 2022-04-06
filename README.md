@@ -1,6 +1,6 @@
 # cr_logger
 
-<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/banner.png" width="100%">
+<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/plugin_banner.png" width="100%">
 
 Web [example](https://cleveroad.github.io/cr_logger)
 
