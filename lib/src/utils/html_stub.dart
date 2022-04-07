@@ -21,6 +21,6 @@ class BodyStub {
 
 class JS {
   const JS([this.name]);
-  
+
   final String? name;
 }
