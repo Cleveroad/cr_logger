@@ -18,12 +18,21 @@ Web [example](https://cleveroad.github.io/cr_logger)
 ✔️ Http from http/http package  
 ✔️ HttpClient from dart:io package  
 
+
+## Table of contents
+
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Quick actions](#quick-actions)
+- [Setup](#setup)
+- [Examples](#examples)
+
 ## Getting Started
 
 1. Add plugin to the project:
     ```yaml
     dependencies:
-        cr_logger: ^0.9.13
+        cr_logger: ^0.9.14
     ```
 
 2. Initialize the logger. main.dart:
@@ -164,21 +173,21 @@ You can also `double tap` on the button to invoke **Quick Actions**.
 Using this popup menu, you can **quickly access** the desired CRLogger options.
 Called by a **long press** or **double tap** on the debug button.
 #####
-##### App info
+#### App info
 Allows you to view **Build type**, also **Endpoint**, **Package name**, **app version** and **build version**
-##### Clear logs
+#### Clear logs
 **Clears** application logs
 ##### Show Inspector
 If the **inspector** is enabled, then a panel appears on the right side of the screen, with buttons to toggle size inspection and the color picker.
-##### Set Charles proxy
+#### Set Charles proxy
 Needed to set **proxy settings** for Charles
-##### Search
+#### Search
 Provides **search by logs** (Debug, Info, Error)
-##### Share logs
+#### Share logs
 Share logs with your team
-##### Import logs
+#### Import logs
 Import logs from file
-##### Value notifiers
+#### Value notifiers
 Helps to track changes in values in variables of the **ValueNotifier** type, the value can be either a **simple type** or a **Widget** and etc.
 1. Type notifiers:
 
