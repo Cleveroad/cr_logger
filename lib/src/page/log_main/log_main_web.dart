@@ -14,7 +14,10 @@ import 'package:flutter/material.dart';
 import 'package:split_view/split_view.dart';
 
 class MainLogWebPage extends StatefulWidget {
-  const MainLogWebPage({Key? key}) : super(key: key);
+  const MainLogWebPage({required this.onLoggerClose, Key? key})
+      : super(key: key);
+
+  final VoidCallback onLoggerClose;
 
   static void cleanLogs() {
     cleanDebug();
@@ -119,7 +122,10 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
                 children: [
                   Column(
                     children: [
-                      CRWebAppBar(popupKey: _popupKey),
+                      CRWebAppBar(
+                        popupKey: _popupKey,
+                        onLoggerClose: widget.onLoggerClose,
+                      ),
                       OptionsButtons(
                         key: _navKey,
                         isWeb: true,

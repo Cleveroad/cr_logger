@@ -7,7 +7,14 @@ import 'package:cr_logger/src/widget/adaptive_layout/adaptive_layout_widget.dart
 import 'package:flutter/material.dart';
 
 class MainLogPage extends StatefulWidget {
-  const MainLogPage({Key? key}) : super(key: key);
+  const MainLogPage({
+    required this.navigationKey,
+    required this.onLoggerClose,
+    Key? key,
+  }) : super(key: key);
+
+  final GlobalKey<NavigatorState> navigationKey;
+  final VoidCallback onLoggerClose;
 
   static void cleanLogs() {
     cleanDebug();
@@ -41,10 +48,31 @@ class _MainLogPageState extends State<MainLogPage> {
   Widget build(BuildContext context) {
     return Theme(
       data: CRLoggerHelper.instance.theme,
-      child: const AdaptiveLayoutWidget(
-        mobileLayoutWidget: MainLogMobilePage(),
-        webLayoutWidget: MainLogWebPage(),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: CRLoggerHelper.instance.loggerShowingNotifier,
+        // ignore: prefer-trailing-comma
+        builder: (_, showLogger, __) => Offstage(
+          offstage: !showLogger,
+          child: Navigator(
+            key: widget.navigationKey,
+            onGenerateRoute: _onGenerateRoute,
+          ),
+        ),
       ),
+    );
+  }
+
+  Route? _onGenerateRoute(RouteSettings settings) {
+    return MaterialPageRoute<dynamic>(
+      builder: (context) => AdaptiveLayoutWidget(
+        mobileLayoutWidget: MainLogMobilePage(
+          onLoggerClose: widget.onLoggerClose,
+        ),
+        webLayoutWidget: MainLogWebPage(
+          onLoggerClose: widget.onLoggerClose,
+        ),
+      ),
+      settings: settings,
     );
   }
 }

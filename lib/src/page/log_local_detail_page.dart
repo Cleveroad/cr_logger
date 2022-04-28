@@ -93,7 +93,7 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
                             valueListenable: _allExpandedNodesNotifier,
                             builder: (
                               BuildContext context,
-                              bool value,
+                              bool isAllNodesExpanded,
                               Widget? child,
                             ) {
                               return Column(children: [
@@ -106,7 +106,7 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
                                       style: CRStyle.subtitle1BlackSemiBold16,
                                     ),
                                     ExpandedArrowWidget(
-                                      expanded: value,
+                                      expanded: isAllNodesExpanded,
                                       allExpandedNotifier:
                                           _allExpandedNodesNotifier,
                                     ),
@@ -115,7 +115,7 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
                                 JsonWidget(
                                   widget.logBean?.message
                                       as Map<String, dynamic>,
-                                  allExpandedNodes: value,
+                                  allExpandedNodes: isAllNodesExpanded,
                                 ),
                               ]);
                             },

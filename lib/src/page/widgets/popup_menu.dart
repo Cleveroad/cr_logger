@@ -172,8 +172,20 @@ class PopupMenuState extends State<PopupMenu> {
         .showSnackBar(const SnackBar(content: Text('Logged out')));
   }
 
-  Future<void> _shareLogs() async =>
-      LocalLogManager.instance.createJsonFileAndShare();
+  Future<void> _shareLogs() async {
+    if (crLoggerInitializer.onShareLogsFile == null) {
+      return showInfoDialog(
+        context: context,
+        title: const Text('Warning'),
+        content: const Text(
+          'onShareLogsFile callback is not defined in CRLoggerInitializer.\n\n'
+          'Please, contact developer.',
+        ),
+      );
+    }
+
+    return LocalLogManager.instance.createJsonFileAndShare();
+  }
 
   Future<void> _showIpInput() async {
     final callbacks = {

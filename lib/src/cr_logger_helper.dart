@@ -9,6 +9,13 @@ class CRLoggerHelper {
 
   final lock = Lock();
   final inspectorNotifier = ValueNotifier<bool>(false);
+  final loggerShowingNotifier = ValueNotifier<bool>(false);
 
   ThemeData theme = loggerTheme;
+
+  bool get isLoggerShowing => loggerShowingNotifier.value;
+
+  void showLogger() => loggerShowingNotifier.value = true;
+
+  void hideLogger() => loggerShowingNotifier.value = false;
 }

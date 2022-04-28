@@ -53,7 +53,7 @@ class LocalLogItem extends StatelessWidget {
                       valueListenable: _allExpandedNodesNotifier,
                       builder: (
                         BuildContext context,
-                        bool value,
+                        bool isAllNodesExpanded,
                         Widget? child,
                       ) {
                         return Column(
@@ -72,7 +72,7 @@ class LocalLogItem extends StatelessWidget {
                                     ExpandedArrowWidget(
                                       allExpandedNotifier:
                                           _allExpandedNodesNotifier,
-                                      expanded: value,
+                                      expanded: isAllNodesExpanded,
                                     ),
                                   ],
                                 ),
@@ -80,7 +80,7 @@ class LocalLogItem extends StatelessWidget {
                             ),
                             JsonWidget(
                               logBean.message as Map<String, dynamic>,
-                              allExpandedNodes: value,
+                              allExpandedNodes: isAllNodesExpanded,
                             ),
                             const SizedBox(height: 12),
                             Text(

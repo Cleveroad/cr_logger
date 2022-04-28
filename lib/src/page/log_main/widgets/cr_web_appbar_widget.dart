@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 class CRWebAppBar extends StatelessWidget {
   const CRWebAppBar({
     required this.popupKey,
+    required this.onLoggerClose,
     Key? key,
   }) : super(key: key);
 
   final GlobalKey popupKey;
+  final VoidCallback onLoggerClose;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +44,7 @@ class CRWebAppBar extends StatelessWidget {
             style: CRStyle.bodyGreyMedium14,
           ),
           InkWell(
-            onTap: () => Navigator.pop(context),
+            onTap: onLoggerClose,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Row(

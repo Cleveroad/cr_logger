@@ -42,19 +42,17 @@ class JsonWidgetState extends State<JsonWidget> {
   void didUpdateWidget(covariant JsonWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateNodes();
+    if (oldWidget.allExpandedNodes != widget.allExpandedNodes) {
+      if (widget.allExpandedNodes) {
+        _jsonController.expandAll();
+      } else {
+        _jsonController.collapseAll();
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    _jsonController
-      ..allNodesExpanded = widget.allExpandedNodes
-      ..uncovered = widget.uncovered;
-    if (_jsonController.allNodesExpanded) {
-      _jsonController.expandAll();
-    } else {
-      _jsonController.collapseAll();
-    }
-
     return widget.jsonObj == null
         ? const SizedBox()
         : Padding(

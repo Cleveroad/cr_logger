@@ -49,6 +49,9 @@ class CRLoggerInitializer {
   static CRLoggerInitializer instance = CRLoggerInitializer._();
 
   final _consoleLogOutput = ConsoleLogOutput();
+  final _loggerNavigationKey = GlobalKey<NavigatorState>();
+  final _rootBackButtonDispatcher = RootBackButtonDispatcher();
+
   late final CRHttpClientAdapter _httpClientAdapter;
   late final CRHttpAdapter _httpAdapter;
 
@@ -133,7 +136,8 @@ class CRLoggerInitializer {
   /// '''
   IsolateFunctionHandler<String>? parseiOSJsonStringInIsolate;
 
-  OverlayEntry? _itemEntry;
+  OverlayEntry? _buttonEntry;
+  OverlayEntry? _loggerEntry;
 
   /// Allows you to listen to local logs and, for example,
   /// send them to a third-party logging service
@@ -146,7 +150,7 @@ class CRLoggerInitializer {
   /// Whether logs will be printed in isolate
   bool get isIsolateHttpLogsPrinting => PrettyCRLogger.isIsolatePrinting;
 
-  bool get isDebugButtonDisplayed => _itemEntry != null;
+  bool get isDebugButtonDisplayed => _buttonEntry != null;
 
   /// Logger initialization.
   ///
@@ -205,6 +209,8 @@ class CRLoggerInitializer {
               ? Level.verbose
               : Level.nothing,
         );
+
+    _rootBackButtonDispatcher.addCallback(_dispatchBackButton);
 
     inited = true;
   }
@@ -324,8 +330,8 @@ class CRLoggerInitializer {
 
   /// Close hover button
   void dismissDebugButton() {
-    _itemEntry?.remove();
-    _itemEntry = null;
+    _buttonEntry?.remove();
+    _buttonEntry = null;
   }
 
   void _showMenu(
@@ -334,19 +340,20 @@ class CRLoggerInitializer {
     required double top,
     Widget? button,
   }) {
-    _itemEntry = OverlayEntry(
+    _buttonEntry = OverlayEntry(
       builder: (BuildContext context) => SafeArea(
         child: button ??
             DraggableButtonWidget(
               leftPos: left,
               topPos: top,
+              onLoggerOpen: _onLoggerOpen,
             ),
       ),
     );
 
     ///Show hover menu
-    if (_itemEntry != null) {
-      Overlay.of(context)?.insert(_itemEntry!);
+    if (_buttonEntry != null) {
+      Overlay.of(context)?.insert(_buttonEntry!);
     }
   }
 
@@ -379,6 +386,48 @@ class CRLoggerInitializer {
         log.e(data.entries.isEmpty ? logData : data);
         break;
     }
+  }
+
+  void _onLoggerClose() {
+    _loggerEntry?.remove();
+    _loggerEntry = null;
+    CRLoggerHelper.instance.hideLogger();
+  }
+
+  void _onLoggerOpen(BuildContext context) {
+    ///Show logger
+    if (_loggerEntry == null) {
+      final newLoggerEntry = OverlayEntry(
+        builder: (context) => MainLogPage(
+          navigationKey: _loggerNavigationKey,
+          onLoggerClose: _onLoggerClose,
+        ),
+      );
+      _loggerEntry = newLoggerEntry;
+      Overlay.of(context)?.insert(newLoggerEntry);
+
+      ///The button should be above logger
+      final buttonEntry = _buttonEntry;
+      if (buttonEntry != null) {
+        buttonEntry.remove();
+        Overlay.of(context)?.insert(buttonEntry);
+      }
+    }
+  }
+
+  Future<bool> _dispatchBackButton() async {
+    if (CRLoggerHelper.instance.isLoggerShowing) {
+      if (_loggerNavigationKey.currentState != null) {
+        final isPopped = await _loggerNavigationKey.currentState!.maybePop();
+        if (!isPopped) {
+          _onLoggerClose();
+        }
+      }
+
+      return true;
+    }
+
+    return false;
   }
 }
 
