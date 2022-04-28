@@ -153,7 +153,7 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
               valueListenable: _allExpandedNodesNotifier,
               builder: (
                 BuildContext context,
-                bool value,
+                bool isAllNodesExpanded,
                 Widget? child,
               ) {
                 return Material(
@@ -180,10 +180,10 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
                               style: CRStyle.subtitle1BlackSemiBold16,
                             ),
                             Transform.rotate(
-                              angle: value ? math.pi : 0,
+                              angle: isAllNodesExpanded ? math.pi : 0,
                               child: IconButton(
-                                onPressed: () => setState(() =>
-                                    _allExpandedNodesNotifier.value = !value),
+                                onPressed: () => _allExpandedNodesNotifier
+                                    .value = !isAllNodesExpanded,
                                 icon: ImageExt.fromPackage(
                                   Assets.assetsArrowDown,
                                   height: 28,
@@ -198,7 +198,7 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
                         ),
                         JsonWidget(
                           _getJsonObj(request),
-                          allExpandedNodes: value,
+                          allExpandedNodes: isAllNodesExpanded,
                           key: _jsonWidgetBodyValueKey,
                         ),
                         const SizedBox(height: 8),
@@ -209,7 +209,7 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
                         const SizedBox(height: 12),
                         JsonWidget(
                           {'params': request?.params},
-                          allExpandedNodes: value,
+                          allExpandedNodes: isAllNodesExpanded,
                           key: _jsonWidgetParamsValueKey,
                         ),
                       ],

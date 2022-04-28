@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 class CRAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CRAppBar({
     this.title = '',
-    this.onBackTap,
     this.showBackButton,
     this.backButtonColor,
     this.onBackPressed,
@@ -22,7 +21,6 @@ class CRAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool centerTitle;
   final bool reverse;
   final bool showLoggerVersion;
-  final VoidCallback? onBackTap;
   final bool? showBackButton;
   final Color? backButtonColor;
   final VoidCallback? onBackPressed;

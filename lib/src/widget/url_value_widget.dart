@@ -10,12 +10,16 @@ import 'package:flutter/material.dart';
 class UrlValueWidget extends StatefulWidget {
   const UrlValueWidget({
     required this.url,
+    this.title,
+    this.child,
     this.requestTime,
     this.responseTime,
     Key? key,
   }) : super(key: key);
 
   final String? url;
+  final String? title;
+  final Widget? child;
   final DateTime? requestTime;
   final DateTime? responseTime;
 
@@ -24,14 +28,16 @@ class UrlValueWidget extends StatefulWidget {
 }
 
 class _UrlValueWidgetState extends State<UrlValueWidget> {
-  bool expanded = false;
+  bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
+    final child = widget.child;
+
     return Material(
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
-        onTap: () => setState(() => expanded = !expanded),
+        onTap: () => setState(() => _expanded = !_expanded),
         borderRadius: BorderRadius.circular(10),
         child: Ink(
           decoration: BoxDecoration(
@@ -50,8 +56,8 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Link',
+                  Text(
+                    widget.title ?? 'Link',
                     style: CRStyle.subtitle1BlackSemiBold16,
                   ),
                   CopyWidget(
@@ -59,9 +65,10 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
                   ),
                 ],
               ),
+              if (child != null) child,
               Text(
                 widget.url.toString(),
-                maxLines: expanded ? null : 4,
+                maxLines: _expanded ? null : 4,
                 overflow: TextOverflow.fade,
                 style: CRStyle.bodyBlackRegular14,
               ),
@@ -74,7 +81,7 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Transform.rotate(
-                    angle: expanded ? math.pi : 0,
+                    angle: _expanded ? math.pi : 0,
                     child: const Icon(
                       Icons.keyboard_arrow_down,
                     ),

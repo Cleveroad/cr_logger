@@ -1,8 +1,8 @@
-import 'package:cr_logger/src/bean/error_bean.dart';
-import 'package:cr_logger/src/bean/http_bean.dart';
+import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/styles.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
+import 'package:cr_logger/src/widget/url_value_widget.dart';
 import 'package:flutter/material.dart';
 
 class HttpErrorWidget extends StatefulWidget {
@@ -26,7 +26,7 @@ class _HttpErrorWidgetState extends State<HttpErrorWidget>
     final errorBean = widget.httpBean.error;
     final statusCode = errorBean?.statusCode;
     final statusMessage = errorBean?.statusMessage;
-    final baseUrl = errorBean?.baseUrl;
+    final url = errorBean?.url;
 
     super.build(context);
 
@@ -47,59 +47,39 @@ class _HttpErrorWidgetState extends State<HttpErrorWidget>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Material(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Ink(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: CRLoggerColors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Dio error',
-                          style: CRStyle.subtitle1BlackSemiBold16,
+                UrlValueWidget(
+                  url: url,
+                  title: 'Dio error',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// Status code and message
+                      if (statusCode != null && statusMessage != null)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Status',
+                              style: CRStyle.bodyBlackMedium14,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: CRLoggerColors.red,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              child: Text(
+                                '$statusCode $statusMessage',
+                                style: CRStyle.bodyWhiteSemiBold14,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 14),
-
-                        /// Status code and message
-                        if (statusCode != null && statusMessage != null)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Status',
-                                style: CRStyle.bodyBlackMedium14,
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: CRLoggerColors.red,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                child: Text(
-                                  '$statusCode $statusMessage',
-                                  style: CRStyle.bodyWhiteSemiBold14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        const Divider(height: 24),
-
-                        /// Base url
-                        if (baseUrl != null)
-                          Text(
-                            baseUrl,
-                            style: CRStyle.bodyBlueRegular14,
-                          ),
-                      ],
-                    ),
+                      const Divider(height: 24),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),

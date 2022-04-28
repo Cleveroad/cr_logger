@@ -16,7 +16,7 @@ Web [example](https://cleveroad.github.io/cr_logger)
 ✔️ Dio  
 ✔️ Chopper  
 ✔️ Http from http/http package  
-✔️ HttpClient from dart:io package  
+✔️ HttpClient from dart:io package
 
 
 ## Table of contents
@@ -32,7 +32,7 @@ Web [example](https://cleveroad.github.io/cr_logger)
 1. Add plugin to the project:
     ```yaml
     dependencies:
-        cr_logger: ^0.9.14
+        cr_logger: ^0.9.16
     ```
 
 2. Initialize the logger. main.dart:
@@ -129,7 +129,12 @@ convenient work with Dart Isolates:
          await Future.delayed(const Duration(seconds: 1));
       };
    ```
-
+   5.4 `ShareLogsFileCallback` - when needed to share logs file on the app's side
+   ```
+      CRLoggerInitializer.instance.onShareLogsFile = (path) async {
+         await Share.shareFiles([path]);
+      };
+   ```
 
 6. Define the variables:
 
@@ -140,7 +145,6 @@ convenient work with Dart Isolates:
    6.3 `hiddenFields` - list of keys for headers to hide when showing network logs
 
    6.4 `endpoints`
-
 
 7. Add the overlay button:
 

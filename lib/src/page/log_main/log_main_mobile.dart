@@ -14,7 +14,12 @@ import 'package:cr_logger/src/widget/options_buttons.dart';
 import 'package:flutter/material.dart';
 
 class MainLogMobilePage extends StatefulWidget {
-  const MainLogMobilePage({Key? key}) : super(key: key);
+  const MainLogMobilePage({
+    required this.onLoggerClose,
+    Key? key,
+  }) : super(key: key);
+
+  final VoidCallback onLoggerClose;
 
   static void cleanLogs() {
     cleanDebug();
@@ -84,6 +89,8 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
         backgroundColor: CRLoggerColors.backgroundGrey,
         appBar: CRAppBar(
           showLoggerVersion: true,
+          onBackPressed: widget.onLoggerClose,
+          showBackButton: true,
           actions: [
             PopupMenu(
               popupKey: _popupKey,

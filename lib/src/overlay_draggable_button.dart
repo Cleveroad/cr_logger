@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cr_logger/src/colors.dart';
-import 'package:cr_logger/src/page/log_main/log_main.dart';
+import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/page/widgets/popup_menu.dart';
 import 'package:cr_logger/src/res/theme.dart';
 import 'package:cr_logger/src/widget/build_number.dart';
@@ -15,8 +15,8 @@ class DraggableButtonWidget extends StatefulWidget {
   const DraggableButtonWidget({
     required this.leftPos,
     required this.topPos,
+    required this.onLoggerOpen,
     this.title = 'log',
-    this.onTap,
     this.btnSize = 48,
     Key? key,
   }) : super(key: key);
@@ -24,8 +24,8 @@ class DraggableButtonWidget extends StatefulWidget {
   final double leftPos;
   final double topPos;
   final String title;
-  final Function()? onTap;
   final double btnSize;
+  final Function(BuildContext context) onLoggerOpen;
 
   @override
   _DraggableButtonWidgetState createState() => _DraggableButtonWidgetState();
@@ -71,7 +71,7 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
                   popupKey: popupButtonKey,
                   onCanceled: _onCanceledPopup,
                   child: GestureDetector(
-                    onTap: widget.onTap ?? _defaultClick,
+                    onTap: () => _defaultClick(context),
                     onLongPress: _onPressDraggableButton,
                     onDoubleTap: _onPressDraggableButton,
                     onPanUpdate: _dragUpdate,
@@ -103,18 +103,13 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
     );
   }
 
-  Future<void> _defaultClick() async {
-    setState(() {
-      isShow = false;
-    });
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const MainLogPage(),
-      ),
-    );
-    setState(() {
-      isShow = true;
-    });
+  Future<void> _defaultClick(BuildContext context) async {
+    if (CRLoggerHelper.instance.isLoggerShowing) {
+      CRLoggerHelper.instance.hideLogger();
+    } else {
+      widget.onLoggerOpen(context);
+      CRLoggerHelper.instance.showLogger();
+    }
   }
 
   void _onPressDraggableButton() {

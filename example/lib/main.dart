@@ -49,8 +49,14 @@ Future<void> main() async {
   CRLoggerInitializer.instance.onGetProxyFromDB = () {
     return ProxyModel.fromString(proxyIpAndPortString ?? '');
   };
+  CRLoggerInitializer.instance.onShareLogsFile = (path) async {
+    await Share.shareFiles([path]);
+  };
+
+  // Third! Define the variables
   CRLoggerInitializer.instance.buildType = 'release';
   CRLoggerInitializer.instance.endpoints = ['https/cr_logger/example/'];
+
   final proxy = ProxyModel.fromString(proxyIpAndPortString ?? '');
   if (proxy != null) {
     RestClient.instance.enableDioProxyForCharles(proxy);
@@ -73,9 +79,6 @@ Future<void> main() async {
     );
   };
 
-  CRLoggerInitializer.instance.onShareLogsFile = (path) async {
-    await Share.shareFiles([path]);
-  };
   runApp(const MyApp());
 }
 

@@ -1,3 +1,13 @@
+## 0.9.16
+
+- Added warning popup when selecting Share logs if onShareLogsFile callback was not defined
+- ShareLogsFileCallback was described in the readme
+- Added ability to minimize logger with saving state when you tap on overlay button again
+
+## 0.9.15
+
+- Changed display of link block on Error tab of Http logs details page to match other tabs
+
 ## 0.9.14
 
 - Updated readme
