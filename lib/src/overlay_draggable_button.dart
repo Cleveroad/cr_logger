@@ -83,12 +83,14 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
                         child: Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,
                           spacing: 2,
-                          children: const [
+                          children: [
                             Icon(
-                              Icons.bug_report,
+                              CRLoggerHelper.instance.isLoggerShowing
+                                  ? Icons.visibility_off
+                                  : Icons.bug_report,
                               color: Colors.white,
                             ),
-                            BuildNumber(),
+                            const BuildNumber(),
                           ],
                         ),
                       ),
@@ -104,19 +106,23 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
   }
 
   Future<void> _defaultClick(BuildContext context) async {
-    if (CRLoggerHelper.instance.isLoggerShowing) {
-      CRLoggerHelper.instance.hideLogger();
-    } else {
-      widget.onLoggerOpen(context);
-      CRLoggerHelper.instance.showLogger();
-    }
+    setState(() {
+      if (CRLoggerHelper.instance.isLoggerShowing) {
+        CRLoggerHelper.instance.hideLogger();
+      } else {
+        widget.onLoggerOpen(context);
+        CRLoggerHelper.instance.showLogger();
+      }
+    });
   }
 
   void _onPressDraggableButton() {
-    setState(() {
-      isShow = false;
-    });
-    popupButtonKey.currentState!.showButtonMenu();
+    if (!CRLoggerHelper.instance.isLoggerShowing) {
+      setState(() {
+        isShow = false;
+      });
+      popupButtonKey.currentState!.showButtonMenu();
+    }
   }
 
   void _onCanceledPopup() {

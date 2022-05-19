@@ -16,8 +16,7 @@ class CrInspector extends StatelessWidget {
       valueListenable: CRLoggerHelper.instance.inspectorNotifier,
       // ignore: Prefer-trailing-comma
       builder: (_, enabled, __) => Inspector(
-        isEnabled: true,
-        isPanelVisible: enabled,
+        isEnabled: enabled,
         child: child,
       ),
     );

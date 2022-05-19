@@ -218,19 +218,42 @@ class CRLoggerInitializer {
   /// Adds a value notifier to the page
   void popupItemAddNotifier(
     String name,
-    ValueNotifier<dynamic> notifier,
-  ) {
-    NotifiersManager.addNotifier(name, notifier);
+    ValueNotifier<dynamic> notifier, {
+    String? connectedWidgetId,
+  }) {
+    NotifiersManager.addNotifier(
+      name,
+      notifier,
+      connectedWidgetId: connectedWidgetId,
+    );
   }
 
-  /// Adds a button action to the page
-  void popupItemAddAction(String text, VoidCallback action) {
-    ActionsManager.addActionButton(text, action);
+  /// Removes all notifiers with the specified identifier
+  void removeNotifiersById(String connectedWidgetId) {
+    NotifiersManager.removeNotifiersById(connectedWidgetId);
   }
 
   /// Clears the value notifiers list on the Value notifiers page
   void notifierListClear() {
-    NotifiersManager.dispose();
+    NotifiersManager.clear();
+  }
+
+  /// Adds a button action to the page
+  void popupItemAddAction(
+    String text,
+    VoidCallback action, {
+    String? connectedWidgetId,
+  }) {
+    ActionsManager.addActionButton(
+      text,
+      action,
+      connectedWidgetId: connectedWidgetId,
+    );
+  }
+
+  /// Removes all button actions with the specified identifier
+  void removeActionsById(String connectedWidgetId) {
+    ActionsManager.removeActionButtonsById(connectedWidgetId);
   }
 
   /// Import logs from json map

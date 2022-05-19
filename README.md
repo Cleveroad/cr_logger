@@ -30,30 +30,30 @@ Web [example](https://cleveroad.github.io/cr_logger)
 ## Getting Started
 
 1. Add plugin to the project:
-    ```yaml
-    dependencies:
-        cr_logger: ^0.9.16
-    ```
+   ```yaml
+   dependencies:
+     cr_logger: ^0.9.19
+   ```
 
 2. Initialize the logger. main.dart:
 
-    ```dart
-        void main()  {
-        ...
-        CRLoggerInitializer.instance.init(
-            theme: ThemeData.light(),
-            levelColors: {
-                Level.debug: Colors.grey.shade300,
-                Level.warning: Colors.orange,
-            },
-            hiddenFields: [
-                'token',
-            ],
-            logFileName: 'my_logs',
-            isPrintingLogs: true,
-        );
-        }
-    ```
+   ```dart
+   void main()  {
+     ...
+     CRLoggerInitializer.instance.init(
+       theme: ThemeData.light(),
+       levelColors: {
+         Level.debug: Colors.grey.shade300,
+         Level.warning: Colors.orange,
+       },
+       hiddenFields: [
+         'token',
+       ],
+       logFileName: 'my_logs',
+       isPrintingLogs: true,
+     );
+   }
+   ```
    `isPrintingLogs` - Prints all logs while [isPrintingLogs] true
 
    `theme` - Custom logger theme
@@ -75,65 +75,65 @@ When writing a lot of logs and printing it to the console UI may lag a lot. Isol
 performance for debug builds with cr_logger enabled. Example is using worker_manager package for
 convenient work with Dart Isolates:
 
-    ```dart
-        Future<void> main() async {
-          // Call this first if main function is async
-          WidgetsFlutterBinding.ensureInitialized();
-
-          ...
-          await Executor().warmUp();
-          CRLoggerInitializer.instance.handleFunctionInIsolate = (fun, data) async {
-             return await Executor().execute(
-              arg1: data,
-              fun1: fun,
-            );
-          };
-
-          CRLoggerInitializer.instance.parseiOSJsonStringInIsolate = (fun, data) async {
-            return await Executor().execute(
-              arg1: data,
-              fun1: fun,
-            );
-          };
-          ...
-        }
-    ```
+   ```dart
+   Future<void> main() async {
+     // Call this first if main function is async
+     WidgetsFlutterBinding.ensureInitialized();
+     
+     ...
+     await Executor().warmUp();
+     CRLoggerInitializer.instance.handleFunctionInIsolate = (fun, data) async {
+       return await Executor().execute(
+         arg1: data,
+         fun1: fun,
+       );
+     };
+     
+     CRLoggerInitializer.instance.parseiOSJsonStringInIsolate = (fun, data) async {
+       return await Executor().execute(
+         arg1: data,
+         fun1: fun,
+       );
+     };
+     ...
+   }
+   ```
 
 4. Initialize Inspector (optional):
 
-    ```dart
-        return MaterialApp(
-            home: const MainPage(),
-            builder: (context, child) => CrInspector(child: child!),
-        );
-    ```
+   ```dart
+   return MaterialApp(
+     home: const MainPage(),
+     builder: (context, child) => CrInspector(child: child!),
+   );
+   ```
 
 5. Initialize the following callbacks (optional):
 
    5.1 `GetIPAndPortFromDBCallback` - return stored Charles IP:PORT settings. Example:
-   ```  
-      CRLoggerInitializer.instance.onGetProxyFromDB = () {
-         return DBProvider.instance.iPAndPort;
-      };
+   ```dart
+   CRLoggerInitializer.instance.onGetProxyFromDB = () {
+     return DBProvider.instance.iPAndPort;
+   };
    ```
    5.2 `ProxySettingsChangeCallback` - when need to store new Charles IP:PORT settings. Example:
-   ```  
-      CRLoggerInitializer.instance.onProxyChanged = (ip, port) {
-         DBProvider.instance.iPAndPort = '$ip:$port';
-      };
+   ```dart
+   CRLoggerInitializer.instance.onProxyChanged = (ip, port) {
+     DBProvider.instance.iPAndPort = '$ip:$port';
+   };
    ```
    5.3 `LogoutCallback` - when needed to log out from app
-   ```  
-      CRLoggerInitializer.instance.onLogout = () async {
-         // logout simulation
-         await Future.delayed(const Duration(seconds: 1));
-      };
+   ```dart
+   CRLoggerInitializer.instance.onLogout = () async {
+     // logout simulation
+     await Future.delayed(const Duration(seconds: 1));
+   };
    ```
    5.4 `ShareLogsFileCallback` - when needed to share logs file on the app's side
-   ```
-      CRLoggerInitializer.instance.onShareLogsFile = (path) async {
-         await Share.shareFiles([path]);
-      };
+   ```dart
+   CRLoggerInitializer.instance.onShareLogsFile = (path) async {
+     await Share.shareFiles([path]);
+   };
    ```
 
 6. Define the variables:
@@ -148,25 +148,27 @@ convenient work with Dart Isolates:
 
 7. Add the overlay button:
 
-    ```dart
-    CRLoggerInitializer.instance.showDebugButton(context);
-    ```
-
+   ```dart
+   CRLoggerInitializer.instance.showDebugButton(context);
+   ```
+   
    `button` - Custom floating button
-
+   
    `left` - X-axis start position
-
+   
    `top` - Y-axis start position
 
 8. You can turn on/off the printing logs in the isolate, by default enabled:
-    ```dart
-    CRLoggerInitializer.instance.isIsolateHttpLogsPrinting = false;
-    ```
+   
+   ```dart
+   CRLoggerInitializer.instance.isIsolateHttpLogsPrinting = false;
+   ```
 
 9. Support for importing logs from json:
-    ```dart
-    await CRLoggerInitializer.instance.createLogsFromJson(json);
-    ```
+   
+   ```dart
+   await CRLoggerInitializer.instance.createLogsFromJson(json);
+   ```
 
 ## Usage
 If the logger is enabled, a floating button appears on the screen; it also indicates the project build number.
@@ -195,35 +197,60 @@ Import logs from file
 Helps to track changes in values in variables of the **ValueNotifier** type, the value can be either a **simple type** or a **Widget** and etc.
 1. Type notifiers:
 
-    ```dart
-    ...
-    final integerNotifier = ValueNotifier<int>(0);
-    final doubleNotifier = ValueNotifier<double>(0);
-    final boolNotifier = ValueNotifier<bool>(false);
-    final stringNotifier = ValueNotifier<String>('integer: ');
-    final iconNotifier = ValueNotifier<Icon>(Icon(Icons.clear));
-    final textNotifier = ValueNotifier<Text>(Text('Widget text'));
-    ```
+   ```dart
+   final integerNotifier = ValueNotifier<int>(0);
+   final doubleNotifier = ValueNotifier<double>(0);
+   final boolNotifier = ValueNotifier<bool>(false);
+   final stringNotifier = ValueNotifier<String>('integer: ');
+   final iconNotifier = ValueNotifier<Icon>(Icon(Icons.clear));
+   final textNotifier = ValueNotifier<Text>(Text('Widget text'));
+   ```
+   
 2. Add notifiers:
 
-    ```dart
-    ...
-    CRLoggerInitializer.instance.popupItemAddNotifier('Integer', integerNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('Double', doubleNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('Bool', boolNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('String', stringNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('Icon', iconNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('Text', textNotifier);
-    ```
+   ```dart
+   CRLoggerInitializer.instance.popupItemAddNotifier('Integer', integerNotifier);
+   CRLoggerInitializer.instance.popupItemAddNotifier('Double', doubleNotifier);
+   CRLoggerInitializer.instance.popupItemAddNotifier('Bool', boolNotifier);
+   CRLoggerInitializer.instance.popupItemAddNotifier('String', stringNotifier);
+   CRLoggerInitializer.instance.popupItemAddNotifier('Icon', iconNotifier);
+   CRLoggerInitializer.instance.popupItemAddNotifier(
+     'Text',
+     textNotifier,
+     connectedWidgetId: 'some identifier',
+   );
+   ```
+   
+3. Remove notifiers by specified id:
+
+   ```dart
+   CRLoggerInitializer.instance.removeNotifiersById('some identifier');
+   ```
+
+4. Clear all notifiers:
+
+   ```dart
+   CRLoggerInitializer.instance.notifierListClear();
+   ```
+   
 ##### Actions
 Allows you to add **different callbacks** for testing
 1. Add actions:
 
-    ```dart
-    ...
-    CRLoggerInitializer.instance.popupItemAddAction('Log Hi', () => log.i('Hi'));
-    CRLoggerInitializer.instance.popupItemAddAction('Log By', () => log.i('By'));
-    ```
+   ```dart
+   CRLoggerInitializer.instance.popupItemAddAction('Log Hi', () => log.i('Hi'));
+   CRLoggerInitializer.instance.popupItemAddAction(
+     'Log By',
+     () => log.i('By'),
+     connectedWidgetId: 'some identifier',
+   );
+   ```
+   
+2. Remove actions by specified id:
+
+   ```dart
+   CRLoggerInitializer.instance.removeActionsById('some identifier');
+   ```
 
 ##### App settings
 Opens application settings

@@ -11,11 +11,13 @@ class NotifierData {
     required this.name,
     required this.valueNotifier,
     this.isWidget = false,
+    this.connectedWidgetId,
   });
 
   final bool isWidget;
   final String name;
   final ValueNotifier<dynamic> valueNotifier;
+  final String? connectedWidgetId;
 }
 
 /// Manager through which value notifiers are added to the page
@@ -24,27 +26,27 @@ class NotifiersManager {
 
   static final List<NotifierData> valueNotifiers = [];
 
-  static void addNotifier(String name, ValueNotifier<dynamic> notifier) {
-    if (notifier.value is Widget) {
-      valueNotifiers.add(NotifierData(
-        name: name,
-        valueNotifier: notifier,
-        isWidget: true,
-      ));
-    } else {
-      valueNotifiers.add(NotifierData(
-        name: name,
-        valueNotifier: notifier,
-      ));
-    }
+  static void addNotifier(
+    String name,
+    ValueNotifier<dynamic> notifier, {
+    String? connectedWidgetId,
+  }) {
+    valueNotifiers.add(NotifierData(
+      name: name,
+      valueNotifier: notifier,
+      isWidget: notifier.value is Widget,
+      connectedWidgetId: connectedWidgetId,
+    ));
   }
 
-  static void dispose() {
-    valueNotifiers
-      ..forEach((element) {
-        element.valueNotifier.dispose();
-      })
-      ..clear();
+  static void removeNotifiersById(String connectedWidgetId) {
+    valueNotifiers.removeWhere((notifier) {
+      return notifier.connectedWidgetId == connectedWidgetId;
+    });
+  }
+
+  static void clear() {
+    valueNotifiers.clear();
   }
 }
 

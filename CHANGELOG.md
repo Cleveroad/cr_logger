@@ -1,3 +1,19 @@
+## 0.9.19
+
+- Added ability to remove action buttons by specified id
+- Added ability to remove notifiers by specified id
+- Updated readme
+
+## 0.9.18
+
+- Сhanged debug button icon when logger is open
+- Fixed debug button disappears after double tap
+- Fixed time parsing when loading logs from json
+
+## 0.9.17
+
+- Fixed issue with inspector
+
 ## 0.9.16
 
 - Added warning popup when selecting Share logs if onShareLogsFile callback was not defined

@@ -1,5 +1,4 @@
 import 'package:cr_logger/src/colors.dart';
-import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -41,7 +40,7 @@ class LogBean implements Comparable<LogBean> {
 
   Map<String, dynamic> toJson() => {
         'message': message.toString(),
-        'time': time.formatTime(),
+        'time': time.toIso8601String(),
         'stackTrace': stackTrace,
         'data': data,
       };
