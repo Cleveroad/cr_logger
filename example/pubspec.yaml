@@ -15,12 +15,12 @@ dependencies:
   cr_logger:
     path: ../
 
-  dio: 4.0.4
-  chopper: 4.0.3
-  logger: ^1.0.0
-  flutter_dropzone: ^3.0.3
-  worker_manager: ^4.2.5
-  share_plus: ^3.0.4
+  dio: 4.0.6
+  chopper: 4.0.5
+  logger: ^1.1.0
+  flutter_dropzone: ^3.0.5
+  worker_manager: ^4.2.6
+  share_plus: ^4.0.4
 
 dev_dependencies:
   flutter_test:
