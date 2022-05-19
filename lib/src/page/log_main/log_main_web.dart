@@ -14,8 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:split_view/split_view.dart';
 
 class MainLogWebPage extends StatefulWidget {
-  const MainLogWebPage({required this.onLoggerClose, Key? key})
-      : super(key: key);
+  const MainLogWebPage({required this.onLoggerClose, super.key});
 
   final VoidCallback onLoggerClose;
 

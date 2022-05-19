@@ -11,8 +11,8 @@ class LocalLogsPage extends StatefulWidget {
     required this.logType,
     this.onLogBeanSelected,
     this.scrollController,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final LogType logType;
   final Function(LogBean logBean, LogType logType)? onLogBeanSelected;

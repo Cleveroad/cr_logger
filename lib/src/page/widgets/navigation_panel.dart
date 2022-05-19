@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 class NavigationPanel extends StatefulWidget {
   const NavigationPanel({
     required this.onLogsTypeChanged,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Function(LogType logType) onLogsTypeChanged;
 

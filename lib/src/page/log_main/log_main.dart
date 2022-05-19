@@ -10,8 +10,8 @@ class MainLogPage extends StatefulWidget {
   const MainLogPage({
     required this.navigationKey,
     required this.onLoggerClose,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final GlobalKey<NavigatorState> navigationKey;
   final VoidCallback onLoggerClose;

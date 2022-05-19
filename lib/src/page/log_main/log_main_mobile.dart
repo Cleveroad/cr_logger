@@ -16,8 +16,8 @@ import 'package:flutter/material.dart';
 class MainLogMobilePage extends StatefulWidget {
   const MainLogMobilePage({
     required this.onLoggerClose,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final VoidCallback onLoggerClose;
 

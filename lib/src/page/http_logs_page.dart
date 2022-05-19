@@ -9,8 +9,8 @@ class HttpLogsPage extends StatefulWidget {
   const HttpLogsPage({
     this.onHttpBeanSelected,
     this.scrollController,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Function(HttpBean httpBean)? onHttpBeanSelected;
   final ScrollController? scrollController;

@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 class SearchItem extends StatelessWidget {
   const SearchItem({
     required this.logBean,
-    Key? key,
+    super.key,
     this.onTap,
     this.onLongTap,
-  }) : super(key: key);
+  });
 
   final LogBean logBean;
   final Function(LogBean)? onTap;

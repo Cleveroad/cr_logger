@@ -52,7 +52,7 @@ class NotifiersManager {
 
 /// The page for observing the values of the added variables
 class ValueNotifiersPage extends StatelessWidget {
-  const ValueNotifiersPage({Key? key}) : super(key: key);
+  const ValueNotifiersPage({super.key});
 
   @override
   Widget build(BuildContext context) {

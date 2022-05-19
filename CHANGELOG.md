@@ -1,3 +1,7 @@
+## 1.0.0
+
+- Support for Flutter 3.0.0
+
 ## 0.9.19
 
 - Added ability to remove action buttons by specified id

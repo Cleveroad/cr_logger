@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class HttpLogCard extends StatelessWidget {
-  const HttpLogCard(this.data, {Key? key}) : super(key: key);
+  const HttpLogCard(this.data, {super.key});
 
   final HttpBean data;
 

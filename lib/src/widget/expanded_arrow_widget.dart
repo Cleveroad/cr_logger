@@ -8,8 +8,8 @@ class ExpandedArrowWidget extends StatefulWidget {
   const ExpandedArrowWidget({
     required this.allExpandedNotifier,
     this.expanded = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final bool expanded;
   final ValueNotifier<bool> allExpandedNotifier;

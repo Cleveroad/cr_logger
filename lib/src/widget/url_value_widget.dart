@@ -14,8 +14,8 @@ class UrlValueWidget extends StatefulWidget {
     this.child,
     this.requestTime,
     this.responseTime,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String? url;
   final String? title;

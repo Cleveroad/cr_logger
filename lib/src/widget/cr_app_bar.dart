@@ -14,8 +14,8 @@ class CRAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.reverse = false,
     this.showLoggerVersion = false,
     this.centerTitle = true,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String title;
   final bool centerTitle;

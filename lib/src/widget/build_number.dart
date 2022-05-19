@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class BuildNumber extends StatelessWidget {
-  const BuildNumber({Key? key}) : super(key: key);
+  const BuildNumber({super.key});
 
   @override
   Widget build(BuildContext context) {

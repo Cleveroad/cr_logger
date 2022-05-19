@@ -5,8 +5,8 @@ class ExampleBtn extends StatelessWidget {
     required this.text,
     required this.assetName,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String text;
   final String assetName;

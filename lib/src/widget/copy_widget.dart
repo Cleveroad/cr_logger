@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 class CopyWidget extends StatelessWidget {
   const CopyWidget({
     required this.onCopy,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final VoidCallback onCopy;
 
