@@ -9,8 +9,8 @@ class JsonWidget extends StatefulWidget {
     this.caption,
     this.allExpandedNodes = false,
     this.uncovered = 1,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Map<String, dynamic>? jsonObj;
   final bool? notRoot;

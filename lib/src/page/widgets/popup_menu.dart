@@ -18,8 +18,8 @@ class PopupMenu extends StatefulWidget {
     this.child,
     this.popupKey,
     this.onCanceled,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget? child;
   final GlobalKey? popupKey;
@@ -291,9 +291,8 @@ class _PopupMenuItem extends PopupMenuItem<VoidCallback> {
     Widget? title,
     IconData? icon,
     VoidCallback? onTap,
-    Key? key,
+    super.key,
   }) : super(
-          key: key,
           value: onTap,
           child: ListTile(
             contentPadding: EdgeInsets.zero,

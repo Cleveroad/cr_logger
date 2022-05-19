@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class LogSearchPage extends StatefulWidget {
-  const LogSearchPage({Key? key}) : super(key: key);
+  const LogSearchPage({super.key});
 
   @override
   _LogSearchPageState createState() => _LogSearchPageState();

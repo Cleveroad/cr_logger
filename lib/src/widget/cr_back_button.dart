@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 
 class CRBackButton extends StatelessWidget {
   const CRBackButton({
-    Key? key,
+    super.key,
     this.color,
     this.onPressed,
     this.showBackButton,
-  }) : super(key: key);
+  });
+
   final bool? showBackButton;
   final Color? color;
   final VoidCallback? onPressed;

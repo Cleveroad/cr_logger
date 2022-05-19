@@ -1,5 +1,5 @@
 const kLoggerPackage = 'package:logger';
-const kVersion = '0.9.19';
+const kVersion = '1.0.0';
 const kLogFileName = 'log';
 
 const requestIconPath = 'assets/ic_request.png';

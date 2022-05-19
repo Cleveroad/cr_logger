@@ -7,8 +7,8 @@ class AdaptiveLayoutWidget extends StatefulWidget {
     required this.mobileLayoutWidget,
     required this.webLayoutWidget,
     this.onLayoutChange,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget mobileLayoutWidget;
   final Widget webLayoutWidget;

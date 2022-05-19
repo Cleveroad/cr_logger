@@ -1,12 +1,12 @@
 name: cr_logger
 description: Powerful logging plugin. Supports android, ios and web platforms.
 
-version: 0.9.19
+version: 1.0.0
 homepage: https://github.com/Cleveroad/cr_logger
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=2.0.0"
+  sdk: ">=2.17.0 <3.0.0"
+  flutter: ">=3.0.0"
 
 dependencies:
   flutter:
@@ -35,7 +35,7 @@ dependencies:
   app_settings: ^4.1.5
 
   # BSD
-  path_provider: ^2.0.5
+  path_provider: ^2.0.10
 
   # MIT
   inspector: ^1.1.1
@@ -48,7 +48,7 @@ dependencies:
   synchronized: ^3.0.0
 
   # BSD-3-Clause
-  js: ^0.6.3
+  js: ^0.6.4
 
   # BSD-3-Clause
   # https://stackoverflow.com/a/70757512
@@ -59,7 +59,7 @@ dev_dependencies:
     sdk: flutter
   # MIT
   dart_code_metrics: ^4.3.3
-  flutter_lints: ^1.0.4
+  flutter_lints: ^2.0.1
 
 flutter:
   uses-material-design: true

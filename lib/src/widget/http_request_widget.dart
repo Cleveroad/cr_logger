@@ -15,8 +15,8 @@ import 'package:flutter/material.dart';
 class HttpRequestWidget extends StatefulWidget {
   const HttpRequestWidget(
     this.httpBean, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final HttpBean httpBean;
 
@@ -250,8 +250,8 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
 class HeadersExpansionTile extends StatefulWidget {
   const HeadersExpansionTile({
     required this.request,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final RequestBean? request;
 

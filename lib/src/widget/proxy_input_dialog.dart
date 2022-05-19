@@ -2,7 +2,7 @@ import 'package:cr_logger/cr_logger.dart';
 import 'package:flutter/material.dart';
 
 class ProxyInputDialog extends StatefulWidget {
-  const ProxyInputDialog({Key? key}) : super(key: key);
+  const ProxyInputDialog({super.key});
 
   @override
   _ProxyInputDialogState createState() => _ProxyInputDialogState();

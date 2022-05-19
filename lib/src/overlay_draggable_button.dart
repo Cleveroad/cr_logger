@@ -18,8 +18,8 @@ class DraggableButtonWidget extends StatefulWidget {
     required this.onLoggerOpen,
     this.title = 'log',
     this.btnSize = 48,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final double leftPos;
   final double topPos;

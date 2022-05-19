@@ -5,8 +5,8 @@ import 'package:inspector/inspector.dart';
 class CrInspector extends StatelessWidget {
   const CrInspector({
     required this.child,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget child;
 

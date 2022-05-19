@@ -12,8 +12,8 @@ class HttpItem extends StatelessWidget {
     required this.httpBean,
     required this.onSelected,
     this.useWebLayout = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final HttpBean httpBean;
   final bool useWebLayout;

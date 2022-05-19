@@ -43,7 +43,7 @@ class ActionsManager {
 
 /// Page with buttons calling added methods from the logger
 class ActionsPage extends StatelessWidget {
-  const ActionsPage({Key? key}) : super(key: key);
+  const ActionsPage({super.key});
 
   @override
   Widget build(BuildContext context) {

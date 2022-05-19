@@ -5,8 +5,8 @@ class KeyValueWidget extends StatelessWidget {
   const KeyValueWidget(
     this.dataKey,
     this.dataValue, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String dataKey, dataValue;
 

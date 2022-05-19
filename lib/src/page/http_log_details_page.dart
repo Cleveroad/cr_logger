@@ -12,8 +12,8 @@ class HttpLogDetailsPage extends StatefulWidget {
   const HttpLogDetailsPage(
     this.netOptions, {
     this.isWeb = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final HttpBean netOptions;
   final bool isWeb;

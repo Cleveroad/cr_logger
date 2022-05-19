@@ -16,8 +16,8 @@ class LocalLogItem extends StatelessWidget {
     required this.logBean,
     required this.onSelected,
     this.useWebLayout = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final LogType logType;
   final LogBean logBean;

@@ -7,8 +7,8 @@ class CRWebAppBar extends StatelessWidget {
   const CRWebAppBar({
     required this.popupKey,
     required this.onLoggerClose,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final GlobalKey popupKey;
   final VoidCallback onLoggerClose;

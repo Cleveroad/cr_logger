@@ -6,7 +6,7 @@ import 'package:cr_logger/src/widget/url_value_widget.dart';
 import 'package:flutter/material.dart';
 
 class HttpErrorWidget extends StatefulWidget {
-  const HttpErrorWidget(this.httpBean, {Key? key}) : super(key: key);
+  const HttpErrorWidget(this.httpBean, {super.key});
 
   final HttpBean httpBean;
 

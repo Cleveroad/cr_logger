@@ -10,7 +10,7 @@ import 'package:cr_logger/src/widget/url_value_widget.dart';
 import 'package:flutter/material.dart';
 
 class HttpResponseWidget extends StatefulWidget {
-  const HttpResponseWidget(this.httpBean, {Key? key}) : super(key: key);
+  const HttpResponseWidget(this.httpBean, {super.key});
 
   final HttpBean httpBean;
 

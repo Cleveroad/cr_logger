@@ -13,8 +13,8 @@ class OptionsButtons extends StatefulWidget with PreferredSizeWidget {
     this.activeColor = CRLoggerColors.blue,
     this.isWeb = false,
     this.disableColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<String> titles;
   final Function(int index) onSelected;

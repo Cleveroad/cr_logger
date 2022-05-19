@@ -3,5 +3,6 @@ extension IntExt on int {
       toString().padLeft(width, symbol);
 
   String get leading => toStringWithLeading();
+
   String get leading3 => toStringWithLeading(3);
 }

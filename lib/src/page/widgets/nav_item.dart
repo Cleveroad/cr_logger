@@ -6,8 +6,8 @@ class NavItem extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.enabled = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String title;
   final bool enabled;

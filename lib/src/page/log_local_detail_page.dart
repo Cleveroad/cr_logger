@@ -14,12 +14,12 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 class LogLocalDetailPage extends StatefulWidget {
   const LogLocalDetailPage({
-    Key? key,
+    super.key,
     this.logBean,
     this.logType,
     this.scrollController,
     this.isWeb = false,
-  }) : super(key: key);
+  });
 
   final bool isWeb;
   final LogBean? logBean;

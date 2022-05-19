@@ -7,8 +7,8 @@ class JsonNodeContent extends StatelessWidget {
   const JsonNodeContent({
     required this.keyValue,
     this.value,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String keyValue;
   final Object? value;

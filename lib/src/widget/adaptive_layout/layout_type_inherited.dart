@@ -8,9 +8,9 @@ typedef LayoutTypeChanged = void Function(LayoutType layoutType);
 class LayoutTypeProvider extends InheritedWidget {
   const LayoutTypeProvider({
     required this.layoutType,
-    required Widget child,
-    Key? key,
-  }) : super(child: child, key: key);
+    required super.child,
+    super.key,
+  });
 
   final LayoutType layoutType;
 

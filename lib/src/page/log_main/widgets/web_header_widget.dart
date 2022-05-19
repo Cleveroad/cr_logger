@@ -6,8 +6,8 @@ class WebHeaderWidget extends StatelessWidget {
   const WebHeaderWidget({
     required this.onClear,
     required this.onAllClear,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final VoidCallback onClear;
   final VoidCallback onAllClear;
