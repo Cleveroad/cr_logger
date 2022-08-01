@@ -15,6 +15,7 @@ import 'package:cr_logger/src/page/value_notifiers_page.dart';
 import 'package:cr_logger/src/res/theme.dart';
 import 'package:cr_logger/src/utils/console_log_output.dart';
 import 'package:cr_logger/src/utils/local_log_managed.dart';
+import 'package:cr_logger/src/utils/nothing_log_filter.dart';
 import 'package:cr_logger/src/utils/pretty_cr_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -56,11 +57,22 @@ class CRLoggerInitializer {
   late final CRHttpAdapter _httpAdapter;
 
   bool inited = false;
-  bool isPrintingLogs = false;
+  bool shouldPrintLogs = false;
+  bool shouldPrintInReleaseMode = false;
   String buildType = '';
   String logFileName = kLogFileName;
   List<String> endpoints = [];
+
+  ///Hides all fields in request|response body and query parameters
+  ///with keys from list
+  ///
+  ///This fields can't be copied
   List<String> hiddenFields = [];
+
+  ///Hides all headers with keys from list
+  ///
+  ///This fields can't be copied
+  List<String> hiddenHeaders = [];
 
   /// Called only when [kIsWeb] is false
   /// When proxy ip and port changed, this callback will return new proxy,
@@ -159,13 +171,15 @@ class CRLoggerInitializer {
   /// Custom logger theme [theme].
   /// Colors for message types [levelColors] (debug, verbose, info, warning,
   /// error, wtf).
-  /// Prints all logs while [isPrintingLogs] true
+  /// Prints all logs while [shouldPrintLogs] true
   // ignore: Long-Parameter-List
   Future<void> init({
-    bool isPrintingLogs = true,
+    bool shouldPrintLogs = true,
+    bool shouldPrintInReleaseMode = false,
     ThemeData? theme,
     Map<Level, Color>? levelColors,
     List<String>? hiddenFields,
+    List<String>? hiddenHeaders,
     String? logFileName,
     int maxCountHttpLogs = 50,
     int maxCountOtherLogs = 50,
@@ -183,13 +197,15 @@ class CRLoggerInitializer {
     }
     _httpClientAdapter = CRHttpClientAdapter();
     _httpAdapter = CRHttpAdapter();
-    this.isPrintingLogs = isPrintingLogs;
+    this.shouldPrintLogs = shouldPrintLogs;
+    this.shouldPrintInReleaseMode = shouldPrintInReleaseMode;
     if (theme != null) {
       CRLoggerHelper.instance.theme =
           theme.copyWithDefaultCardTheme(loggerTheme.cardTheme);
     }
     this.logFileName = logFileName ?? this.logFileName;
     this.hiddenFields = hiddenFields ?? [];
+    this.hiddenHeaders = hiddenHeaders ?? [];
 
     log = logger ??
         Logger(
@@ -202,10 +218,12 @@ class CRLoggerInitializer {
             levelColors: levelColors,
           ),
           output: _consoleLogOutput,
-          filter: CRLoggerInitializer.instance.isPrintingLogs
-              ? ProductionFilter()
-              : null,
-          level: CRLoggerInitializer.instance.isPrintingLogs
+          filter: CRLoggerInitializer.instance.shouldPrintLogs
+              ? shouldPrintInReleaseMode
+                  ? ProductionFilter()
+                  : DevelopmentFilter()
+              : NothingLogFilter(),
+          level: CRLoggerInitializer.instance.shouldPrintLogs
               ? Level.verbose
               : Level.nothing,
         );

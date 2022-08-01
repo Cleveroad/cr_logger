@@ -32,7 +32,7 @@ Web [example](https://cleveroad.github.io/cr_logger)
 1. Add plugin to the project:
    ```yaml
    dependencies:
-     cr_logger: ^1.0.0
+     cr_logger: ^1.0.1
    ```
 
 2. Initialize the logger. main.dart:
@@ -60,7 +60,7 @@ Web [example](https://cleveroad.github.io/cr_logger)
 
    `levelColors` - Colors for message types levelColors (debug, verbose, info, warning, error, wtf)
 
-   `hiddenFields` - List of hidden fields that do not need to be shown in headers & body, for example: token
+   `hiddenFields` - List of keys, whose value need to be replaced by string 'Hidden'
    
    `logFileName` - File name when sharing logs
 

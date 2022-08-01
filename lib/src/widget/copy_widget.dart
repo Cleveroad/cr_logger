@@ -8,7 +8,7 @@ class CopyWidget extends StatelessWidget {
     super.key,
   });
 
-  final VoidCallback onCopy;
+  final VoidCallback? onCopy;
 
   @override
   Widget build(BuildContext context) {

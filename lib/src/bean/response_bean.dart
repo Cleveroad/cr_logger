@@ -1,3 +1,7 @@
+import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/constants.dart';
+import 'package:cr_logger/src/utils/url_parser.dart';
+
 class ResponseBean {
   ResponseBean({
     this.id,
@@ -37,19 +41,31 @@ class ResponseBean {
 
   Map<String, Object?> toJson() {
     final headers = <String, String>{};
-
     this.headers?.forEach((k, list) => headers[k] = list.toString());
+    final changedHeaders = headers.map((key, value) {
+      return CRLoggerInitializer.instance.hiddenHeaders.contains(key)
+          ? MapEntry(key, kHidden)
+          : MapEntry(key, value);
+    });
+    Map? changedData;
+    if (data is Map) {
+      changedData = (data as Map).map(
+        (key, value) => CRLoggerInitializer.instance.hiddenFields.contains(key)
+            ? MapEntry(key, kHidden)
+            : MapEntry(key, value),
+      );
+    }
 
     return {
       'id': id,
       'statusCode': statusCode,
-      'url': url,
+      'url': getUrlWithHiddenParams(url ?? ''),
       'method': method,
       'statusMessage': statusMessage,
       'responseTime': responseTime?.toIso8601String(),
       'duration': duration,
-      'headers': headers,
-      'data': data,
+      'headers': changedHeaders,
+      'data': changedData,
     };
   }
 }

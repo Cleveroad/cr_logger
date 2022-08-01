@@ -19,7 +19,7 @@ dependencies:
   chopper: 4.0.5
   logger: ^1.1.0
   flutter_dropzone: ^3.0.5
-  worker_manager: ^4.2.6
+  worker_manager: ^4.4.0
   share_plus: ^4.0.4
 
 dev_dependencies:

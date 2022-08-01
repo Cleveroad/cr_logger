@@ -12,7 +12,7 @@ class RestClient {
       ..options.connectTimeout = _serverTimeout
       ..options.sendTimeout = _serverTimeout;
 
-    if (CRLoggerInitializer.instance.isPrintingLogs) {
+    if (CRLoggerInitializer.instance.shouldPrintLogs) {
       dio.interceptors.add(
         CRLoggerInitializer.instance.getDioInterceptor(),
       );
