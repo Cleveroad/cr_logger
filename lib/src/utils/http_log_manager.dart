@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/utils/pretty_cr_logger.dart';
 
 class HttpLogManager {
@@ -46,24 +45,7 @@ class HttpLogManager {
         logMap.remove(keys.last);
         keys.removeLast();
       }
-
       keys.insert(0, key);
-      if (options.headers != null) {
-        for (final element in options.headers!.entries) {
-          if (CRLoggerInitializer.instance.hiddenFields.contains(element.key)) {
-            options.headers?.update(element.key, (value) => kHidden);
-          }
-        }
-      }
-
-      if (options.body is Map) {
-        options.body.entries.forEach((element) {
-          if (CRLoggerInitializer.instance.hiddenFields.contains(element.key)) {
-            options.body?.update(element.key, (value) => kHidden);
-          }
-        });
-      }
-
       logMap.putIfAbsent(key, () => HttpBean(request: options));
       onUpdate?.call();
     }
@@ -83,7 +65,6 @@ class HttpLogManager {
 
         return value;
       });
-
       onUpdate?.call();
     }
   }

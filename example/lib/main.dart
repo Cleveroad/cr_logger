@@ -6,6 +6,7 @@ import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger_example/generated/assets.dart';
 import 'package:cr_logger_example/rest_client.dart';
 import 'package:cr_logger_example/widgets/example_btn.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +33,15 @@ Future<void> main() async {
       Level.warning: Colors.orange,
     },
     hiddenFields: [
-      'token',
+      'Test',
+      'Test3',
+      'Test7',
+      'freeform',
+    ],
+    hiddenHeaders: [
+      'content-type',
+      'Test3',
+      'Authorization',
     ],
     logFileName: 'my_logs',
   );
@@ -67,7 +76,7 @@ Future<void> main() async {
   CRLoggerInitializer.instance.handleFunctionInIsolate = (fun, data) async {
     return await Executor().execute(
       arg1: data,
-      fun1: fun,
+      fun1: (arg, _) => fun(arg),
     );
   };
 
@@ -75,7 +84,7 @@ Future<void> main() async {
   CRLoggerInitializer.instance.parseiOSJsonStringInIsolate = (fun, json) async {
     return await Executor().execute(
       arg1: json,
-      fun1: fun,
+      fun1: (String arg, _) => fun(arg),
     );
   };
 
@@ -394,26 +403,37 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> _makeHttpRequest() async {
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      'freeform': 'test',
+      'testParameter': 'test',
+    };
 
-    for (var i = 0; i < 2; ++i) {
-      queryParameters.addAll(<String, dynamic>{
-        'null_$i': null,
-        'bool_$i': true,
-        'int_$i': 256,
-        'double_$i': 1.23,
-        'string_$i': 'text',
-        'map_$i': {
-          'int': 256,
-          'double': 1.23,
-          'string': 'text',
-        },
-        'array_$i': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-      });
-    }
-    await RestClient.instance.dio.get(
-      'https://httpbin.org/json',
+    await RestClient.instance.dio.post(
+      'https://httpbin.org/response-headers',
       queryParameters: queryParameters,
+      data: {
+        'Test': '1',
+        'Test2': {
+          'Test': [
+            {'Test': 'qwe'},
+            {'Test': 'qwe'},
+          ]
+        },
+        'Test5': {
+          'Test9': [
+            {'name': 'qwe'},
+            {'Test7': 'qwe'},
+          ]
+        },
+        'Test3': {'qwe': 1},
+        'Test4': {'qwe': 1},
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'qwewrrq',
+          'Test3': 'qwewrrq',
+        },
+      ),
     );
   }
 

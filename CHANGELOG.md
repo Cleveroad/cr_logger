@@ -1,3 +1,9 @@
+## 1.0.1
+
+- Added ability to hide fields in requests and responses and in query parameters
+- Added ability to turn on/off printing logs in release mode
+- Added ability to copy to clipboard headers values
+
 ## 1.0.0
 
 - Support for Flutter 3.0.0

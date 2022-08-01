@@ -1,4 +1,5 @@
 import 'package:cr_json_widget/cr_json_widget.dart';
+import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/widget/json_widget/json_node_content.dart';
 import 'package:flutter/material.dart';
 
@@ -92,6 +93,8 @@ class JsonWidgetState extends State<JsonWidget> {
     /// Create Map Nodes
     if (parsedJson is Map) {
       return parsedJson.entries.map((k) {
+        final isHidden =
+            CRLoggerInitializer.instance.hiddenFields.contains(k.key);
         List<JsonNode>? children;
 
         /// If the item is a List or a Map then create a node
@@ -104,8 +107,9 @@ class JsonWidgetState extends State<JsonWidget> {
           content: JsonNodeContent(
             keyValue: '${k.key}: ',
             value: k.value,
+            isHidden: isHidden,
           ),
-          children: children,
+          children: isHidden ? null : children,
         );
       }).toList();
     }

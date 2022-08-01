@@ -1,10 +1,8 @@
 import 'dart:io';
 
-import 'package:cr_logger/src/bean/error_bean.dart';
-import 'package:cr_logger/src/bean/request_bean.dart';
-import 'package:cr_logger/src/bean/response_bean.dart';
-import 'package:cr_logger/src/utils/http_log_manager.dart';
+import 'package:cr_logger/cr_logger.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 typedef ParserError = Map<String, dynamic> Function(Object? data);
 
@@ -15,11 +13,19 @@ class DioLogInterceptor implements Interceptor {
   final logManager = HttpLogManager.instance;
   final ParserError? parserError;
 
+  final shouldPrintLogs = CRLoggerInitializer.instance.shouldPrintLogs;
+  final shouldPrintInReleaseMode =
+      CRLoggerInitializer.instance.shouldPrintInReleaseMode;
+
   @override
   void onError(
     DioError err,
     ErrorInterceptorHandler handler,
   ) {
+    if (!shouldPrintLogs || (!shouldPrintInReleaseMode && kReleaseMode)) {
+      return handler.next(err);
+    }
+
     dynamic json;
     try {
       if (err.error is Map) {
@@ -77,6 +83,10 @@ class DioLogInterceptor implements Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    if (!shouldPrintLogs || (!shouldPrintInReleaseMode && kReleaseMode)) {
+      return handler.next(options);
+    }
+
     final reqOpt = RequestBean()
       ..id = options.hashCode
       ..url = options.uri.toString()
@@ -95,6 +105,10 @@ class DioLogInterceptor implements Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
+    if (!shouldPrintLogs || (!shouldPrintInReleaseMode && kReleaseMode)) {
+      return handler.next(response);
+    }
+
     final resOpt = ResponseBean()
       ..id = response.requestOptions.hashCode
       ..responseTime = DateTime.now()

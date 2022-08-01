@@ -3,6 +3,7 @@ import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/utils/url_parser.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +31,7 @@ class HttpItem extends StatelessWidget {
         : CRLoggerColors.green;
     final statusCode =
         httpBean.response?.statusCode ?? httpBean.error?.statusCode;
+    final urlWithHiddenParams = getUrlWithHiddenParams(httpBean.request?.url ?? '');
 
     return Material(
       borderRadius: BorderRadius.circular(10),
@@ -91,12 +93,15 @@ class HttpItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  CopyWidget(onCopy: () => _onCopy(context)),
+                  if (urlWithHiddenParams == httpBean.request?.url)
+                    CopyWidget(
+                      onCopy: () => _onCopy(context),
+                    ),
                 ],
               ),
               const SizedBox(height: 4),
               Text(
-                httpBean.request?.url ?? '',
+                urlWithHiddenParams,
                 style: CRStyle.h3Black,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

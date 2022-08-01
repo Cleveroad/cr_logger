@@ -1,4 +1,7 @@
+import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
+import 'package:cr_logger/src/utils/url_parser.dart';
 import 'package:dio/dio.dart';
 
 class RequestBean {
@@ -53,19 +56,43 @@ class RequestBean {
   Map<String, dynamic>? params;
   dynamic body;
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'connectTimeout': connectTimeout,
-        'receiveTimeout': receiveTimeout,
-        'url': url,
-        'method': method,
-        'contentType': contentType,
-        'followRedirects': followRedirects,
-        'requestTime': requestTime?.toString(),
-        'headers': headers,
-        'params': params,
-        'body': body is FormData ? getFormData() : body,
-      };
+  Map<String, dynamic> toJson() {
+    final changedHeaders = headers?.map((key, value) {
+      return CRLoggerInitializer.instance.hiddenHeaders.contains(key)
+          ? MapEntry(key, kHidden)
+          : MapEntry(key, value);
+    });
+    Map? changedBody;
+    Map? changedParams;
+    if (body is Map) {
+      changedBody = (body as Map).map(
+        (key, value) => CRLoggerInitializer.instance.hiddenFields.contains(key)
+            ? MapEntry(key, kHidden)
+            : MapEntry(key, value),
+      );
+    }
+    if (params is Map) {
+      changedParams = (params as Map).map(
+        (key, value) => CRLoggerInitializer.instance.hiddenFields.contains(key)
+            ? MapEntry(key, kHidden)
+            : MapEntry(key, value),
+      );
+    }
+
+    return {
+      'id': id,
+      'connectTimeout': connectTimeout,
+      'receiveTimeout': receiveTimeout,
+      'url': getUrlWithHiddenParams(url ?? ''),
+      'method': method,
+      'contentType': contentType,
+      'followRedirects': followRedirects,
+      'requestTime': requestTime?.toString(),
+      'headers': changedHeaders,
+      'params': changedParams,
+      'body': body is FormData ? getFormData() : changedBody ?? body,
+    };
+  }
 
   Map<String, List<Map<String, String>>> getFormData() {
     final castedFormData = cast<FormData>(body);

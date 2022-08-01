@@ -1,8 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/generated/assets.dart';
-import 'package:cr_logger/src/bean/http_bean.dart';
-import 'package:cr_logger/src/bean/request_bean.dart';
 import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
@@ -341,7 +340,8 @@ class _HeadersExpansionTileState extends State<HeadersExpansionTile> {
                       ),
                       Expanded(
                         flex: 2,
-                        child: value == kHidden
+                        child: CRLoggerInitializer.instance.hiddenHeaders
+                                .contains(header)
                             ? Row(children: [
                                 Container(
                                   decoration: BoxDecoration(
@@ -353,16 +353,20 @@ class _HeadersExpansionTileState extends State<HeadersExpansionTile> {
                                     vertical: 4,
                                   ),
                                   child: Text(
-                                    value.toString(),
+                                    kHidden.toString(),
                                     style: CRStyle.bodyWhiteSemiBold14,
                                     textAlign: TextAlign.left,
                                   ),
                                 ),
                               ])
-                            : Text(
-                                value.toString(),
-                                style: CRStyle.bodyBlackRegular14,
-                                textAlign: TextAlign.left,
+                            : GestureDetector(
+                                onLongPress: () =>
+                                    copyClipboard(context, value.toString()),
+                                child: Text(
+                                  value.toString(),
+                                  style: CRStyle.bodyBlackRegular14,
+                                  textAlign: TextAlign.left,
+                                ),
                               ),
                       ),
                     ]);

@@ -1,4 +1,5 @@
 import 'package:cr_logger/src/bean/response_bean.dart';
+import 'package:cr_logger/src/utils/url_parser.dart';
 
 class ErrorBean {
   ErrorBean({
@@ -38,7 +39,7 @@ class ErrorBean {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'url': url,
+        'url': getUrlWithHiddenParams(url ?? ''),
         'errorMessage': errorMessage,
         'time': time?.toIso8601String(),
         'responseBean': responseBean?.toJson(),

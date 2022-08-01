@@ -4,6 +4,7 @@ import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/utils/url_parser.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -33,6 +34,7 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
   @override
   Widget build(BuildContext context) {
     final child = widget.child;
+    final urlWithHiddenParams = getUrlWithHiddenParams(widget.url.toString());
 
     return Material(
       borderRadius: BorderRadius.circular(10),
@@ -60,14 +62,15 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
                     widget.title ?? 'Link',
                     style: CRStyle.subtitle1BlackSemiBold16,
                   ),
-                  CopyWidget(
-                    onCopy: () => copyClipboard(context, widget.url ?? ''),
-                  ),
+                  if (urlWithHiddenParams == widget.url)
+                    CopyWidget(
+                      onCopy: () => copyClipboard(context, widget.url ?? ''),
+                    ),
                 ],
               ),
               if (child != null) child,
               Text(
-                widget.url.toString(),
+                urlWithHiddenParams,
                 maxLines: _expanded ? null : 4,
                 overflow: TextOverflow.fade,
                 style: CRStyle.bodyBlackRegular14,

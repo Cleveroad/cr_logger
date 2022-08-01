@@ -1,3 +1,6 @@
+import 'package:cr_logger/src/colors.dart';
+import 'package:cr_logger/src/constants.dart';
+import 'package:cr_logger/src/styles.dart';
 import 'package:cr_logger/src/utils/copy_clipboard.dart';
 import 'package:cr_logger/src/utils/json_utils.dart';
 import 'package:cr_logger/src/widget/json_widget/json_tree_colors.dart';
@@ -7,14 +10,47 @@ class JsonNodeContent extends StatelessWidget {
   const JsonNodeContent({
     required this.keyValue,
     this.value,
+    this.isHidden = false,
     super.key,
   });
 
   final String keyValue;
   final Object? value;
+  final bool isHidden;
 
   @override
   Widget build(BuildContext context) {
+    if (isHidden) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Row(
+          children: [
+            Text(
+              keyValue.toString(),
+              style: const TextStyle(
+                color: jsonTreeColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: CRLoggerColors.darkMagenta,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 4,
+              ),
+              child: const Text(
+                kHidden,
+                style: CRStyle.bodyWhiteSemiBold14,
+                textAlign: TextAlign.left,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     var valueText = '';
 
     /// If the value is a List, print its type and cardinality

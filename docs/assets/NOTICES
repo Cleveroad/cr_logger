@@ -1822,6 +1822,7 @@ SOFTWARE.
 async
 collection
 mime
+typed_data
 
 Copyright 2015, the Dart project authors. 
 
@@ -16581,7 +16582,6 @@ May you find forgiveness for yourself and forgive others
 May you share freely, never taking more than you give.
 --------------------------------------------------------------------------------
 stream_channel
-typed_data
 
 Copyright 2015, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
