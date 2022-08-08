@@ -373,8 +373,12 @@ void _printPrettyMap(
         if (msg.length + indent.length > linWidth) {
           final lines = (msg.length / linWidth).ceil();
           for (var i = 0; i < lines; ++i) {
+            var keyOrSpace = '  ';
+            if(i == 0) {
+              keyOrSpace = '$key: ';
+            }
             PrettyCRLogger.logPrint(
-              '║${_indent(_tabs)} ${msg.substring(i * linWidth, math.min<int>(i * linWidth + linWidth, msg.length))}',
+              '║${_indent(_tabs)} $keyOrSpace${msg.substring(i * linWidth, math.min<int>(i * linWidth + linWidth, msg.length))}',
             );
           }
         } else {

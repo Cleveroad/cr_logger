@@ -3,6 +3,7 @@
 - Added ability to hide fields in requests and responses and in query parameters
 - Added ability to turn on/off printing logs in release mode
 - Added ability to copy to clipboard headers values
+- Fixed missing parameter key in http logs printed in console
 
 ## 1.0.0
 
