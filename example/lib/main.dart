@@ -76,7 +76,7 @@ Future<void> main() async {
   CRLoggerInitializer.instance.handleFunctionInIsolate = (fun, data) async {
     return await Executor().execute(
       arg1: data,
-      fun1: (arg, _) => fun(arg),
+      fun1: (dynamic data, _) => fun(data),
     );
   };
 
@@ -84,7 +84,7 @@ Future<void> main() async {
   CRLoggerInitializer.instance.parseiOSJsonStringInIsolate = (fun, json) async {
     return await Executor().execute(
       arg1: json,
-      fun1: (String arg, _) => fun(arg),
+      fun1: (String data, _) => fun(data),
     );
   };
 
