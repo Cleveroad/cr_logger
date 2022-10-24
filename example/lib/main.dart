@@ -2,15 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chopper/chopper.dart';
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger_example/generated/assets.dart';
 import 'package:cr_logger_example/rest_client.dart';
 import 'package:cr_logger_example/widgets/example_btn.dart';
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:worker_manager/worker_manager.dart';
@@ -37,6 +39,7 @@ Future<void> main() async {
       'Test3',
       'Test7',
       'freeform',
+      'qwe',
     ],
     hiddenHeaders: [
       'content-type',
@@ -403,13 +406,19 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> _makeHttpRequest() async {
+    await _makeDioHttpRequest();
+    //await _makeRegularHttpRequest();
+    //await _makeChopperHttpRequest();
+  }
+
+  Future<void> _makeDioHttpRequest() async {
     final queryParameters = <String, dynamic>{
       'freeform': 'test',
       'testParameter': 'test',
     };
 
     await RestClient.instance.dio.post(
-      'https://httpbin.org/response-headers',
+      'https://httpbin.org/anything',
       queryParameters: queryParameters,
       data: {
         'Test': '1',
@@ -428,13 +437,46 @@ class _MainPageState extends State<MainPage> {
         'Test3': {'qwe': 1},
         'Test4': {'qwe': 1},
       },
-      options: Options(
+      options: dio.Options(
         headers: {
           'Authorization': 'qwewrrq',
           'Test3': 'qwewrrq',
         },
       ),
     );
+  }
+
+  //ignore: unused_element
+  Future<void> _makeRegularHttpRequest() async {
+    final url = Uri.parse('https://httpbin.org/anything');
+    const body = {'Test': '1', 'Test2': 'qwe'};
+
+    /// In case there is no internet, the http request will throw
+    /// a SocketException and the logger will not record anything.
+    /// You can wrap the request in a try catch block and log the error yourself
+    try {
+      final response = await http.post(url, body: body);
+      CRLoggerInitializer.instance.onHttpResponse(response, body);
+    } on SocketException catch (error) {
+      log.e(error.message);
+    }
+  }
+
+  //ignore: unused_element
+  Future<void> _makeChopperHttpRequest() async {
+    /// In case there is no internet, the chopper will log a request, then it
+    /// will receive a SocketException and will not log a response.
+    /// This causes the request to remain in "Sending" status in the logger
+    await RestClient.instance.chopper.send(const Request(
+      'POST',
+      'https://httpbin.org/anything',
+      '',
+      headers: {
+        'Authorization': 'qwewrrq',
+        'Test3': 'qwewrrq',
+      },
+      body: {'Test': '1', 'Test2': 'qwe'},
+    ));
   }
 
   String _getWarningNativeAsset() {

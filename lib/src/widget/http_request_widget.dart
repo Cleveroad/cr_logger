@@ -5,6 +5,7 @@ import 'package:cr_logger/generated/assets.dart';
 import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
+import 'package:cr_logger/src/models/request_status.dart';
 import 'package:cr_logger/src/styles.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
 import 'package:cr_logger/src/widget/url_value_widget.dart';
@@ -48,9 +49,7 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
     final response = widget.httpBean.response;
     final error = widget.httpBean.error;
 
-    final color = (error != null || response?.statusCode == null)
-        ? CRLoggerColors.red
-        : CRLoggerColors.green;
+    final status = widget.httpBean.status;
     final methodColor = request?.method == kMethodPost
         ? CRLoggerColors.orange
         : CRLoggerColors.green;
@@ -116,16 +115,21 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (statusCode != null)
+                        if (statusCode != null ||
+                            status == RequestStatus.sending)
                           Text(
-                            statusCode.toString(),
+                            statusCode != null
+                                ? statusCode.toString()
+                                : kSending,
                             style: CRStyle.subtitle1BlackSemiBold16
-                                .copyWith(color: color),
+                                .copyWith(color: status.color),
                           )
                         else
                           Icon(
-                            Icons.wifi_off,
-                            color: color,
+                            status == RequestStatus.noInternet
+                                ? Icons.wifi_off
+                                : Icons.error,
+                            color: status.color,
                             size: 18,
                           ),
                         const SizedBox(height: 6),

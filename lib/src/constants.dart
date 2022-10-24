@@ -1,5 +1,5 @@
 const kLoggerPackage = 'package:logger';
-const kVersion = '1.0.1';
+const kVersion = '1.0.2';
 const kLogFileName = 'log';
 
 const requestIconPath = 'assets/ic_request.png';
@@ -19,3 +19,7 @@ const kResponseWorkerId = 'responseWorker';
 const kErrorWorkerId = 'errorWorker';
 const kMs = 'ms';
 const kMore = '...';
+const kSending = 'Sending';
+
+/// Maximum number of each type of logs (http, debug, info, error) by default
+const kMaxEachTypeOfLogsCountByDefault = 50;

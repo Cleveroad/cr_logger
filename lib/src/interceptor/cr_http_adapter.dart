@@ -22,7 +22,7 @@ class CRHttpAdapter {
       contentType = requestHeaders['Content-Type'] as String?;
     }
 
-    final reqOpt = RequestBean()
+    final requestBean = RequestBean()
       ..id = request.hashCode
       ..url = request.url.toString()
       ..method = request.method
@@ -30,7 +30,7 @@ class CRHttpAdapter {
       ..requestTime = DateTime.now()
       ..body = body
       ..headers = requestHeaders;
-    logManager.onRequest(reqOpt);
+    logManager.onRequest(requestBean);
 
     final responseHeaders = <String, dynamic>{};
 
@@ -38,12 +38,31 @@ class CRHttpAdapter {
       responseHeaders[header] = value;
     });
 
-    final resOpt = ResponseBean()
+    final statusCode = response.statusCode;
+    final isError = statusCode < 200 || statusCode >= 300;
+
+    final responseBean = ResponseBean()
       ..id = request.hashCode
       ..responseTime = DateTime.now()
+      ..url = request.url.toString()
+      ..method = request.method
       ..statusCode = response.statusCode
-      ..data = body
+      ..statusMessage = response.reasonPhrase
+
+      /// In error case, do not put data in ResponseBean.
+      ..data = isError ? null : body
       ..headers = responseHeaders;
-    logManager.onResponse(resOpt);
+    logManager.onResponse(responseBean);
+
+    /// On error
+    if (isError) {
+      final errorBean = ErrorBean()
+        ..id = request.hashCode
+        ..url = request.url.toString()
+        ..time = DateTime.now()
+        ..statusCode = response.statusCode
+        ..statusMessage = response.reasonPhrase;
+      logManager.onError(errorBean);
+    }
   }
 }

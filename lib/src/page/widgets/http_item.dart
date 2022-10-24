@@ -2,6 +2,7 @@ import 'package:cr_logger/src/bean/http_bean.dart';
 import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
+import 'package:cr_logger/src/models/request_status.dart';
 import 'package:cr_logger/src/styles.dart';
 import 'package:cr_logger/src/utils/url_parser.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
@@ -22,16 +23,14 @@ class HttpItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        (httpBean.error != null || httpBean.response?.statusCode == null)
-            ? CRLoggerColors.red
-            : CRLoggerColors.green;
+    final status = httpBean.status;
     final methodColor = httpBean.request?.method == kMethodPost
         ? CRLoggerColors.orange
         : CRLoggerColors.green;
     final statusCode =
         httpBean.response?.statusCode ?? httpBean.error?.statusCode;
-    final urlWithHiddenParams = getUrlWithHiddenParams(httpBean.request?.url ?? '');
+    final urlWithHiddenParams =
+        getUrlWithHiddenParams(httpBean.request?.url ?? '');
 
     return Material(
       borderRadius: BorderRadius.circular(10),
@@ -70,24 +69,29 @@ class HttpItem extends StatelessWidget {
                         height: 28,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          color: color.withOpacity(0.06),
+                          color: status.color.withOpacity(0.06),
                         ),
                         padding: const EdgeInsets.symmetric(
                           vertical: 6,
                           horizontal: 16,
                         ),
-                        child: statusCode != null
+                        child: statusCode != null ||
+                                status == RequestStatus.sending
                             ? FittedBox(
                                 child: Text(
-                                  statusCode.toString(),
+                                  statusCode != null
+                                      ? statusCode.toString()
+                                      : kSending,
                                   style: CRStyle.bodyBlackSemiBold14
-                                      .copyWith(color: color),
+                                      .copyWith(color: status.color),
                                   maxLines: 1,
                                 ),
                               )
                             : Icon(
-                                Icons.wifi_off,
-                                color: color,
+                                status == RequestStatus.noInternet
+                                    ? Icons.wifi_off
+                                    : Icons.error,
+                                color: status.color,
                                 size: 14,
                               ),
                       ),

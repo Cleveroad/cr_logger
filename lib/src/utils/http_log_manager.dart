@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/utils/pretty_cr_logger.dart';
 
 class HttpLogManager {
@@ -12,7 +13,7 @@ class HttpLogManager {
 
   LinkedHashMap<String, HttpBean> logMap = LinkedHashMap<String, HttpBean>();
 
-  int logSize = 50;
+  int maxLogsCount = kMaxEachTypeOfLogsCountByDefault;
 
   List<String> keys = <String>[];
 
@@ -41,7 +42,7 @@ class HttpLogManager {
     _prettyCRLogger.onRequest(options);
     final key = options.id.toString();
     if (!keys.contains(key)) {
-      if (logMap.length >= logSize) {
+      if (logMap.length >= maxLogsCount) {
         logMap.remove(keys.last);
         keys.removeLast();
       }

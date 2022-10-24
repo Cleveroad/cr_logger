@@ -12,7 +12,7 @@ class ChopperLogInterceptor extends ResponseInterceptor
   @override
   FutureOr<Request> onRequest(Request request) async {
     final reqOpt = RequestBean()
-      ..id = getRequestHashCode(await request.toBaseRequest())
+      ..id = _getRequestHashCode(await request.toBaseRequest())
       ..url = request.url
       ..method = request.method
       ..contentType = request.headers['Content-Type'].toString()
@@ -38,19 +38,47 @@ class ChopperLogInterceptor extends ResponseInterceptor
       );
     }
 
-    final resOpt = ResponseBean()
-      ..id = getRequestHashCode(response.base.request!)
+    final requestId = _getRequestHashCode(response.base.request!);
+    final statusCode = response.statusCode;
+    final isError = statusCode < 200 || statusCode >= 300;
+
+    /// In error case, do not put data in ResponseBean.
+    final dynamic responseData;
+    //ignore: prefer-conditional-expressions
+    if (isError) {
+      responseData = null;
+    } else {
+      responseData = data.isNotEmpty ? data : response.body;
+    }
+
+    final responseBean = ResponseBean()
+      ..id = requestId
       ..responseTime = DateTime.now()
       ..statusCode = response.statusCode
-      ..data = data.isNotEmpty ? data : response.body
+      ..url = response.base.request?.url.toString()
+      ..method = response.base.request?.method
+      ..statusMessage = response.base.reasonPhrase
+      ..data = responseData
       ..headers = response.headers;
-    logManager.onResponse(resOpt);
+    logManager.onResponse(responseBean);
+
+    /// On error
+    if (isError) {
+      final errorBean = ErrorBean()
+        ..id = requestId
+        ..errorData = response.error
+        ..statusCode = statusCode
+        ..statusMessage = response.base.reasonPhrase
+        ..url = response.base.request?.url.toString()
+        ..time = DateTime.now();
+      logManager.onError(errorBean);
+    }
 
     return response;
   }
 
   /// Creates hashcode based on request
-  int getRequestHashCode(http.BaseRequest baseRequest) {
+  int _getRequestHashCode(http.BaseRequest baseRequest) {
     var hashCodeSum = 0;
 
     hashCodeSum += baseRequest.url.hashCode;
