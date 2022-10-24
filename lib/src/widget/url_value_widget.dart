@@ -1,26 +1,21 @@
-import 'dart:math' as math;
-
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/styles.dart';
 import 'package:cr_logger/src/utils/url_parser.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
+import 'package:cr_logger/src/widget/expand_arrow_button.dart';
+import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:flutter/material.dart';
 
 class UrlValueWidget extends StatefulWidget {
   const UrlValueWidget({
     required this.url,
-    this.title,
-    this.child,
     this.requestTime,
     this.responseTime,
     super.key,
   });
 
   final String? url;
-  final String? title;
-  final Widget? child;
   final DateTime? requestTime;
   final DateTime? responseTime;
 
@@ -33,80 +28,75 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final child = widget.child;
     final urlWithHiddenParams = getUrlWithHiddenParams(widget.url.toString());
+    final requestTime = widget.requestTime;
+    final responseTime = widget.responseTime;
 
-    return Material(
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: () => setState(() => _expanded = !_expanded),
-        borderRadius: BorderRadius.circular(10),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: CRLoggerColors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            6,
-            16,
-            16,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    widget.title ?? 'Link',
-                    style: CRStyle.subtitle1BlackSemiBold16,
-                  ),
-                  if (urlWithHiddenParams == widget.url)
-                    CopyWidget(
-                      onCopy: () => copyClipboard(context, widget.url ?? ''),
-                    ),
-                ],
-              ),
-              if (child != null) child,
-              Text(
-                urlWithHiddenParams,
-                maxLines: _expanded ? null : 4,
-                overflow: TextOverflow.fade,
-                style: CRStyle.bodyBlackRegular14,
-              ),
-              const SizedBox(height: 6),
-              IgnorePointer(
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF77788A).withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Transform.rotate(
-                    angle: _expanded ? math.pi : 0,
-                    child: const Icon(
-                      Icons.keyboard_arrow_down,
+    return RoundedCard(
+      padding: const EdgeInsets.only(
+        left: 16,
+        top: 10,
+        right: 16,
+        bottom: 10,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+
+                /// URL
+                Text(
+                  urlWithHiddenParams,
+                  maxLines: _expanded ? null : 1,
+                  overflow: _expanded ? null : TextOverflow.ellipsis,
+                  style: CRStyle.bodyBlackRegular14,
+                ),
+                const SizedBox(height: 4),
+
+                /// Request time
+                if (_expanded && requestTime != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      'Request time: ${requestTime.formatTime()}',
+                      style: CRStyle.bodyGreyRegular14,
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (widget.requestTime != null)
-                Text(
-                  'requestTime: ${widget.requestTime!.formatTime()}',
-                  style: CRStyle.bodyGreyRegular14,
-                ),
-              if (widget.responseTime != null) ...[
-                const SizedBox(height: 6),
-                Text(
-                  'responseTime: ${widget.responseTime!.formatTime()}',
-                  style: CRStyle.bodyGreyRegular14,
-                ),
+
+                /// Response time
+                if (_expanded && responseTime != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      'Response time: ${responseTime.formatTime()}',
+                      style: CRStyle.bodyGreyRegular14,
+                    ),
+                  ),
               ],
+            ),
+          ),
+          const SizedBox(width: 4),
+
+          /// Arrow button and copy widget
+          Flex(
+            direction: _expanded ? Axis.vertical : Axis.horizontal,
+            verticalDirection: VerticalDirection.up,
+            children: [
+              CopyWidget(
+                onCopy: () => copyClipboard(context, widget.url ?? ''),
+              ),
+              if (_expanded) const SizedBox(height: 4),
+              ExpandArrowButton(
+                isExpanded: _expanded,
+                onTap: () => setState(() => _expanded = !_expanded),
+              ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

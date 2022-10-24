@@ -61,6 +61,7 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
   late List<Widget> tabPages;
 
   LogType _currentLogType = LogType.http;
+  List<double?> _splitWeights = [0.6, 0.4];
 
   HttpBean? _httpBean;
   LogBean? _logBean;
@@ -172,11 +173,9 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
                       WeightLimit(min: 0.3),
                       WeightLimit(min: 0.3),
                     ],
-                    weights: [
-                      0.6,
-                      0.4,
-                    ],
+                    weights: _splitWeights,
                   ),
+                  onWeightChanged: (weights) => _splitWeights = weights,
                   children: [
                     PageView(
                       controller: _pageController,

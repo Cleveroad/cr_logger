@@ -1,4 +1,5 @@
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:http/http.dart' as http;
 
 class CRHttpAdapter {
@@ -6,6 +7,10 @@ class CRHttpAdapter {
 
   /// Handles http response. It creates both request and response from http call
   void onResponse(http.Response response, Object? body) {
+    if (!CRLoggerHelper.instance.doPrintLogs) {
+      return;
+    }
+
     if (response.request == null) {
       return;
     }

@@ -6,8 +6,9 @@ import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/styles.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
 import 'package:cr_logger/src/widget/cr_app_bar.dart';
-import 'package:cr_logger/src/widget/expanded_arrow_widget.dart';
+import 'package:cr_logger/src/widget/expand_arrow_button.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
+import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -50,7 +51,6 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
   @override
   Widget build(BuildContext context) {
     final logName = logTypes[widget.logType!];
-
     final isJsonData = widget.logBean?.message is Map<String, dynamic>;
 
     return Theme(
@@ -66,85 +66,82 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
             ? const Text('No log bean')
             : SingleChildScrollView(
                 controller: widget.scrollController,
-                padding: const EdgeInsets.fromLTRB(
-                  16,
-                  8,
-                  16,
-                  16,
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  top: 8,
+                  right: 16,
+                  bottom: 16,
                 ),
-                child: Material(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      color: CRLoggerColors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: EdgeInsets.fromLTRB(
-                      16,
-                      isJsonData ? 6 : 16,
-                      16,
-                      16,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (isJsonData) ...[
-                          ValueListenableBuilder(
-                            valueListenable: _allExpandedNodesNotifier,
-                            builder: (
-                              BuildContext context,
-                              bool isAllNodesExpanded,
-                              Widget? child,
-                            ) {
-                              return Column(children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      'JSON data',
-                                      style: CRStyle.subtitle1BlackSemiBold16,
-                                    ),
-                                    ExpandedArrowWidget(
-                                      expanded: isAllNodesExpanded,
-                                      allExpandedNotifier:
-                                          _allExpandedNodesNotifier,
-                                    ),
-                                  ],
-                                ),
-                                JsonWidget(
-                                  widget.logBean?.message
-                                      as Map<String, dynamic>,
-                                  allExpandedNodes: isAllNodesExpanded,
-                                ),
-                              ]);
-                            },
-                          ),
-                        ] else
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'message:\n${widget.logBean?.message}',
-                                  style: CRStyle.bodyBlackMedium14.copyWith(
-                                    color: widget.logBean?.color,
+                child: RoundedCard(
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    top: isJsonData ? 10 : 16,
+                    right: 16,
+                    bottom: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (isJsonData) ...[
+                        ValueListenableBuilder(
+                          valueListenable: _allExpandedNodesNotifier,
+                          builder: (
+                            BuildContext context,
+                            bool isAllNodesExpanded,
+                            Widget? child,
+                          ) {
+                            return Column(children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'JSON data',
+                                    style: CRStyle.subtitle1BlackSemiBold16,
                                   ),
+                                  ExpandArrowButton(
+                                    isExpanded: isAllNodesExpanded,
+                                    onTap: _onExpandArrowTap,
+                                  ),
+                                ],
+                              ),
+                              JsonWidget(
+                                widget.logBean?.message as Map<String, dynamic>,
+                                allExpandedNodes: isAllNodesExpanded,
+                              ),
+                            ]);
+                          },
+                        ),
+                      ] else
+
+                        /// Log message with copy widget
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Message:\n${widget.logBean?.message}',
+                                style: CRStyle.bodyBlackMedium14.copyWith(
+                                  color: widget.logBean?.color,
                                 ),
                               ),
-                              CopyWidget(onCopy: _onCopy),
-                            ],
-                          ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'time: ${widget.logBean?.time.formatTime()}',
-                          style: CRStyle.bodyGreyRegular14,
+                            ),
+                            CopyWidget(onCopy: _onCopy),
+                          ],
                         ),
-                        const SizedBox(height: 10),
-                        if (listWidgetStackTrace.isNotEmpty)
-                          ...listWidgetStackTrace,
-                      ],
-                    ),
+                      const SizedBox(height: 8),
+
+                      /// Log time
+                      Text(
+                        'Time: ${widget.logBean?.time.formatTime()}',
+                        style: CRStyle.bodyGreyRegular14,
+                      ),
+                      const SizedBox(height: 10),
+
+                      /// Stacktrace
+                      if (listWidgetStackTrace.isNotEmpty)
+                        ...listWidgetStackTrace,
+                    ],
                   ),
                 ),
               ),
@@ -211,5 +208,9 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
       ),
     );
     Clipboard.setData(ClipboardData(text: widget.logBean?.message));
+  }
+
+  void _onExpandArrowTap() {
+    _allExpandedNodesNotifier.value = !_allExpandedNodesNotifier.value;
   }
 }

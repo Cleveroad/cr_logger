@@ -1,11 +1,9 @@
-import 'dart:math' as math;
-
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/generated/assets.dart';
-import 'package:cr_logger/src/colors.dart';
-import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/widget/expand_arrow_button.dart';
+import 'package:cr_logger/src/widget/headers_expansion_tile.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
+import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:cr_logger/src/widget/url_value_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -20,8 +18,6 @@ class HttpResponseWidget extends StatefulWidget {
 
 class HttpResponseWidgetState extends State<HttpResponseWidget>
     with AutomaticKeepAliveClientMixin {
-  double fontSize = 15;
-
   final _allExpandedNodesNotifier = ValueNotifier<bool>(false);
   final _jsonWidgetValueKey = const ValueKey('ResponsePage');
 
@@ -40,23 +36,27 @@ class HttpResponseWidgetState extends State<HttpResponseWidget>
 
     final request = widget.httpBean.request;
     final response = widget.httpBean.response;
-    final data = response?.data ?? 'no response';
+    final data = response?.data ?? 'No response';
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          16,
-          0,
-          16,
-          16,
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 16,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          children: [
+            /// Headers
             HeadersExpansionTile(request: request),
             const SizedBox(height: 12),
+
+            /// URL
             UrlValueWidget(url: request?.url),
             const SizedBox(height: 12),
+
+            /// Data
             ValueListenableBuilder(
               valueListenable: _allExpandedNodesNotifier,
               builder: (
@@ -64,58 +64,42 @@ class HttpResponseWidgetState extends State<HttpResponseWidget>
                 bool isAllNodesExpanded,
                 Widget? child,
               ) {
-                return Material(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      color: CRLoggerColors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(
-                      16,
-                      6,
-                      16,
-                      16,
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Data',
-                              style: CRStyle.subtitle1BlackSemiBold16,
-                            ),
-                            Transform.rotate(
-                              angle: isAllNodesExpanded ? math.pi : 0,
-                              child: IconButton(
-                                onPressed: () => _allExpandedNodesNotifier
-                                    .value = !isAllNodesExpanded,
-                                icon: ImageExt.fromPackage(
-                                  Assets.assetsArrowDown,
-                                  height: 28,
-                                  width: 28,
-                                ),
-                                iconSize: 32,
-                                splashRadius: 20,
-                                padding: EdgeInsets.zero,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (data is Map<String, dynamic> || data is List)
-                          JsonWidget(
-                            {'': data},
-                            allExpandedNodes: isAllNodesExpanded,
-                            key: _jsonWidgetValueKey,
-                          )
-                        else
-                          Text(
-                            data.toString(),
-                            style: CRStyle.bodyBlackMedium14,
+                return RoundedCard(
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    top: 10,
+                    right: 16,
+                    bottom: 12,
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Data',
+                            style: CRStyle.subtitle1BlackSemiBold16,
                           ),
-                      ],
-                    ),
+                          ExpandArrowButton(
+                            isExpanded: isAllNodesExpanded,
+                            onTap: () => _allExpandedNodesNotifier.value =
+                                !isAllNodesExpanded,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      if (data is Map<String, dynamic> || data is List)
+                        JsonWidget(
+                          {'': data},
+                          allExpandedNodes: isAllNodesExpanded,
+                          key: _jsonWidgetValueKey,
+                        )
+                      else
+                        Text(
+                          data.toString(),
+                          style: CRStyle.bodyBlackMedium14,
+                        ),
+                    ],
                   ),
                 );
               },

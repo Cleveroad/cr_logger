@@ -9,9 +9,9 @@ import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/interceptor/cr_http_adapter.dart';
 import 'package:cr_logger/src/interceptor/cr_http_client_adapter.dart';
-import 'package:cr_logger/src/page/actions_page.dart';
+import 'package:cr_logger/src/page/actions_and_values/actions_managed.dart';
+import 'package:cr_logger/src/page/actions_and_values/notifiers_manager.dart';
 import 'package:cr_logger/src/page/log_main/log_main.dart';
-import 'package:cr_logger/src/page/value_notifiers_page.dart';
 import 'package:cr_logger/src/res/theme.dart';
 import 'package:cr_logger/src/utils/console_log_output.dart';
 import 'package:cr_logger/src/utils/local_log_managed.dart';
@@ -56,31 +56,31 @@ class CRLoggerInitializer {
   late final CRHttpClientAdapter _httpClientAdapter;
   late final CRHttpAdapter _httpAdapter;
 
+  /// Has the logger been initialised
   bool inited = false;
-  bool shouldPrintLogs = false;
-  bool shouldPrintInReleaseMode = false;
-  String buildType = '';
+
+  /// Will logs be printed to console and logger
+  bool _shouldPrintLogs = true;
+
+  /// Will logs be printed to console and logger when [kReleaseMode] is true
+  ///
+  /// Also depends on [shouldPrintLogs]
+  bool _shouldPrintInReleaseMode = false;
+
+  /// Name of file when sharing logs
   String logFileName = kLogFileName;
-  List<String> endpoints = [];
+
+  /// Information to be displayed in the logger on the App info page
+  ///
+  /// Map of parameter names and values
+  Map<String, String> appInfo = {};
 
   /// Hides all fields in request|response body and query parameters
   /// with keys from list
-  ///
-  /// This fields can't be copied
   List<String> hiddenFields = [];
 
   /// Hides all headers with keys from list
-  ///
-  /// This fields can't be copied
   List<String> hiddenHeaders = [];
-
-  /// Called only when [kIsWeb] is false
-  /// When proxy ip and port changed, this callback will return new proxy,
-  /// for saving it on the app side to DB or shared preferences.
-  ValueChanged<ProxyModel>? onProxyChanged;
-
-  /// Callback for getting saved proxy settings from local storage for editing.
-  ValueGetter<ProxyModel?>? onGetProxyFromDB;
 
   /// Callback for fast logout button in logger popup menu.
   LogoutFromAppCallback? onLogout;
@@ -164,6 +164,10 @@ class CRLoggerInitializer {
 
   bool get isDebugButtonDisplayed => _buttonEntry != null;
 
+  bool get shouldPrintLogs => _shouldPrintLogs;
+
+  bool get shouldPrintInReleaseMode => _shouldPrintInReleaseMode;
+
   /// Logger initialization.
   ///
   /// Custom logger [logger], maximum number of logs of each type (http, debug,
@@ -171,7 +175,9 @@ class CRLoggerInitializer {
   /// Custom logger theme [theme].
   /// Colors for message types [levelColors] (debug, verbose, info, warning,
   /// error, wtf).
-  /// Prints all logs while [shouldPrintLogs] true
+  /// Prints all logs only if [shouldPrintLogs] is true. Doesn't print logs if
+  /// [kReleaseMode] is true and the [shouldPrintInReleaseMode] parameter is
+  /// false, even if [shouldPrintLogs] parameter is true
   // ignore: Long-Parameter-List
   Future<void> init({
     bool shouldPrintLogs = true,
@@ -182,10 +188,6 @@ class CRLoggerInitializer {
     List<String>? hiddenHeaders,
     String? logFileName,
     int maxLogsCount = kMaxEachTypeOfLogsCountByDefault,
-    @Deprecated('To be removed in future versions. Use maxLogsCount instead')
-        int maxCountHttpLogs = kMaxEachTypeOfLogsCountByDefault,
-    @Deprecated('To be removed in future versions. Use maxLogsCount instead')
-        int maxCountOtherLogs = kMaxEachTypeOfLogsCountByDefault,
     Logger? logger,
   }) async {
     if (inited) {
@@ -195,13 +197,15 @@ class CRLoggerInitializer {
     HttpLogManager.instance.maxLogsCount = maxLogsCount;
     LocalLogManager.instance.maxLogsCount = maxLogsCount;
 
+    await CRLoggerHelper.instance.init();
+
     if (!kIsWeb) {
       _channel.receiveBroadcastStream().listen(_receiveNativeLogs);
     }
     _httpClientAdapter = CRHttpClientAdapter();
     _httpAdapter = CRHttpAdapter();
-    this.shouldPrintLogs = shouldPrintLogs;
-    this.shouldPrintInReleaseMode = shouldPrintInReleaseMode;
+    _shouldPrintLogs = shouldPrintLogs;
+    _shouldPrintInReleaseMode = shouldPrintInReleaseMode;
     if (theme != null) {
       CRLoggerHelper.instance.theme =
           theme.copyWithDefaultCardTheme(loggerTheme.cardTheme);
@@ -236,8 +240,14 @@ class CRLoggerInitializer {
     inited = true;
   }
 
-  /// Adds a value notifier to the page
-  void popupItemAddNotifier(
+  /// Get current Charles proxy settings as an "ip:port" string
+  ///
+  /// Proxy settings are saved in the logger with SharedPreferences
+  String? getProxySettings() =>
+      CRLoggerHelper.instance.getProxyFromSharedPref();
+
+  /// Adds a value notifier to the Actions and values page
+  void addValueNotifier(
     String name,
     ValueNotifier<dynamic> notifier, {
     String? connectedWidgetId,
@@ -254,13 +264,13 @@ class CRLoggerInitializer {
     NotifiersManager.removeNotifiersById(connectedWidgetId);
   }
 
-  /// Clears the value notifiers list on the Value notifiers page
+  /// Clears the value notifiers list on the Actions and values page
   void notifierListClear() {
     NotifiersManager.clear();
   }
 
-  /// Adds a button action to the page
-  void popupItemAddAction(
+  /// Adds an action button to the Actions and values page
+  void addActionButton(
     String text,
     VoidCallback action, {
     String? connectedWidgetId,
@@ -272,7 +282,7 @@ class CRLoggerInitializer {
     );
   }
 
-  /// Removes all button actions with the specified identifier
+  /// Removes all action buttons with the specified identifier
   void removeActionsById(String connectedWidgetId) {
     ActionsManager.removeActionButtonsById(connectedWidgetId);
   }
@@ -322,12 +332,12 @@ class CRLoggerInitializer {
     return ChopperLogInterceptor();
   }
 
-  /// Handle request from HttpClient
+  /// Handle request of HttpClient from dart:io library
   void onHttpClientRequest(HttpClientRequest request, Object? body) {
     _httpClientAdapter.onRequest(request, body);
   }
 
-  /// Handle response from HttpClient
+  /// Handle response of HttpClient from dart:io library
   void onHttpClientResponse(
     HttpClientResponse response,
     HttpClientRequest request,
@@ -580,8 +590,6 @@ class PrettyCRPrinter extends LogPrinter {
       event.level,
       event.message,
       timeStr,
-      errorStr,
-      stackTraceStr,
     );
 
     return _formatAndPrint(
@@ -678,8 +686,6 @@ class PrettyCRPrinter extends LogPrinter {
   void _addToLogWidget(
     Level level,
     message,
-    String? time,
-    String? error,
     String? stacktrace,
   ) {
     final logModel = LogBean(

@@ -12,16 +12,19 @@ class CopyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onCopy,
-      icon: ImageExt.fromPackage(
-        Assets.assetsContentCopy,
-        height: 20,
-        width: 20,
+    return SizedBox.square(
+      dimension: 28,
+      child: IconButton(
+        onPressed: onCopy,
+        icon: ImageExt.fromPackage(
+          CRLoggerAssets.assetsContentCopy,
+          height: 20,
+          width: 20,
+        ),
+        iconSize: 20,
+        splashRadius: 20,
+        padding: EdgeInsets.zero,
       ),
-      iconSize: 20,
-      splashRadius: 20,
-      padding: EdgeInsets.zero,
     );
   }
 }

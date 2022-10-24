@@ -18,21 +18,27 @@ Web [example](https://cleveroad.github.io/cr_logger)
 ✔️ Http from http/http package  
 ✔️ HttpClient from dart:io package
 
-
 ## Table of contents
 
+- [Screenshots](#screenshots)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Quick actions](#quick-actions)
 - [Setup](#setup)
-- [Examples](#examples)
+
+## Screenshots
+<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-1.png" height="500">  <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-2.png" height="500">  <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-3.png" height="500">
+
+<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-4.png" height="500">  <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-5.png" height="500">  <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-6.png" height="500">
+
+<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-web.png" height="500">
 
 ## Getting Started
 
 1. Add plugin to the project:
    ```yaml
    dependencies:
-     cr_logger: ^1.0.2
+     cr_logger: ^1.1.0
    ```
 
 2. Initialize the logger. main.dart:
@@ -50,18 +56,21 @@ Web [example](https://cleveroad.github.io/cr_logger)
          'token',
        ],
        logFileName: 'my_logs',
-       isPrintingLogs: true,
+       shouldPrintLogs: true,
+       shouldPrintInReleaseMode: false,
      );
    }
    ```
-   `isPrintingLogs` - Prints all logs while [isPrintingLogs] true
+   `shouldPrintLogs` - Prints all logs while [shouldPrintLogs] is true
+
+   `shouldPrintInReleaseMode` - Will all logs be printed when [kReleaseMode] is true
 
    `theme` - Custom logger theme
 
    `levelColors` - Colors for message types levelColors (debug, verbose, info, warning, error, wtf)
 
    `hiddenFields` - List of keys, whose value need to be replaced by string 'Hidden'
-   
+
    `logFileName` - File name when sharing logs
 
    `maxLogsCount` - Maximum number of each type of logs (http, debug, info, error), by default = 50
@@ -69,9 +78,9 @@ Web [example](https://cleveroad.github.io/cr_logger)
    `logger` - Custom logger
 
 3. Provide functions to handle cr_logger jobs in separate Isolates (e.g. printing logs or parsing jsons).
-When writing a lot of logs and printing it to the console UI may lag a lot. Isolates helps to improve
-performance for debug builds with cr_logger enabled. Example is using worker_manager package for
-convenient work with Dart Isolates:
+   When writing a lot of logs and printing it to the console UI may lag a lot. Isolates helps to improve
+   performance for debug builds with cr_logger enabled. Example is using worker_manager package for
+   convenient work with Dart Isolates:
 
    ```dart
    Future<void> main() async {
@@ -108,26 +117,14 @@ convenient work with Dart Isolates:
 
 5. Initialize the following callbacks (optional):
 
-   5.1 `GetIPAndPortFromDBCallback` - return stored Charles IP:PORT settings. Example:
-   ```dart
-   CRLoggerInitializer.instance.onGetProxyFromDB = () {
-     return DBProvider.instance.iPAndPort;
-   };
-   ```
-   5.2 `ProxySettingsChangeCallback` - when need to store new Charles IP:PORT settings. Example:
-   ```dart
-   CRLoggerInitializer.instance.onProxyChanged = (ip, port) {
-     DBProvider.instance.iPAndPort = '$ip:$port';
-   };
-   ```
-   5.3 `LogoutCallback` - when needed to log out from app
+   5.1 `LogoutCallback` - when needed to log out from app
    ```dart
    CRLoggerInitializer.instance.onLogout = () async {
      // logout simulation
      await Future.delayed(const Duration(seconds: 1));
    };
    ```
-   5.4 `ShareLogsFileCallback` - when needed to share logs file on the app's side
+   5.2 `ShareLogsFileCallback` - when needed to share logs file on the app's side
    ```dart
    CRLoggerInitializer.instance.onShareLogsFile = (path) async {
      await Share.shareFiles([path]);
@@ -136,36 +133,49 @@ convenient work with Dart Isolates:
 
 6. Define the variables:
 
-   6.1 `buildType` - e.g. ```CRLoggerInitializer.instance.buildType = buildType.toString();```
+   6.1 `appInfo` - you can provide custom information to be displayed on the AppInfo page 
+   ```dart
+   CRLoggerInitializer.instance.appInfo = {
+     'Build type': buildType.toString(),
+     'Endpoint': 'https/cr_logger/example/',
+   };
+   ```
 
    6.2 `logFileName` - file name when exporting logs
-   
-   6.3 `hiddenFields` - list of keys for headers to hide when showing network logs
 
-   6.4 `endpoints`
+   6.3 `hiddenFields` - list of keys for headers to hide when showing network logs
 
 7. Add the overlay button:
 
    ```dart
    CRLoggerInitializer.instance.showDebugButton(context);
    ```
-   
+
    `button` - Custom floating button
-   
+
    `left` - X-axis start position
-   
+
    `top` - Y-axis start position
 
 8. You can turn on/off the printing logs in the isolate, by default enabled:
-   
+
    ```dart
    CRLoggerInitializer.instance.isIsolateHttpLogsPrinting = false;
    ```
 
 9. Support for importing logs from json:
-   
+
    ```dart
    await CRLoggerInitializer.instance.createLogsFromJson(json);
+   ```
+
+10. You can get the current proxy settings to initialise Charles:
+
+   ```dart
+   final proxy = CRLoggerInitializer.instance.getProxySettings();
+   if (proxy != null) {
+     RestClient.instance.init(proxy);
+   }
    ```
 
 ## Usage
@@ -178,10 +188,10 @@ Using this popup menu, you can **quickly access** the desired CRLogger options.
 Called by a **long press** or **double tap** on the debug button.
 #####
 #### App info
-Allows you to view **Build type**, also **Endpoint**, **Package name**, **app version** and **build version**
+Allows you to view **Package name**, **app version**, **build version** and 
 #### Clear logs
 **Clears** application logs
-##### Show Inspector
+#### Show Inspector
 If the **inspector** is enabled, then a panel appears on the right side of the screen, with buttons to toggle size inspection and the color picker.
 #### Set Charles proxy
 Needed to set **proxy settings** for Charles
@@ -189,10 +199,28 @@ Needed to set **proxy settings** for Charles
 Provides **search by logs** (Debug, Info, Error)
 #### Share logs
 Share logs with your team
-#### Import logs
-Import logs from file
-#### Value notifiers
-Helps to track changes in values in variables of the **ValueNotifier** type, the value can be either a **simple type** or a **Widget** and etc.
+#### Actions and values
+Opens a page that contains action buttons and value notifiers.
+
+**Action buttons** allows you to add **different callbacks** for testing
+1. Add actions:
+
+   ```dart
+   CRLoggerInitializer.instance.addActionButton('Log Hi', () => log.i('Hi'));
+   CRLoggerInitializer.instance.addActionButton(
+     'Log By',
+     () => log.i('By'),
+     connectedWidgetId: 'some identifier',
+   );
+   ```
+
+2. Remove actions by specified id:
+
+   ```dart
+   CRLoggerInitializer.instance.removeActionsById('some identifier');
+   ```
+
+**Value notifiers** help keep track of changes to variables of **ValueNotifier** type. The value can be either a **simple type** or a **Widget** and etc.
 1. Type notifiers:
 
    ```dart
@@ -203,22 +231,22 @@ Helps to track changes in values in variables of the **ValueNotifier** type, the
    final iconNotifier = ValueNotifier<Icon>(Icon(Icons.clear));
    final textNotifier = ValueNotifier<Text>(Text('Widget text'));
    ```
-   
+
 2. Add notifiers:
 
    ```dart
-   CRLoggerInitializer.instance.popupItemAddNotifier('Integer', integerNotifier);
-   CRLoggerInitializer.instance.popupItemAddNotifier('Double', doubleNotifier);
-   CRLoggerInitializer.instance.popupItemAddNotifier('Bool', boolNotifier);
-   CRLoggerInitializer.instance.popupItemAddNotifier('String', stringNotifier);
-   CRLoggerInitializer.instance.popupItemAddNotifier('Icon', iconNotifier);
-   CRLoggerInitializer.instance.popupItemAddNotifier(
+   CRLoggerInitializer.instance.addValueNotifier('Integer', integerNotifier);
+   CRLoggerInitializer.instance.addValueNotifier('Double', doubleNotifier);
+   CRLoggerInitializer.instance.addValueNotifier('Bool', boolNotifier);
+   CRLoggerInitializer.instance.addValueNotifier('String', stringNotifier);
+   CRLoggerInitializer.instance.addValueNotifier('Icon', iconNotifier);
+   CRLoggerInitializer.instance.addValueNotifier(
      'Text',
      textNotifier,
      connectedWidgetId: 'some identifier',
    );
    ```
-   
+
 3. Remove notifiers by specified id:
 
    ```dart
@@ -230,28 +258,11 @@ Helps to track changes in values in variables of the **ValueNotifier** type, the
    ```dart
    CRLoggerInitializer.instance.notifierListClear();
    ```
-   
-##### Actions
-Allows you to add **different callbacks** for testing
-1. Add actions:
 
-   ```dart
-   CRLoggerInitializer.instance.popupItemAddAction('Log Hi', () => log.i('Hi'));
-   CRLoggerInitializer.instance.popupItemAddAction(
-     'Log By',
-     () => log.i('By'),
-     connectedWidgetId: 'some identifier',
-   );
-   ```
-   
-2. Remove actions by specified id:
-
-   ```dart
-   CRLoggerInitializer.instance.removeActionsById('some identifier');
-   ```
-
-##### App settings
+#### App settings
 Opens application settings
+#### Logout from app
+A quick way to quit your application by providing an **onLogout** callback
 
 ## Setup
 In IntelliJ/Studio you can collapse the request/response body:
@@ -263,12 +274,6 @@ and under `Fold console lines that contain` add these 2 rules: `║`, `╟`
 and under `Exceptions` add 1 rule: `╔╣`
 
 ![Settings][settings]
-
-## Examples
-<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-1.png" height="500">  <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-2.png" height="500">  <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-3.png" height="500">
-
-<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-4.png" height="500">  <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-5.png" height="500">  <img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-6.png" height="500">
-<img src="https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/screenshot-web.png" height="500">
 
 [show_body]: https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/http-logs-example.gif
 [settings]: https://raw.githubusercontent.com/Cleveroad/cr_logger/master/screenshots/settings-screenshot.png
