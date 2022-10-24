@@ -32,7 +32,7 @@ Web [example](https://cleveroad.github.io/cr_logger)
 1. Add plugin to the project:
    ```yaml
    dependencies:
-     cr_logger: ^1.0.1
+     cr_logger: ^1.0.2
    ```
 
 2. Initialize the logger. main.dart:
@@ -64,9 +64,7 @@ Web [example](https://cleveroad.github.io/cr_logger)
    
    `logFileName` - File name when sharing logs
 
-   `maxCountHttpLogs` - Maximum number of http logs, default = 50
-
-   `maxCountOtherLogs` - Maximum number of other logs, default = 50
+   `maxLogsCount` - Maximum number of each type of logs (http, debug, info, error), by default = 50
 
    `logger` - Custom logger
 

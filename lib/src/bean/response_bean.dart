@@ -1,5 +1,6 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/constants.dart';
+import 'package:cr_logger/src/utils/hide_values_in_map.dart';
 import 'package:cr_logger/src/utils/url_parser.dart';
 
 class ResponseBean {
@@ -49,11 +50,7 @@ class ResponseBean {
     });
     Map? changedData;
     if (data is Map) {
-      changedData = (data as Map).map(
-        (key, value) => CRLoggerInitializer.instance.hiddenFields.contains(key)
-            ? MapEntry(key, kHidden)
-            : MapEntry(key, value),
-      );
+      changedData = hideValuesInMap(data);
     }
 
     return {

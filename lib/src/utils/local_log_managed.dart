@@ -3,6 +3,7 @@ import 'dart:convert' as conv;
 import 'dart:io';
 
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/js/console_output_worker.dart';
 import 'package:cr_logger/src/js/scripts.dart';
 import 'package:cr_logger/src/utils/html_stub.dart'
@@ -15,7 +16,7 @@ class LocalLogManager {
 
   static final instance = LocalLogManager._();
 
-  int logSize = 50;
+  int maxLogsCount = kMaxEachTypeOfLogsCountByDefault;
 
   final localLogs = StreamController<LogBean>.broadcast();
 
@@ -178,7 +179,7 @@ class LocalLogManager {
   }
 
   void _add(LogBean log, List<LogBean> logs) {
-    if (logs.length >= logSize) {
+    if (logs.length >= maxLogsCount) {
       logs.removeAt(0);
     }
     localLogs.add(log);

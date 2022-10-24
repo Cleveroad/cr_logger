@@ -1,3 +1,12 @@
+## 1.0.2
+
+- Hide "hidden" fields in shared file
+- Number of logs of each type (http, debug, info, error) is now counted separately
+- The maxCountHttpLogs and maxCountOtherLogs parameters in the logger's Init method have been
+  replaced by maxLogsCount
+- Requests that have not yet been responded to now have a "Sending" status
+- Fixed error handling for regular http and chopper logs
+
 ## 1.0.1
 
 - Added ability to hide fields in requests and responses and in query parameters

@@ -63,15 +63,15 @@ class CRLoggerInitializer {
   String logFileName = kLogFileName;
   List<String> endpoints = [];
 
-  ///Hides all fields in request|response body and query parameters
-  ///with keys from list
+  /// Hides all fields in request|response body and query parameters
+  /// with keys from list
   ///
-  ///This fields can't be copied
+  /// This fields can't be copied
   List<String> hiddenFields = [];
 
-  ///Hides all headers with keys from list
+  /// Hides all headers with keys from list
   ///
-  ///This fields can't be copied
+  /// This fields can't be copied
   List<String> hiddenHeaders = [];
 
   /// Called only when [kIsWeb] is false
@@ -166,8 +166,8 @@ class CRLoggerInitializer {
 
   /// Logger initialization.
   ///
-  /// Custom logger [logger], maximum number of http logs [maxCountHttpLogs]
-  /// and other logs [maxCountOtherLogs] (errors, info, debug).
+  /// Custom logger [logger], maximum number of logs of each type (http, debug,
+  /// info, error) [maxLogsCount].
   /// Custom logger theme [theme].
   /// Colors for message types [levelColors] (debug, verbose, info, warning,
   /// error, wtf).
@@ -181,16 +181,19 @@ class CRLoggerInitializer {
     List<String>? hiddenFields,
     List<String>? hiddenHeaders,
     String? logFileName,
-    int maxCountHttpLogs = 50,
-    int maxCountOtherLogs = 50,
+    int maxLogsCount = kMaxEachTypeOfLogsCountByDefault,
+    @Deprecated('To be removed in future versions. Use maxLogsCount instead')
+        int maxCountHttpLogs = kMaxEachTypeOfLogsCountByDefault,
+    @Deprecated('To be removed in future versions. Use maxLogsCount instead')
+        int maxCountOtherLogs = kMaxEachTypeOfLogsCountByDefault,
     Logger? logger,
   }) async {
     if (inited) {
       return;
     }
 
-    LocalLogManager.instance.logSize = maxCountOtherLogs;
-    HttpLogManager.instance.logSize = maxCountHttpLogs;
+    HttpLogManager.instance.maxLogsCount = maxLogsCount;
+    LocalLogManager.instance.maxLogsCount = maxLogsCount;
 
     if (!kIsWeb) {
       _channel.receiveBroadcastStream().listen(_receiveNativeLogs);
@@ -280,8 +283,8 @@ class CRLoggerInitializer {
     await LocalLogManager.instance.createLogsFromJson(json);
   }
 
-  ///Show global hover debug buttons
-// ignore: Long-Parameter-List
+  /// Show global hover debug buttons
+  // ignore: Long-Parameter-List
   void showDebugButton(
     BuildContext context, {
     Widget? button,
@@ -392,7 +395,7 @@ class CRLoggerInitializer {
       ),
     );
 
-    ///Show hover menu
+    /// Show hover menu
     if (_buttonEntry != null) {
       Overlay.of(context)?.insert(_buttonEntry!);
     }
@@ -436,7 +439,7 @@ class CRLoggerInitializer {
   }
 
   void _onLoggerOpen(BuildContext context) {
-    ///Show logger
+    /// Show logger
     if (_loggerEntry == null) {
       final newLoggerEntry = OverlayEntry(
         builder: (context) => MainLogPage(
@@ -447,7 +450,7 @@ class CRLoggerInitializer {
       _loggerEntry = newLoggerEntry;
       Overlay.of(context)?.insert(newLoggerEntry);
 
-      ///The button should be above logger
+      /// The button should be above logger
       final buttonEntry = _buttonEntry;
       if (buttonEntry != null) {
         buttonEntry.remove();

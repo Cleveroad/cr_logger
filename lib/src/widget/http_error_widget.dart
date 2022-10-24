@@ -49,7 +49,7 @@ class _HttpErrorWidgetState extends State<HttpErrorWidget>
               children: [
                 UrlValueWidget(
                   url: url,
-                  title: 'Dio error',
+                  title: 'Error',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -98,7 +98,7 @@ class _HttpErrorWidgetState extends State<HttpErrorWidget>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Dio response:',
+                          'Response:',
                           style: CRStyle.subtitle1BlackSemiBold16,
                         ),
                         const SizedBox(height: 12),
