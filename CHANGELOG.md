@@ -1,4 +1,4 @@
-## 1.1.0
+## 1.1.0+1
 
 - Small UI updates for headers, link and error preview
 - Proxy settings are now stored in the logger. `onProxyChanged` and `onGetProxyFromDB` replaced
