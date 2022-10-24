@@ -374,7 +374,7 @@ void _printPrettyMap(
           final lines = (msg.length / linWidth).ceil();
           for (var i = 0; i < lines; ++i) {
             var keyOrSpace = '  ';
-            if(i == 0) {
+            if (i == 0) {
               keyOrSpace = '$key: ';
             }
             PrettyCRLogger.logPrint(

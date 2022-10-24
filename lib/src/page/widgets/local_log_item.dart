@@ -1,12 +1,11 @@
-import 'package:cr_logger/generated/assets.dart';
 import 'package:cr_logger/src/bean/log_bean.dart';
 import 'package:cr_logger/src/bean/log_type.dart';
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/styles.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
-import 'package:cr_logger/src/widget/expanded_arrow_widget.dart';
+import 'package:cr_logger/src/widget/expand_arrow_button.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
+import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -28,122 +27,110 @@ class LocalLogItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stackTrace = logBean.stackTrace?.split('\n') ?? [];
+    final isJsonData = logBean.message is Map<String, dynamic>;
 
-    return Material(
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: () => onSelected(logBean),
-        borderRadius: BorderRadius.circular(10),
-        child: Ink(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            12,
-            16,
-            16,
-          ),
-          decoration: BoxDecoration(
-            color: CRLoggerColors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: (logBean.message is Map<String, dynamic>)
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ValueListenableBuilder(
-                      valueListenable: _allExpandedNodesNotifier,
-                      builder: (
-                        BuildContext context,
-                        bool isAllNodesExpanded,
-                        Widget? child,
-                      ) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+    return RoundedCard(
+      padding: const EdgeInsets.only(
+        left: 16,
+        top: 16,
+        right: 16,
+        bottom: 12,
+      ),
+      onTap: () => onSelected(logBean),
+      child: isJsonData
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ValueListenableBuilder(
+                  valueListenable: _allExpandedNodesNotifier,
+                  builder: (
+                    BuildContext context,
+                    bool isAllNodesExpanded,
+                    Widget? child,
+                  ) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            const Text(
+                              'JSON data',
+                              style: CRStyle.subtitle1BlackSemiBold16,
+                            ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
-                                  'JSON data',
-                                  style: CRStyle.subtitle1BlackSemiBold16,
-                                ),
-                                Row(
-                                  children: [
-                                    CopyWidget(onCopy: () => _onCopy(context)),
-                                    ExpandedArrowWidget(
-                                      allExpandedNotifier:
-                                          _allExpandedNodesNotifier,
-                                      expanded: isAllNodesExpanded,
-                                    ),
-                                  ],
+                                CopyWidget(onCopy: () => _onCopy(context)),
+                                ExpandArrowButton(
+                                  isExpanded: isAllNodesExpanded,
+                                  onTap: _onExpandArrowTap,
                                 ),
                               ],
                             ),
-                            JsonWidget(
-                              logBean.message as Map<String, dynamic>,
-                              allExpandedNodes: isAllNodesExpanded,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              stackTrace.isNotEmpty ? stackTrace.first : '',
-                              style: CRStyle.captionBlackRegular12,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'time: ${logBean.time.formatTime()}',
-                              style: CRStyle.bodyGreyRegular14,
-                            ),
                           ],
-                        );
-                      },
-                    ),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            logBean.message.toString(),
-                            style: CRStyle.bodyGreyMedium14
-                                .copyWith(color: logType.getColor()),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
                         ),
-                        IconButton(
-                          onPressed: () => _onCopy(context),
-                          icon: ImageExt.fromPackage(
-                            Assets.assetsContentCopy,
-                            height: 20,
-                            width: 20,
-                          ),
-                          iconSize: 20,
-                          splashRadius: 20,
-                          padding: EdgeInsets.zero,
+                        JsonWidget(
+                          logBean.message as Map<String, dynamic>,
+                          allExpandedNodes: isAllNodesExpanded,
+                        ),
+                        const SizedBox(height: 10),
+
+                        /// Stacktrace
+                        Text(
+                          stackTrace.isNotEmpty ? stackTrace.first : '',
+                          style: CRStyle.captionBlackRegular12,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+
+                        /// Log time
+                        Text(
+                          'Time: ${logBean.time.formatTime()}',
+                          style: CRStyle.bodyGreyRegular14,
                         ),
                       ],
+                    );
+                  },
+                ),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        logBean.message.toString(),
+                        style: CRStyle.bodyGreyMedium14
+                            .copyWith(color: logType.getColor()),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      stackTrace.isNotEmpty ? stackTrace.first : '',
-                      style: CRStyle.captionBlackRegular12,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'time: ${logBean.time.formatTime()}',
-                      style: CRStyle.bodyGreyRegular14,
-                    ),
+                    CopyWidget(onCopy: () => _onCopy(context)),
                   ],
                 ),
-        ),
-      ),
+                const SizedBox(height: 10),
+
+                /// Stacktrace
+                Text(
+                  stackTrace.isNotEmpty ? stackTrace.first : '',
+                  style: CRStyle.captionBlackRegular12,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 10),
+
+                /// Log time
+                Text(
+                  'Time: ${logBean.time.formatTime()}',
+                  style: CRStyle.bodyGreyRegular14,
+                ),
+              ],
+            ),
     );
   }
 
@@ -159,5 +146,9 @@ class LocalLogItem extends StatelessWidget {
       ),
     );
     Clipboard.setData(ClipboardData(text: logBean.message));
+  }
+
+  void _onExpandArrowTap() {
+    _allExpandedNodesNotifier.value = !_allExpandedNodesNotifier.value;
   }
 }

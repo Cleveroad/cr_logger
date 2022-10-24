@@ -1,8 +1,8 @@
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/widget/error_value_widget.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
-import 'package:cr_logger/src/widget/url_value_widget.dart';
+import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:flutter/material.dart';
 
 class HttpErrorWidget extends StatefulWidget {
@@ -23,92 +23,46 @@ class _HttpErrorWidgetState extends State<HttpErrorWidget>
 
   @override
   Widget build(BuildContext context) {
-    final errorBean = widget.httpBean.error;
-    final statusCode = errorBean?.statusCode;
-    final statusMessage = errorBean?.statusMessage;
-    final url = errorBean?.url;
-
     super.build(context);
+
+    final errorBean = widget.httpBean.error;
 
     return errorBean == null
         ? const Center(
             child: Text(
-              'no error',
+              'No error',
               style: CRStyle.bodyGreyMedium14,
             ),
           )
         : SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              0,
-              16,
-              16,
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              bottom: 16,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                UrlValueWidget(
-                  url: url,
-                  title: 'Error',
+                ErrorValueWidget(errorBean: errorBean),
+                const SizedBox(height: 12),
+
+                /// Error response
+                RoundedCard(
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// Status code and message
-                      if (statusCode != null && statusMessage != null)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Status',
-                              style: CRStyle.bodyBlackMedium14,
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: CRLoggerColors.red,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              child: Text(
-                                '$statusCode $statusMessage',
-                                style: CRStyle.bodyWhiteSemiBold14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      const Divider(height: 24),
+                      const Text(
+                        'Response:',
+                        style: CRStyle.subtitle1BlackSemiBold16,
+                      ),
+                      const SizedBox(height: 12),
+                      JsonWidget(
+                        _getJsonObj(errorBean),
+                        allExpandedNodes: true,
+                        key: _jsonWidgetErrorValueKey,
+                      ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                /// Params
-                Material(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Ink(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: CRLoggerColors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Response:',
-                          style: CRStyle.subtitle1BlackSemiBold16,
-                        ),
-                        const SizedBox(height: 12),
-                        JsonWidget(
-                          _getJsonObj(errorBean),
-                          allExpandedNodes: true,
-                          key: _jsonWidgetErrorValueKey,
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ],

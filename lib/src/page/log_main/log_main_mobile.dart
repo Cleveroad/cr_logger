@@ -96,7 +96,7 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
               popupKey: _popupKey,
               child: IconButton(
                 onPressed: () => _popupKey.currentState?.showButtonMenu(),
-                icon: ImageExt.fromPackage(Assets.assetsIcMenu),
+                icon: ImageExt.fromPackage(CRLoggerAssets.assetsIcMenu),
               ),
             ),
           ],

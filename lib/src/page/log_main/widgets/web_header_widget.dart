@@ -37,7 +37,7 @@ class WebHeaderWidget extends StatelessWidget {
                   vertical: 4,
                   horizontal: 16,
                 ),
-                primary: CRLoggerColors.red,
+                foregroundColor: CRLoggerColors.red,
               ),
               child: const Text(
                 'Clear logs',

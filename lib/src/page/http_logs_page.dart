@@ -87,8 +87,10 @@ class HttpLogsPageState extends State<HttpLogsPage> {
   }
 
   void _update() => doPostFrame(() {
-        // ignore: no-empty-block
-        setState(() {});
+        if (mounted) {
+          // ignore: no-empty-block
+          setState(() {});
+        }
       });
 
   Future<void> _onHttpBeanSelected(HttpBean httpBean) async {

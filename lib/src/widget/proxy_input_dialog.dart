@@ -1,4 +1,6 @@
-import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/colors.dart';
+import 'package:cr_logger/src/cr_logger_helper.dart';
+import 'package:cr_logger/src/styles.dart';
 import 'package:flutter/material.dart';
 
 class ProxyInputDialog extends StatefulWidget {
@@ -17,10 +19,11 @@ class _ProxyInputDialogState extends State<ProxyInputDialog> {
     String? ip;
     String? port;
 
-    final proxyModel = CRLoggerInitializer.instance.onGetProxyFromDB?.call();
-    if (proxyModel != null) {
-      ip = proxyModel.ip;
-      port = proxyModel.port;
+    final proxy = CRLoggerHelper.instance.getProxyFromSharedPref();
+    if (proxy != null) {
+      final items = proxy.split(':');
+      ip = items.first;
+      port = items[1];
     }
 
     iPCtrl = TextEditingController(text: ip ?? '');
@@ -36,56 +39,67 @@ class _ProxyInputDialogState extends State<ProxyInputDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-        title: const Text('Proxy settings for Charles'),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            TextField(
-              // ignore: no-empty-block
-              onChanged: (_) => setState(() {}),
-              controller: iPCtrl,
-              decoration:
-                  const InputDecoration(hintText: 'Enter new IP address'),
-            ),
-            TextField(
-              // ignore: no-empty-block
-              onChanged: (_) => setState(() {}),
-              controller: portCtrl,
-              decoration: const InputDecoration(hintText: 'Enter port'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: _clearProxy,
-            child: const Text('CLEAR'),
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Proxy settings for Charles'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Changes will be applied after restarting the app',
+            style: CRStyle.captionGreyMedium12,
           ),
-          TextButton(
-            onPressed: iPCtrl.text.isEmpty || portCtrl.text.isEmpty
-                ? null
-                : _saveAndApplyProxy,
-            child: const Text('SAVE'),
+          TextField(
+            // ignore: no-empty-block
+            onChanged: (_) => setState(() {}),
+            controller: iPCtrl,
+            decoration: const InputDecoration(hintText: 'Enter new IP address'),
+          ),
+          TextField(
+            // ignore: no-empty-block
+            onChanged: (_) => setState(() {}),
+            controller: portCtrl,
+            decoration: const InputDecoration(hintText: 'Enter port'),
           ),
         ],
-      );
+      ),
+      actions: [
+        TextButton(
+          onPressed: _clearProxy,
+          child: const DefaultTextStyle(
+            style: TextStyle(color: CRLoggerColors.red),
+            child: Text('CLEAR'),
+          ),
+        ),
+        TextButton(
+          onPressed: _closeDialog,
+          child: const Text('CANCEL'),
+        ),
+        TextButton(
+          onPressed:
+              iPCtrl.text.isEmpty || portCtrl.text.isEmpty ? null : _saveProxy,
+          child: const Text('SAVE'),
+        ),
+      ],
+    );
+  }
 
-  void _saveAndApplyProxy() {
+  void _closeDialog() => Navigator.of(context).pop();
+
+  Future<void> _saveProxy() async {
     final ip = iPCtrl.text.trim();
     final port = portCtrl.text.trim();
 
     if (ip.isNotEmpty && port.isNotEmpty) {
-      final proxy = ProxyModel(ip, port);
-      CRLoggerInitializer.instance.onProxyChanged?.call(proxy);
+      final proxy = '$ip:$port';
+      await CRLoggerHelper.instance.setProxyToSharedPref(proxy);
     }
-
-    Navigator.of(context).pop();
+    _closeDialog();
   }
 
-  void _clearProxy() {
-    iPCtrl.clear();
-    portCtrl.clear();
-    _saveAndApplyProxy();
+  Future<void> _clearProxy() async {
+    await CRLoggerHelper.instance.setProxyToSharedPref(null);
+    _closeDialog();
   }
 }

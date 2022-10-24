@@ -1,9 +1,28 @@
+## 1.1.0
+
+- Small UI updates for headers, link and error preview
+- Proxy settings are now stored in the logger. `onProxyChanged` and `onGetProxyFromDB` replaced
+  with `getProxySettings` method
+- Added custom variable `appInfo` as `Map<String, String>`. `buildType` and `endpoints` variables
+  removed, and must be passed in `appInfo`
+- Actions and Value notifiers pages are combined into Actions and values page
+- Removed `maxCountHttpLogs` and `maxCountOtherLogs` parameters (use `maxLogsCount` instead)
+- Chopper and regular http interceptors now depend on `shouldPrintLogs`
+  and `shouldPrintInReleaseMode`
+  parameters
+- The `popupItemAddAction` method has been renamed to a `addActionButton`, and
+  the `popupItemAddNotifier` to a `addValueNotifier`
+- Fixed print of double http request to console in error case
+- Fixed pop-ups under the logger
+- Fixed slider reset in web when hovering over debug button
+- Fixed error handling for http requests of dart:io library
+
 ## 1.0.2
 
 - Hide "hidden" fields in shared file
 - Number of logs of each type (http, debug, info, error) is now counted separately
-- The maxCountHttpLogs and maxCountOtherLogs parameters in the logger's Init method have been
-  replaced by maxLogsCount
+- The `maxCountHttpLogs` and `maxCountOtherLogs` parameters in the logger's `Init` method have been
+  replaced by `maxLogsCount`
 - Requests that have not yet been responded to now have a "Sending" status
 - Fixed error handling for regular http and chopper logs
 
@@ -36,7 +55,7 @@
 
 ## 0.9.16
 
-- Added warning popup when selecting Share logs if onShareLogsFile callback was not defined
+- Added warning popup when selecting Share logs if `onShareLogsFile` callback was not defined
 - ShareLogsFileCallback was described in the readme
 - Added ability to minimize logger with saving state when you tap on overlay button again
 

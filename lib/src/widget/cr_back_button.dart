@@ -17,10 +17,10 @@ class CRBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return (showBackButton == null
-            ? Navigator.of(context).canPop()
+            ? ModalRoute.of(context)?.canPop == true
             : (showBackButton ?? false))
         ? IconButton(
-            icon: ImageExt.fromPackage(Assets.assetsIcBack),
+            icon: ImageExt.fromPackage(CRLoggerAssets.assetsIcBack),
             color: color,
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onPressed: () => _onBackPressed(context),

@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 
 typedef ParserError = Map<String, dynamic> Function(Object? data);
 
@@ -13,16 +13,12 @@ class DioLogInterceptor implements Interceptor {
   final logManager = HttpLogManager.instance;
   final ParserError? parserError;
 
-  final shouldPrintLogs = CRLoggerInitializer.instance.shouldPrintLogs;
-  final shouldPrintInReleaseMode =
-      CRLoggerInitializer.instance.shouldPrintInReleaseMode;
-
   @override
   void onError(
     DioError err,
     ErrorInterceptorHandler handler,
   ) {
-    if (!shouldPrintLogs || (!shouldPrintInReleaseMode && kReleaseMode)) {
+    if (!CRLoggerHelper.instance.doPrintLogs) {
       return handler.next(err);
     }
 
@@ -67,23 +63,29 @@ class DioLogInterceptor implements Interceptor {
       ..time = DateTime.now()
       ..responseBean = resOpt;
     logManager.onError(errOptions);
-    final options = err.requestOptions;
-    final reqOpt = RequestBean()
-      ..id = options.hashCode
-      ..url = options.uri.toString()
-      ..method = options.method
-      ..contentType = options.contentType?.toString()
-      ..requestTime = DateTime.now()
-      ..params = options.queryParameters
-      ..body = options.data
-      ..headers = options.headers;
-    logManager.onRequest(reqOpt);
+
+    /// TODO
+    /// it looks like it's useless code that just duplicates the request
+    /// in the console, but we need to make sure it wasn't some kind of crutch
+    /// and nothing will break
+    // final options = err.requestOptions;
+    // final reqOpt = RequestBean()
+    //   ..id = options.hashCode
+    //   ..url = options.uri.toString()
+    //   ..method = options.method
+    //   ..contentType = options.contentType?.toString()
+    //   ..requestTime = DateTime.now()
+    //   ..params = options.queryParameters
+    //   ..body = options.data
+    //   ..headers = options.headers;
+    // logManager.onRequest(reqOpt);
+
     handler.next(err);
   }
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (!shouldPrintLogs || (!shouldPrintInReleaseMode && kReleaseMode)) {
+    if (!CRLoggerHelper.instance.doPrintLogs) {
       return handler.next(options);
     }
 
@@ -105,7 +107,7 @@ class DioLogInterceptor implements Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    if (!shouldPrintLogs || (!shouldPrintInReleaseMode && kReleaseMode)) {
+    if (!CRLoggerHelper.instance.doPrintLogs) {
       return handler.next(response);
     }
 

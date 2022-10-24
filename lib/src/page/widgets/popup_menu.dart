@@ -1,17 +1,16 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
-import 'package:cr_logger/src/page/actions_page.dart';
+import 'package:cr_logger/src/page/actions_and_values/actions_and_values_page.dart';
+import 'package:cr_logger/src/page/app_info_page.dart';
 import 'package:cr_logger/src/page/http_logs_page.dart';
 import 'package:cr_logger/src/page/log_local_page.dart';
 import 'package:cr_logger/src/page/log_search_page.dart';
-import 'package:cr_logger/src/page/value_notifiers_page.dart';
 import 'package:cr_logger/src/utils/local_log_managed.dart';
 import 'package:cr_logger/src/utils/show_info_dialog.dart';
 import 'package:cr_logger/src/widget/proxy_input_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 class PopupMenu extends StatefulWidget {
   const PopupMenu({
@@ -41,7 +40,7 @@ class PopupMenuState extends State<PopupMenu> {
     _PopupMenuItem(
       title: const Text('App info'),
       icon: Icons.info,
-      onTap: _showAppInfo,
+      onTap: _openAppInfo,
     ),
     _PopupMenuItem(
       title: const Text('Clear logs'),
@@ -60,7 +59,7 @@ class PopupMenuState extends State<PopupMenu> {
     ),
     if (!kIsWeb)
       _PopupMenuItem(
-        title: const Text('Set Charlies proxy'),
+        title: const Text('Set Charles proxy'),
         icon: Icons.important_devices,
         onTap: _showIpInput,
       ),
@@ -75,14 +74,9 @@ class PopupMenuState extends State<PopupMenu> {
       onTap: _shareLogs,
     ),
     _PopupMenuItem(
-      title: const Text('Value notifiers'),
-      icon: Icons.all_inclusive,
-      onTap: _openValuesNotifierPage,
-    ),
-    _PopupMenuItem(
-      title: const Text('Actions'),
+      title: const Text('Actions and values'),
       icon: Icons.add_to_home_screen,
-      onTap: _openActionsPage,
+      onTap: _openActionsAndValuesPage,
     ),
     // App Settings is not implemented on Web
     if (!kIsWeb)
@@ -122,6 +116,7 @@ class PopupMenuState extends State<PopupMenu> {
   }
 
   Future<void> _cleanAllLogs() async {
+    CRLoggerHelper.instance.hideLogger();
     await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -157,6 +152,8 @@ class PopupMenuState extends State<PopupMenu> {
 
   Future<void> _logOut() async {
     if (crLoggerInitializer.onLogout == null) {
+      CRLoggerHelper.instance.hideLogger();
+
       return showInfoDialog(
         context: context,
         title: const Text('Warning'),
@@ -174,6 +171,8 @@ class PopupMenuState extends State<PopupMenu> {
 
   Future<void> _shareLogs() async {
     if (crLoggerInitializer.onShareLogsFile == null) {
+      CRLoggerHelper.instance.hideLogger();
+
       return showInfoDialog(
         context: context,
         title: const Text('Warning'),
@@ -188,24 +187,7 @@ class PopupMenuState extends State<PopupMenu> {
   }
 
   Future<void> _showIpInput() async {
-    final callbacks = {
-      '  - onProxyChanged': crLoggerInitializer.onProxyChanged == null,
-      '  - onGetProxyFromDB': crLoggerInitializer.onGetProxyFromDB == null,
-    }..removeWhere((key, value) => !value);
-    final callbacksNames = callbacks.keys.toList();
-
-    if (callbacksNames.isNotEmpty) {
-      return showInfoDialog(
-        context: context,
-        title: const Text('Warning'),
-        content: Text(
-          'There are not defined in CRLoggerInitializer the next callbacks:\n'
-          '${callbacksNames.join('\n')}\n\n'
-          'Please, contact developer.',
-        ),
-      );
-    }
-
+    CRLoggerHelper.instance.hideLogger();
     await showDialog(
       context: context,
       builder: (_) => Theme(
@@ -215,15 +197,9 @@ class PopupMenuState extends State<PopupMenu> {
     );
   }
 
-  Future<void> _openValuesNotifierPage() async {
+  Future<void> _openActionsAndValuesPage() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ValueNotifiersPage()),
-    );
-  }
-
-  Future<void> _openActionsPage() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ActionsPage()),
+      MaterialPageRoute(builder: (context) => const ActionsAndValuesPage()),
     );
   }
 
@@ -237,23 +213,9 @@ class PopupMenuState extends State<PopupMenu> {
     );
   }
 
-  Future<void> _showAppInfo() async {
-    final packageInfo = await PackageInfo.fromPlatform();
-    final endPoint = crLoggerInitializer.endpoints.toString();
-    final packageName = packageInfo.packageName;
-    final version = packageInfo.version;
-    final buildNumber = packageInfo.buildNumber;
-    final buffer = StringBuffer()
-      ..write('Build type:\n${crLoggerInitializer.buildType.toString()}\n\n')
-      ..write('Endpoint: $endPoint\n\n')
-      ..write('Package name:\n$packageName\n\n')
-      ..write('Version: $version\n\n')
-      ..write('Build number: $buildNumber\n');
-
-    await showInfoDialog(
-      context: context,
-      title: const Text('App info'),
-      content: Text(buffer.toString()),
+  Future<void> _openAppInfo() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const AppInfoPage()),
     );
   }
 
@@ -268,6 +230,8 @@ class PopupMenuState extends State<PopupMenu> {
 
   Future<void> _toggleInspector() async {
     if (context.findAncestorWidgetOfExactType<CrInspector>() == null) {
+      CRLoggerHelper.instance.hideLogger();
+
       return showInfoDialog(
         context: context,
         title: const Text('Warning'),

@@ -24,16 +24,20 @@ class RestClient {
     }
   }
 
-  static final RestClient instance = RestClient._();
   static const _serverTimeout = 15000;
+  static final RestClient instance = RestClient._();
 
   late Dio dio;
   late ChopperClient chopper;
 
-  /// Enable proxy for Dio client.
-  void enableDioProxyForCharles(ProxyModel proxyModel) {
-    final proxyStr = 'PROXY ${proxyModel.ip}:${proxyModel.port}; '
-        'PROXY localhost:${proxyModel.port}; DIRECT';
+  /// Init proxy for Dio client.
+  void initDioProxyForCharles(String proxy) {
+    final split = proxy.split(':');
+    final ip = split.first;
+    final port = split[1];
+
+    final proxyStr = 'PROXY $ip:$port; '
+        'PROXY localhost:$port; DIRECT';
     final adapter = dio.httpClientAdapter;
     if (adapter is DefaultHttpClientAdapter) {
       adapter.onHttpClientCreate = (HttpClient client) {

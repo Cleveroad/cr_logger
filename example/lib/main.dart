@@ -7,6 +7,7 @@ import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger_example/generated/assets.dart';
 import 'package:cr_logger_example/rest_client.dart';
 import 'package:cr_logger_example/widgets/example_btn.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +17,6 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:worker_manager/worker_manager.dart';
-
-String? proxyIpAndPortString;
 
 Future<void> main() async {
   // Call this first if main function is async
@@ -33,6 +32,11 @@ Future<void> main() async {
     levelColors: {
       Level.debug: Colors.grey.shade300,
       Level.warning: Colors.orange,
+      Level.verbose: Colors.blueAccent,
+      Level.info: Colors.blueAccent,
+      Level.error: Colors.red,
+      Level.wtf: Colors.red.shade900,
+      Level.nothing: Colors.grey.shade300,
     },
     hiddenFields: [
       'Test',
@@ -47,6 +51,10 @@ Future<void> main() async {
       'Authorization',
     ],
     logFileName: 'my_logs',
+
+    /// To display logs in our web example on pub.dev
+    /// https://cleveroad.github.io/cr_logger/#/
+    shouldPrintInReleaseMode: kIsWeb,
   );
 
   // Second! Define the callbacks
@@ -54,25 +62,9 @@ Future<void> main() async {
     // logout simulation
     await Future.delayed(const Duration(seconds: 1));
   };
-  CRLoggerInitializer.instance.onProxyChanged = (ProxyModel proxyModel) {
-    proxyIpAndPortString = proxyModel.ipAndPortString;
-    RestClient.instance.enableDioProxyForCharles(proxyModel);
-  };
-  CRLoggerInitializer.instance.onGetProxyFromDB = () {
-    return ProxyModel.fromString(proxyIpAndPortString ?? '');
-  };
   CRLoggerInitializer.instance.onShareLogsFile = (path) async {
-    await Share.shareFiles([path]);
+    await Share.shareXFiles([XFile(path)]);
   };
-
-  // Third! Define the variables
-  CRLoggerInitializer.instance.buildType = 'release';
-  CRLoggerInitializer.instance.endpoints = ['https/cr_logger/example/'];
-
-  final proxy = ProxyModel.fromString(proxyIpAndPortString ?? '');
-  if (proxy != null) {
-    RestClient.instance.enableDioProxyForCharles(proxy);
-  }
 
   // Provide isolated execution callback for other CrLogger functions
   // (e.g. printing logs)
@@ -90,6 +82,17 @@ Future<void> main() async {
       fun1: (String data, _) => fun(data),
     );
   };
+
+  // Third! Define the variables
+  CRLoggerInitializer.instance.appInfo = {
+    'Build type': 'release',
+    'Endpoint': 'https/cr_logger/example/',
+  };
+
+  final proxy = CRLoggerInitializer.instance.getProxySettings();
+  if (proxy != null) {
+    RestClient.instance.initDioProxyForCharles(proxy);
+  }
 
   runApp(const MyApp());
 }
@@ -140,15 +143,20 @@ class _MainPageState extends State<MainPage> {
 
     /// Type notifiers changes
     Timer.periodic(const Duration(seconds: 1), (_) => integerNotifier.value++);
-    Timer.periodic(const Duration(milliseconds: 1), (_) {
-      doubleNotifier
+    Timer.periodic(
+      const Duration(milliseconds: 1),
+      (_) => doubleNotifier
         ..value += 0.1
-        ..value = double.parse(doubleNotifier.value.toStringAsFixed(3));
-    });
-    Timer.periodic(const Duration(seconds: 1),
-        (_) => boolNotifier.value = !boolNotifier.value);
-    Timer.periodic(const Duration(seconds: 1),
-        (_) => stringNotifier.value = 'number: ${integerNotifier.value}');
+        ..value = double.parse(doubleNotifier.value.toStringAsFixed(3)),
+    );
+    Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => boolNotifier.value = !boolNotifier.value,
+    );
+    Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => stringNotifier.value = 'number: ${integerNotifier.value}',
+    );
 
     /// Widget notifiers changes
     Timer.periodic(
@@ -178,19 +186,16 @@ class _MainPageState extends State<MainPage> {
       ),
     );
 
-    CRLoggerInitializer.instance
-        .popupItemAddNotifier('Integer', integerNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('Double', doubleNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('Bool', boolNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('String', stringNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('Icon', iconNotifier);
-    CRLoggerInitializer.instance.popupItemAddNotifier('Text', textNotifier);
+    CRLoggerInitializer.instance.addValueNotifier('Integer', integerNotifier);
+    CRLoggerInitializer.instance.addValueNotifier('Double', doubleNotifier);
+    CRLoggerInitializer.instance.addValueNotifier('Bool', boolNotifier);
+    CRLoggerInitializer.instance.addValueNotifier('String', stringNotifier);
+    CRLoggerInitializer.instance.addValueNotifier('Icon', iconNotifier);
+    CRLoggerInitializer.instance.addValueNotifier('Text', textNotifier);
 
     /// Actions
-    CRLoggerInitializer.instance
-        .popupItemAddAction('Log Hi', () => log.i('Hi'));
-    CRLoggerInitializer.instance
-        .popupItemAddAction('Log By', () => log.i('By'));
+    CRLoggerInitializer.instance.addActionButton('Log Hi', () => log.i('Hi'));
+    CRLoggerInitializer.instance.addActionButton('Log By', () => log.i('By'));
 
     super.initState();
   }
@@ -257,17 +262,8 @@ class _MainPageState extends State<MainPage> {
                                   operation: DragOperation.move,
                                   onCreated: (ctrl) => _dropCtrl = ctrl,
                                   onDrop: _onDrop,
-                                  onHover: () {
-                                    _debouncer.dispose();
-                                    if (!_dragging) {
-                                      setState(() => _dragging = true);
-                                    }
-                                  },
-                                  onLeave: () {
-                                    _debouncer.run(() {
-                                      setState(() => _dragging = false);
-                                    });
-                                  },
+                                  onHover: _onHover,
+                                  onLeave: _onLeave,
                                 ),
                               ],
                             ),
@@ -370,7 +366,7 @@ class _MainPageState extends State<MainPage> {
                         const SizedBox(height: 12),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.blueGrey,
+                            backgroundColor: Colors.blueGrey,
                           ),
                           onPressed: () => _toggleDebugButton(context),
                           child: const Text(
@@ -394,6 +390,19 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  void _onHover() {
+    _debouncer.dispose();
+    if (!_dragging) {
+      setState(() => _dragging = true);
+    }
+  }
+
+  void _onLeave() {
+    _debouncer.run(() {
+      setState(() => _dragging = false);
+    });
+  }
+
   void _toggleDebugButton(BuildContext context) {
     if (CRLoggerInitializer.instance.isDebugButtonDisplayed) {
       CRLoggerInitializer.instance.dismissDebugButton();
@@ -405,10 +414,19 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  /// Examples of http request with logger interceptor
   Future<void> _makeHttpRequest() async {
+    /// Request example for dio package
     await _makeDioHttpRequest();
-    //await _makeRegularHttpRequest();
+
+    /// Request example for chopper package
     //await _makeChopperHttpRequest();
+
+    /// Request example for http package
+    //await _makeRegularHttpRequest();
+
+    /// Request example for dart:io library
+    //await _makeHttpClientRequest();
   }
 
   Future<void> _makeDioHttpRequest() async {
@@ -426,13 +444,13 @@ class _MainPageState extends State<MainPage> {
           'Test': [
             {'Test': 'qwe'},
             {'Test': 'qwe'},
-          ]
+          ],
         },
         'Test5': {
           'Test9': [
             {'name': 'qwe'},
             {'Test7': 'qwe'},
-          ]
+          ],
         },
         'Test3': {'qwe': 1},
         'Test4': {'qwe': 1},
@@ -463,11 +481,40 @@ class _MainPageState extends State<MainPage> {
   }
 
   //ignore: unused_element
+  Future<void> _makeHttpClientRequest() async {
+    final url = Uri.parse('https://httpbin.org/anything');
+    const body = {'Test': '1', 'Test2': 'qwe'};
+
+    /// In case there is no internet, the http request will throw
+    /// a SocketException and the logger will not record anything.
+    /// You can wrap the request in a try catch block and log the error yourself
+    final client = HttpClient();
+    try {
+      final request = await client.postUrl(url);
+      request.headers.set(
+        HttpHeaders.contentTypeHeader,
+        'application/json; charset=UTF-8',
+      );
+      request.write('{"title": "Foo","body": "Bar", "userId": 99}');
+      CRLoggerInitializer.instance.onHttpClientRequest(request, body);
+
+      final response = await request.close();
+      CRLoggerInitializer.instance.onHttpClientResponse(
+        response,
+        request,
+        body,
+      );
+    } on SocketException catch (error) {
+      log.e(error.message);
+    }
+  }
+
+  //ignore: unused_element
   Future<void> _makeChopperHttpRequest() async {
     /// In case there is no internet, the chopper will log a request, then it
     /// will receive a SocketException and will not log a response.
     /// This causes the request to remain in "Sending" status in the logger
-    await RestClient.instance.chopper.send(const Request(
+    await RestClient.instance.chopper.send(Request(
       'POST',
       'https://httpbin.org/anything',
       '',
@@ -518,7 +565,7 @@ class _MainPageState extends State<MainPage> {
         'c': 3,
         'str1': 'string1',
         'str2': 'string2',
-      }
+      },
     };
 
     log
@@ -535,8 +582,10 @@ class _MainPageState extends State<MainPage> {
 
   void _makeLogError() {
     log
-      ..e('Error message at ${DateTime.now().toIso8601String()}',
-          const HttpException('message'))
+      ..e(
+        'Error message at ${DateTime.now().toIso8601String()}',
+        const HttpException('message'),
+      )
       ..wtf('Wtf message at ${DateTime.now().toIso8601String()}');
   }
 

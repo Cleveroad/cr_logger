@@ -1,12 +1,17 @@
 import 'dart:io';
 
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/cr_logger_helper.dart';
 
 class CRHttpClientAdapter {
   HttpLogManager logManager = HttpLogManager.instance;
 
   /// Handles httpClientRequest and creates http alice call from it
   void onRequest(HttpClientRequest request, Object? body) {
+    if (!CRLoggerHelper.instance.doPrintLogs) {
+      return;
+    }
+
     final headers = <String, dynamic>{};
 
     request.headers.forEach((header, value) {
@@ -36,18 +41,41 @@ class CRHttpClientAdapter {
     HttpClientRequest request,
     Object? body,
   ) {
+    if (!CRLoggerHelper.instance.doPrintLogs) {
+      return;
+    }
+
     final headers = <String, dynamic>{};
 
     response.headers.forEach((header, value) {
       headers[header] = value;
     });
 
+    final statusCode = response.statusCode;
+    final isError = statusCode < 200 || statusCode >= 300;
+
     final resOpt = ResponseBean()
       ..id = request.hashCode
       ..responseTime = DateTime.now()
+      ..url = request.uri.toString()
+      ..method = request.method
       ..statusCode = response.statusCode
-      ..data = body
+      ..statusMessage = response.reasonPhrase
+
+      /// In error case, do not put data in ResponseBean.
+      ..data = isError ? null : body
       ..headers = headers;
     logManager.onResponse(resOpt);
+
+    /// On error
+    if (isError) {
+      final errorBean = ErrorBean()
+        ..id = request.hashCode
+        ..url = request.uri.toString()
+        ..time = DateTime.now()
+        ..statusCode = response.statusCode
+        ..statusMessage = response.reasonPhrase;
+      logManager.onError(errorBean);
+    }
   }
 }
