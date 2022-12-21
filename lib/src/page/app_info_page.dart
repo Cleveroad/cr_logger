@@ -1,8 +1,8 @@
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/cr_logger.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/page/widgets/app_info_item.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/cr_app_bar.dart';
 import 'package:flutter/material.dart';
 

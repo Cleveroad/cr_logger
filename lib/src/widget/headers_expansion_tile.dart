@@ -1,18 +1,18 @@
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/expand_arrow_button.dart';
 import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:flutter/material.dart';
 
 class HeadersExpansionTile extends StatefulWidget {
   const HeadersExpansionTile({
-    required this.request,
+    required this.headers,
     super.key,
   });
 
-  final RequestBean? request;
+  final Map<String, dynamic>? headers;
 
   @override
   State<HeadersExpansionTile> createState() => _HeadersExpansionTileState();
@@ -23,7 +23,7 @@ class _HeadersExpansionTileState extends State<HeadersExpansionTile> {
 
   @override
   Widget build(BuildContext context) {
-    final headersLength = widget.request?.headers?.length ?? 0;
+    final headersLength = widget.headers?.length ?? 0;
 
     return RoundedCard(
       padding: const EdgeInsets.only(
@@ -64,8 +64,8 @@ class _HeadersExpansionTileState extends State<HeadersExpansionTile> {
               shrinkWrap: true,
               separatorBuilder: (_, __) => const SizedBox(height: 4),
               itemBuilder: (_, index) {
-                final header = widget.request?.headers?.keys.elementAt(index);
-                final value = widget.request?.headers?.values.elementAt(index);
+                final header = widget.headers?.keys.elementAt(index);
+                final value = widget.headers?.values.elementAt(index);
 
                 return Row(children: [
                   Container(

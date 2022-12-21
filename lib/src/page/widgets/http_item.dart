@@ -1,10 +1,10 @@
-import 'package:cr_logger/src/bean/http_bean.dart';
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
+import 'package:cr_logger/src/data/bean/http_bean.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/models/request_status.dart';
-import 'package:cr_logger/src/styles.dart';
-import 'package:cr_logger/src/utils/url_parser.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
+import 'package:cr_logger/src/utils/parsers/url_parser.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
 import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class HttpItem extends StatelessWidget {
 
   final HttpBean httpBean;
   final bool useWebLayout;
-  final Function(HttpBean httpBean) onSelected;
+  final ValueChanged<HttpBean> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +99,7 @@ class HttpItem extends StatelessWidget {
           Text(
             urlWithHiddenParams,
             style: CRStyle.h3Black,
-            maxLines: 2,
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 10),

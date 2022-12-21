@@ -1,14 +1,16 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/generated/assets.dart';
-import 'package:cr_logger/src/colors.dart';
+import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/extensions/do_post_frame.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
-import 'package:cr_logger/src/page/http_logs_page.dart';
-import 'package:cr_logger/src/page/log_local_page.dart';
+import 'package:cr_logger/src/managers/log_manager.dart';
+import 'package:cr_logger/src/page/http_logs/http_logs_page.dart';
 import 'package:cr_logger/src/page/log_main/widgets/mobile_header_widget.dart';
+import 'package:cr_logger/src/page/logs/log_page.dart';
 import 'package:cr_logger/src/page/widgets/popup_menu.dart';
-import 'package:cr_logger/src/utils/local_log_managed.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/cr_app_bar.dart';
 import 'package:cr_logger/src/widget/options_buttons.dart';
 import 'package:flutter/material.dart';
@@ -21,27 +23,24 @@ class MainLogMobilePage extends StatefulWidget {
 
   final VoidCallback onLoggerClose;
 
-  static void cleanLogs() {
-    cleanDebug();
-    cleanError();
-    cleanInfo();
-    cleanHttpLogs();
+  static void cleanLogs({bool clearDB = false}) {
+    LogManager.instance.clean(cleanDB: clearDB);
   }
 
   static void cleanHttpLogs() {
-    HttpLogManager.instance.clear();
+    HttpLogManager.instance.cleanAllLogs(cleanDB: true);
   }
 
   static void cleanDebug() {
-    LocalLogManager.instance.cleanDebug();
+    LogManager.instance.cleanDebug();
   }
 
   static void cleanInfo() {
-    LocalLogManager.instance.cleanInfo();
+    LogManager.instance.cleanInfo();
   }
 
   static void cleanError() {
-    LocalLogManager.instance.cleanError();
+    LogManager.instance.cleanError();
   }
 
   @override
@@ -50,14 +49,15 @@ class MainLogMobilePage extends StatefulWidget {
 
 class _MainLogMobilePageState extends State<MainLogMobilePage> {
   final _pageController = PageController();
+  final _logsMode = LogsModeController.instance.logMode;
 
   final _popupKey = GlobalKey<PopupMenuButtonState>();
   final _navKey = GlobalKey<OptionsButtonsState>();
 
   final _httpLogKey = GlobalKey<HttpLogsPageState>();
-  final _debugLogKey = GlobalKey<LocalLogsPageState>();
-  final _infoLogKey = GlobalKey<LocalLogsPageState>();
-  final _errorLogKey = GlobalKey<LocalLogsPageState>();
+  final _debugLogKey = GlobalKey<LogPageState>();
+  final _infoLogKey = GlobalKey<LogPageState>();
+  final _errorLogKey = GlobalKey<LogPageState>();
 
   late List<Widget> tabPages;
 
@@ -68,9 +68,9 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
     super.initState();
     tabPages = [
       HttpLogsPage(key: _httpLogKey),
-      LocalLogsPage(key: _debugLogKey, logType: LogType.debug),
-      LocalLogsPage(key: _infoLogKey, logType: LogType.info),
-      LocalLogsPage(key: _errorLogKey, logType: LogType.error),
+      LogPage(key: _debugLogKey, logType: LogType.debug),
+      LogPage(key: _infoLogKey, logType: LogType.info),
+      LogPage(key: _errorLogKey, logType: LogType.error),
     ];
     _pageController.addListener(_onPageChanged);
   }
@@ -78,6 +78,7 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
   @override
   void dispose() {
     _pageController.removeListener(_onPageChanged);
+
     super.dispose();
   }
 
@@ -88,7 +89,15 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
       child: Scaffold(
         backgroundColor: CRLoggerColors.backgroundGrey,
         appBar: CRAppBar(
-          showLoggerVersion: true,
+          titleWidget: ValueListenableBuilder(
+            valueListenable: _logsMode,
+
+            //ignore: prefer-trailing-comma
+            builder: (_, __, ___) => Text(
+              _logsMode.value.appBarTitle,
+              style: CRStyle.subtitle1BlackSemiBold17,
+            ),
+          ),
           onBackPressed: widget.onLoggerClose,
           showBackButton: true,
           actions: [
@@ -113,10 +122,10 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
                     OptionsButtons(
                       key: _navKey,
                       titles: [
-                        LogType.http.asString(),
-                        LogType.debug.asString(),
-                        LogType.info.asString(),
-                        LogType.error.asString(),
+                        LogType.http.name,
+                        LogType.debug.name,
+                        LogType.info.name,
+                        LogType.error.name,
                       ],
                       onSelected: _onOptionSelected,
                     ),
@@ -143,24 +152,23 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
   }
 
   void _onAllClear() {
-    LocalLogManager.instance.clean();
-    HttpLogManager.instance.clear();
+    LogManager.instance.clean(cleanDB: _logsMode.value == LogsMode.fromDB);
     _updatePages();
   }
 
   void _onClear() {
     switch (_currentLogType) {
       case LogType.debug:
-        LocalLogManager.instance.logDebug.clear();
+        LogManager.instance.cleanDebug();
         break;
       case LogType.info:
-        LocalLogManager.instance.logInfo.clear();
+        LogManager.instance.cleanInfo();
         break;
       case LogType.error:
-        LocalLogManager.instance.logError.clear();
+        LogManager.instance.cleanError();
         break;
       case LogType.http:
-        HttpLogManager.instance.clear();
+        HttpLogManager.instance.cleanHTTP();
         break;
     }
     _updatePages();

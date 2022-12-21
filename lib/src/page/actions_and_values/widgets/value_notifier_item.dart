@@ -1,6 +1,5 @@
-import 'package:cr_logger/src/dio_log.dart';
-import 'package:cr_logger/src/page/actions_and_values/models/notifier_data.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:flutter/material.dart';
 
 class ValueNotifierItem extends StatelessWidget {
@@ -13,30 +12,24 @@ class ValueNotifierItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: notifierData.valueNotifier,
-      //ignore: Prefer-trailing-comma
-      builder: (_, value, __) {
-        final widget = value is Widget
-            ? value
-            : const Text(
-                'Bad widget',
-                style: CRStyle.subtitle1BlackMedium16,
-              );
+    final notifier = notifierData.valueNotifier;
 
-        return Row(
-          children: [
-            Expanded(
-              child: Text(
-                notifierData.name,
-                style: CRStyle.bodyBlackRegular14,
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: notifierData.isWidget
-                  ? widget
-                  : GestureDetector(
+    return notifier != null
+        ? ValueListenableBuilder(
+            valueListenable: notifier,
+            //ignore: prefer-trailing-comma
+            builder: (_, value, __) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      notifierData.name ?? '',
+                      style: CRStyle.bodyBlackRegular14,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: GestureDetector(
                       onLongPress: () => copyClipboard(
                         context,
                         value.toString(),
@@ -46,10 +39,11 @@ class ValueNotifierItem extends StatelessWidget {
                         style: CRStyle.bodyBlackRegular14,
                       ),
                     ),
-            ),
-          ],
-        );
-      },
-    );
+                  ),
+                ],
+              );
+            },
+          )
+        : notifierData.widget ?? const SizedBox();
   }
 }

@@ -1,5 +1,6 @@
-import 'package:cr_logger/src/colors.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:flutter/material.dart';
 
 class MobileHeaderWidget extends StatelessWidget {
@@ -39,9 +40,15 @@ class MobileHeaderWidget extends StatelessWidget {
                 ),
                 foregroundColor: CRLoggerColors.red,
               ),
-              child: const Text(
-                'Clear logs',
-                style: CRStyle.bodyRedMedium14,
+              child: ValueListenableBuilder(
+                valueListenable: LogsModeController.instance.logMode,
+                //ignore: prefer-trailing-comma
+                builder: (_, value, __) => Text(
+                  value == LogsMode.fromCurrentSession
+                      ? 'Clear logs'
+                      : 'Clear logs from DB',
+                  style: CRStyle.bodyRedMedium14,
+                ),
               ),
             ),
           ],

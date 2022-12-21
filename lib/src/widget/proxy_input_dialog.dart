@@ -1,6 +1,6 @@
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:flutter/material.dart';
 
 class ProxyInputDialog extends StatefulWidget {

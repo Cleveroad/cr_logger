@@ -1,16 +1,18 @@
-import 'package:cr_logger/src/colors.dart';
+import 'package:cr_logger/src/res/colors.dart';
 import 'package:flutter/material.dart';
 
 class RoundedCard extends StatelessWidget {
   const RoundedCard({
     required this.child,
     this.onTap,
+    this.onLongTap,
     this.padding,
     super.key,
   });
 
   final Widget child;
   final VoidCallback? onTap;
+  final VoidCallback? onLongTap;
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -23,6 +25,7 @@ class RoundedCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongTap,
         borderRadius: BorderRadius.circular(10),
         child: Ink(
           decoration: BoxDecoration(

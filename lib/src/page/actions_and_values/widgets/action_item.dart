@@ -1,5 +1,5 @@
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/page/actions_and_values/models/action_model.dart';
+import 'package:cr_logger/src/res/colors.dart';
 import 'package:flutter/material.dart';
 
 class ActionItem extends StatelessWidget {

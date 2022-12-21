@@ -1,6 +1,5 @@
-import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/page/widgets/popup_menu.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:flutter/material.dart';
 
 class CRWebAppBar extends StatelessWidget {
@@ -38,10 +37,6 @@ class CRWebAppBar extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-          const Text(
-            'cr_logger $kVersion',
-            style: CRStyle.bodyGreyMedium14,
           ),
           InkWell(
             onTap: onLoggerClose,

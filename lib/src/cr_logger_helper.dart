@@ -16,6 +16,9 @@ class CRLoggerHelper {
   final inspectorNotifier = ValueNotifier<bool>(false);
   final loggerShowingNotifier = ValueNotifier<bool>(false);
 
+  final maxLogsCount = CRLoggerInitializer.instance.maxCurrentLogsCount;
+
+  final maxDBLogsCount = CRLoggerInitializer.instance.maxDBLogsCount;
   late final PackageInfo packageInfo;
   late final SharedPreferences _prefs;
 
@@ -23,13 +26,21 @@ class CRLoggerHelper {
 
   bool get isLoggerShowing => loggerShowingNotifier.value;
 
-  /// Condition that determines whether or not to print logs
-  bool get doPrintLogs {
-    final shouldPrintLogs = CRLoggerInitializer.instance.shouldPrintLogs;
-    final shouldPrintInReleaseMode =
-        CRLoggerInitializer.instance.shouldPrintInReleaseMode;
+  bool get useDB {
+    final useCrLoggerInReleaseBuild =
+        CRLoggerInitializer.instance.useCrLoggerInReleaseBuild;
+    final useDB = CRLoggerInitializer.instance.useDB;
 
-    return shouldPrintLogs && (shouldPrintInReleaseMode || !kReleaseMode);
+    return useDB && (useCrLoggerInReleaseBuild || !kReleaseMode) && !kIsWeb;
+  }
+
+  /// Condition that determines whether or not to print logs
+  bool get printLogs {
+    final printLogs = CRLoggerInitializer.instance.printLogs;
+    final useCrLoggerInReleaseBuild =
+        CRLoggerInitializer.instance.useCrLoggerInReleaseBuild;
+
+    return printLogs && (useCrLoggerInReleaseBuild || !kReleaseMode);
   }
 
   Future<void> init() async {

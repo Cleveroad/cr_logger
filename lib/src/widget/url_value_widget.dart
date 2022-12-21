@@ -1,8 +1,7 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
-import 'package:cr_logger/src/styles.dart';
-import 'package:cr_logger/src/utils/url_parser.dart';
-import 'package:cr_logger/src/widget/copy_widget.dart';
+import 'package:cr_logger/src/res/styles.dart';
+import 'package:cr_logger/src/utils/parsers/url_parser.dart';
 import 'package:cr_logger/src/widget/expand_arrow_button.dart';
 import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:flutter/material.dart';
@@ -24,15 +23,20 @@ class UrlValueWidget extends StatefulWidget {
 }
 
 class _UrlValueWidgetState extends State<UrlValueWidget> {
-  bool _expanded = false;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
-    final urlWithHiddenParams = getUrlWithHiddenParams(widget.url.toString());
+    final urlWithHiddenParams = getUrlWithHiddenParams(
+      widget.url.toString(),
+      showFullPath: _isExpanded,
+    );
     final requestTime = widget.requestTime;
     final responseTime = widget.responseTime;
 
     return RoundedCard(
+      onTap: () => setState(() => _isExpanded = !_isExpanded),
+      onLongTap: () => copyClipboard(context, widget.url ?? ''),
       padding: const EdgeInsets.only(
         left: 16,
         top: 10,
@@ -51,14 +55,14 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
                 /// URL
                 Text(
                   urlWithHiddenParams,
-                  maxLines: _expanded ? null : 1,
-                  overflow: _expanded ? null : TextOverflow.ellipsis,
+                  maxLines: _isExpanded ? null : 1,
+                  overflow: _isExpanded ? null : TextOverflow.ellipsis,
                   style: CRStyle.bodyBlackRegular14,
                 ),
                 const SizedBox(height: 4),
 
                 /// Request time
-                if (_expanded && requestTime != null)
+                if (_isExpanded && requestTime != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
@@ -68,7 +72,7 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
                   ),
 
                 /// Response time
-                if (_expanded && responseTime != null)
+                if (_isExpanded && responseTime != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
@@ -81,21 +85,8 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
           ),
           const SizedBox(width: 4),
 
-          /// Arrow button and copy widget
-          Flex(
-            direction: _expanded ? Axis.vertical : Axis.horizontal,
-            verticalDirection: VerticalDirection.up,
-            children: [
-              CopyWidget(
-                onCopy: () => copyClipboard(context, widget.url ?? ''),
-              ),
-              if (_expanded) const SizedBox(height: 4),
-              ExpandArrowButton(
-                isExpanded: _expanded,
-                onTap: () => setState(() => _expanded = !_expanded),
-              ),
-            ],
-          ),
+          /// Arrow button
+          ExpandArrowButton(isExpanded: _isExpanded),
         ],
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/colors.dart';
-import 'package:cr_logger/src/styles.dart';
-import 'package:cr_logger/src/utils/url_parser.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
+import 'package:cr_logger/src/utils/parsers/url_parser.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
 import 'package:cr_logger/src/widget/expand_arrow_button.dart';
 import 'package:cr_logger/src/widget/rounded_card.dart';

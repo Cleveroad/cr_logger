@@ -1,14 +1,12 @@
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/models/request_status.dart';
-import 'package:cr_logger/src/styles.dart';
-import 'package:cr_logger/src/widget/expand_arrow_button.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
+import 'package:cr_logger/src/widget/body_expansion_tile.dart';
 import 'package:cr_logger/src/widget/headers_expansion_tile.dart';
-import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
-import 'package:cr_logger/src/widget/rounded_card.dart';
+import 'package:cr_logger/src/widget/params_expansion_tile.dart';
 import 'package:cr_logger/src/widget/url_value_widget.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class HttpRequestWidget extends StatefulWidget {
@@ -25,9 +23,6 @@ class HttpRequestWidget extends StatefulWidget {
 
 class HttpRequestWidgetState extends State<HttpRequestWidget>
     with AutomaticKeepAliveClientMixin {
-  final _allExpandedNodesNotifier = ValueNotifier<bool>(false);
-  final _jsonWidgetBodyValueKey = const ValueKey('RequestPageBody');
-  final _jsonWidgetParamsValueKey = const ValueKey('RequestPageParams');
   final _scrollCtrl = ScrollController();
 
   @override
@@ -35,7 +30,6 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
 
   @override
   void dispose() {
-    _allExpandedNodesNotifier.dispose();
     _scrollCtrl.dispose();
     super.dispose();
   }
@@ -150,7 +144,7 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
             const SizedBox(height: 12),
 
             /// Headers
-            HeadersExpansionTile(request: request),
+            HeadersExpansionTile(headers: request?.headers),
             const SizedBox(height: 12),
 
             /// URL
@@ -161,59 +155,16 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
             ),
             const SizedBox(height: 12),
 
+            /// Params
+            ParamsExpansionTile(
+              request: request,
+            ),
+
+            const SizedBox(height: 12),
+
             /// Body
-            ValueListenableBuilder(
-              valueListenable: _allExpandedNodesNotifier,
-              builder: (
-                BuildContext context,
-                bool isAllNodesExpanded,
-                Widget? child,
-              ) {
-                return RoundedCard(
-                  padding: const EdgeInsets.only(
-                    left: 16,
-                    top: 10,
-                    right: 16,
-                    bottom: 12,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Body',
-                            style: CRStyle.subtitle1BlackSemiBold16,
-                          ),
-                          ExpandArrowButton(
-                            isExpanded: isAllNodesExpanded,
-                            onTap: () => _allExpandedNodesNotifier.value =
-                                !isAllNodesExpanded,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      JsonWidget(
-                        _getJsonObj(request),
-                        allExpandedNodes: isAllNodesExpanded,
-                        key: _jsonWidgetBodyValueKey,
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Params',
-                        style: CRStyle.subtitle1BlackSemiBold16,
-                      ),
-                      const SizedBox(height: 12),
-                      JsonWidget(
-                        {'params': request?.params},
-                        allExpandedNodes: isAllNodesExpanded,
-                        key: _jsonWidgetParamsValueKey,
-                      ),
-                    ],
-                  ),
-                );
-              },
+            BodyExpansionTile(
+              request: request,
             ),
           ],
         ),
@@ -228,18 +179,6 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
       return CRLoggerColors.orange;
     } else {
       return CRLoggerColors.red;
-    }
-  }
-
-  Map<String, dynamic>? _getJsonObj(request) {
-    if (request?.body is FormData) {
-      return {'formData': request?.getFormData() ?? ''};
-    } else if (request?.body is List) {
-      return {'[]': request?.body ?? ''};
-    } else if (request?.body is Map<String, dynamic>) {
-      return {'body': request?.body ?? ''};
-    } else {
-      return {'body': request?.body.toString() ?? ''};
     }
   }
 }

@@ -7,7 +7,6 @@ import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger_example/generated/assets.dart';
 import 'package:cr_logger_example/rest_client.dart';
 import 'package:cr_logger_example/widgets/example_btn.dart';
-import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,21 +15,17 @@ import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:worker_manager/worker_manager.dart';
 
 Future<void> main() async {
   // Call this first if main function is async
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Warmup executor, used for convenient usage of Isolates, without manual
-  // creation and management of isolates.
-  await Executor().warmUp();
-
   // First! Initialize logger
   await CRLoggerInitializer.instance.init(
+    useDatabase: true,
     theme: ThemeData.light(),
     levelColors: {
-      Level.debug: Colors.grey.shade300,
+      Level.debug: Colors.lightGreenAccent,
       Level.warning: Colors.orange,
       Level.verbose: Colors.blueAccent,
       Level.info: Colors.blueAccent,
@@ -54,36 +49,10 @@ Future<void> main() async {
 
     /// To display logs in our web example on pub.dev
     /// https://cleveroad.github.io/cr_logger/#/
-    shouldPrintInReleaseMode: kIsWeb,
+    useCrLoggerInReleaseBuild: !kReleaseMode,
   );
 
-  // Second! Define the callbacks
-  CRLoggerInitializer.instance.onLogout = () async {
-    // logout simulation
-    await Future.delayed(const Duration(seconds: 1));
-  };
-  CRLoggerInitializer.instance.onShareLogsFile = (path) async {
-    await Share.shareXFiles([XFile(path)]);
-  };
-
-  // Provide isolated execution callback for other CrLogger functions
-  // (e.g. printing logs)
-  CRLoggerInitializer.instance.handleFunctionInIsolate = (fun, data) async {
-    return await Executor().execute(
-      arg1: data,
-      fun1: (dynamic data, _) => fun(data),
-    );
-  };
-
-  // Provide isolated execution callback for parsing json string in CrLogger.
-  CRLoggerInitializer.instance.parseiOSJsonStringInIsolate = (fun, json) async {
-    return await Executor().execute(
-      arg1: json,
-      fun1: (String data, _) => fun(data),
-    );
-  };
-
-  // Third! Define the variables
+  // Second! Define the variables
   CRLoggerInitializer.instance.appInfo = {
     'Build type': 'release',
     'Endpoint': 'https/cr_logger/example/',
@@ -94,6 +63,9 @@ Future<void> main() async {
     RestClient.instance.initDioProxyForCharles(proxy);
   }
 
+  CRLoggerInitializer.instance.onShareLogsFile = (String path) async {
+    await Share.shareXFiles([XFile(path)]);
+  };
   runApp(const MyApp());
 }
 
@@ -132,17 +104,62 @@ class _MainPageState extends State<MainPage> {
     );
 
     /// Type notifiers
-    final integerNotifier = ValueNotifier<int>(0);
     final doubleNotifier = ValueNotifier<double>(0);
     final boolNotifier = ValueNotifier<bool>(false);
     final stringNotifier = ValueNotifier<String>('integer: ');
 
     /// Widget notifiers
-    final iconNotifier = ValueNotifier<Icon>(const Icon(Icons.clear));
-    final textNotifier = ValueNotifier<Text>(const Text('Widget text'));
+    final iconNotifier = ValueNotifier<IconData>(Icons.clear);
+    final iconWidget = ValueListenableBuilder<IconData>(
+      valueListenable: iconNotifier,
+      //ignore: prefer-trailing-comma
+      builder: (_, value, __) => Row(
+        children: [
+          const Text('Icon'),
+          const Spacer(),
+          Icon(value),
+          const Spacer(),
+        ],
+      ),
+    );
+    final textNotifier = ValueNotifier<Text>(
+      const Text('Widget text'),
+    );
+    final textWidget = ValueListenableBuilder<Text>(
+      valueListenable: textNotifier,
+      //ignore: prefer-trailing-comma
+      builder: (_, value, __) => Row(
+        children: [
+          const Text('Icon'),
+          const Spacer(),
+          value,
+          const Spacer(),
+        ],
+      ),
+    );
+
+    final integerNotifier = ValueNotifier<int>(0);
+    final intWidget = ValueListenableBuilder<int>(
+      valueListenable: integerNotifier,
+      //ignore: prefer-trailing-comma
+      builder: (_, value, __) => Text('Int: ${value.toString()}'),
+    );
+    final boolWithWidgetNotifier = ValueNotifier<bool>(false);
+
+    final boolWidget = ValueListenableBuilder<bool>(
+      valueListenable: boolWithWidgetNotifier,
+      //ignore: prefer-trailing-comma
+      builder: (_, value, __) => SwitchListTile(
+        title: const Text('Bool'),
+        subtitle: Text(value.toString()),
+        value: value,
+        onChanged: (newValue) => boolWithWidgetNotifier.value = newValue,
+      ),
+    );
 
     /// Type notifiers changes
     Timer.periodic(const Duration(seconds: 1), (_) => integerNotifier.value++);
+    //ignore: prefer-extracting-callbacks
     Timer.periodic(
       const Duration(milliseconds: 1),
       (_) => doubleNotifier
@@ -168,9 +185,9 @@ class _MainPageState extends State<MainPage> {
 
     Timer.periodic(
       const Duration(seconds: 1),
-      (_) => iconNotifier.value = Icon(boolNotifier.value
+      (_) => iconNotifier.value = boolNotifier.value
           ? Icons.airline_seat_flat
-          : Icons.airline_seat_flat_angled),
+          : Icons.airline_seat_flat_angled,
     );
 
     Timer.periodic(
@@ -186,12 +203,33 @@ class _MainPageState extends State<MainPage> {
       ),
     );
 
-    CRLoggerInitializer.instance.addValueNotifier('Integer', integerNotifier);
-    CRLoggerInitializer.instance.addValueNotifier('Double', doubleNotifier);
-    CRLoggerInitializer.instance.addValueNotifier('Bool', boolNotifier);
-    CRLoggerInitializer.instance.addValueNotifier('String', stringNotifier);
-    CRLoggerInitializer.instance.addValueNotifier('Icon', iconNotifier);
-    CRLoggerInitializer.instance.addValueNotifier('Text', textNotifier);
+    /// If the widget is not defined, then the name and the value will be used.
+    CRLoggerInitializer.instance.addValueNotifier(
+      widget: intWidget,
+    );
+
+    CRLoggerInitializer.instance.addValueNotifier(
+      widget: boolWidget,
+    );
+
+    CRLoggerInitializer.instance.addValueNotifier(
+      name: 'Double',
+      notifier: doubleNotifier,
+    );
+    CRLoggerInitializer.instance.addValueNotifier(
+      name: 'Bool',
+      notifier: boolNotifier,
+    );
+    CRLoggerInitializer.instance.addValueNotifier(
+      name: 'String',
+      notifier: stringNotifier,
+    );
+    CRLoggerInitializer.instance.addValueNotifier(
+      widget: iconWidget,
+    );
+    CRLoggerInitializer.instance.addValueNotifier(
+      widget: textWidget,
+    );
 
     /// Actions
     CRLoggerInitializer.instance.addActionButton('Log Hi', () => log.i('Hi'));

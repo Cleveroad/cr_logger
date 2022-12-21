@@ -1,6 +1,6 @@
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/utils/copy_clipboard.dart';
 import 'package:cr_logger/src/utils/json_utils.dart';
 import 'package:cr_logger/src/widget/json_widget/json_tree_colors.dart';

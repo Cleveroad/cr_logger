@@ -1,17 +1,12 @@
 import 'dart:io';
 
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/cr_logger_helper.dart';
 
 class CRHttpClientAdapter {
   HttpLogManager logManager = HttpLogManager.instance;
 
   /// Handles httpClientRequest and creates http alice call from it
   void onRequest(HttpClientRequest request, Object? body) {
-    if (!CRLoggerHelper.instance.doPrintLogs) {
-      return;
-    }
-
     final headers = <String, dynamic>{};
 
     request.headers.forEach((header, value) {
@@ -41,10 +36,6 @@ class CRHttpClientAdapter {
     HttpClientRequest request,
     Object? body,
   ) {
-    if (!CRLoggerHelper.instance.doPrintLogs) {
-      return;
-    }
-
     final headers = <String, dynamic>{};
 
     response.headers.forEach((header, value) {

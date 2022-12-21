@@ -12,16 +12,12 @@ class RestClient {
       ..options.connectTimeout = _serverTimeout
       ..options.sendTimeout = _serverTimeout;
 
-    if (CRLoggerInitializer.instance.shouldPrintLogs) {
-      dio.interceptors.add(
-        CRLoggerInitializer.instance.getDioInterceptor(),
-      );
-      chopper = ChopperClient(interceptors: [
-        CRLoggerInitializer.instance.getChopperInterceptor(),
-      ]);
-    } else {
-      chopper = ChopperClient();
-    }
+    dio.interceptors.add(
+      CRLoggerInitializer.instance.getDioInterceptor(),
+    );
+    chopper = ChopperClient(interceptors: [
+      CRLoggerInitializer.instance.getChopperInterceptor(),
+    ]);
   }
 
   static const _serverTimeout = 15000;

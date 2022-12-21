@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:chopper/chopper.dart';
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:http/http.dart' as http;
 
 class ChopperLogInterceptor extends ResponseInterceptor
@@ -12,10 +11,6 @@ class ChopperLogInterceptor extends ResponseInterceptor
 
   @override
   FutureOr<Request> onRequest(Request request) async {
-    if (!CRLoggerHelper.instance.doPrintLogs) {
-      return request;
-    }
-
     final reqOpt = RequestBean()
       ..id = _getRequestHashCode(await request.toBaseRequest())
       ..url = request.url.toString()
@@ -32,10 +27,6 @@ class ChopperLogInterceptor extends ResponseInterceptor
 
   @override
   FutureOr<Response> onResponse(Response<dynamic> response) {
-    if (!CRLoggerHelper.instance.doPrintLogs) {
-      return response;
-    }
-
     var data = <String, dynamic>{};
     try {
       data = json.decode(response.body as String);

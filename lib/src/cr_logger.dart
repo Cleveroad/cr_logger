@@ -1,40 +1,27 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/interceptor/cr_http_adapter.dart';
 import 'package:cr_logger/src/interceptor/cr_http_client_adapter.dart';
-import 'package:cr_logger/src/page/actions_and_values/actions_managed.dart';
+import 'package:cr_logger/src/managers/log_manager.dart';
+import 'package:cr_logger/src/managers/transfer_manager.dart';
+import 'package:cr_logger/src/page/actions_and_values/actions_manager.dart';
 import 'package:cr_logger/src/page/actions_and_values/notifiers_manager.dart';
 import 'package:cr_logger/src/page/log_main/log_main.dart';
+import 'package:cr_logger/src/providers/sqflite_provider.dart';
 import 'package:cr_logger/src/res/theme.dart';
 import 'package:cr_logger/src/utils/console_log_output.dart';
-import 'package:cr_logger/src/utils/local_log_managed.dart';
-import 'package:cr_logger/src/utils/nothing_log_filter.dart';
-import 'package:cr_logger/src/utils/pretty_cr_logger.dart';
+import 'package:cr_logger/src/utils/parsers/isolate_parser.dart';
+import 'package:cr_logger/src/utils/pretty_cr_printer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-
-/// Typedef for function callback to provide Isolate handle of some function
-/// outside of cr_logger.
-///
-/// When printing large logs to the console UI of the app may lag.
-///
-/// [fun] - should always be global or static function. Should allow only 1
-/// argument.
-/// [data] - data which [fun] receives as an argument.
-typedef IsolateFunctionHandler<DATA> = Future<dynamic> Function(
-  Function(DATA) fun,
-  DATA data,
-);
 
 typedef BuildTypeCallback = String Function();
 typedef EndpointCallback = String Function();
@@ -52,20 +39,31 @@ class CRLoggerInitializer {
   final _consoleLogOutput = ConsoleLogOutput();
   final _loggerNavigationKey = GlobalKey<NavigatorState>();
   final _rootBackButtonDispatcher = RootBackButtonDispatcher();
-
   late final CRHttpClientAdapter _httpClientAdapter;
   late final CRHttpAdapter _httpAdapter;
+
+  /// Callback for sharing logs file on the app's side.
+  ValueChanged<String>? onShareLogsFile;
 
   /// Has the logger been initialised
   bool inited = false;
 
+  /// Will db init
+  bool _useDB = false;
+
   /// Will logs be printed to console and logger
-  bool _shouldPrintLogs = true;
+  bool _printLogs = true;
 
   /// Will logs be printed to console and logger when [kReleaseMode] is true
   ///
-  /// Also depends on [shouldPrintLogs]
-  bool _shouldPrintInReleaseMode = false;
+  /// Also depends on [printLogs]
+  bool _useCrLoggerInReleaseBuild = false;
+
+  /// Maximum count of logs, which will be showed in the page. Default is 50.
+  int _maxCurrentLogsCount = kDefaultMaxLogsCount;
+
+  /// Maximum count of logs, which will be saved to database. Default is 50.
+  int _maxDBLogsCount = kDefaultMaxLogsCount;
 
   /// Name of file when sharing logs
   String logFileName = kLogFileName;
@@ -82,120 +80,62 @@ class CRLoggerInitializer {
   /// Hides all headers with keys from list
   List<String> hiddenHeaders = [];
 
-  /// Callback for fast logout button in logger popup menu.
-  LogoutFromAppCallback? onLogout;
-
-  /// Callback for sharing logs file on the app's side.
-  /// Needed for avoiding additional iOS permissions from share plugins if not
-  /// needed.
-  ValueChanged<String>? onShareLogsFile;
-
-  /// Callback for printing cr_logger logs to console in separate isolate
-  /// provided by the app.
-  ///
-  /// Printing a lot of log may cause UI and performance lags, isolate print
-  /// helps to print logs faster.
-  ///
-  /// If callback not provided all logs are printed in main isolate.
-  ///
-  /// E.g. with worker_manager package https://pub.dev/packages/worker_manager:
-  ///
-  /// '''dart
-  /// Future<void> main() async {
-  ///   // Call this first if main function is async
-  ///   WidgetsFlutterBinding.ensureInitialized();
-  ///
-  ///   await Executor().warmUp();
-  ///
-  ///   CRLoggerInitializer.instance.handleFunctionInIsolate = (fun, data) {
-  ///      return await Executor().execute(
-  ///       arg1: data,
-  ///       fun1: fun,
-  ///     );
-  ///   };
-  ///   runApp(const MyApp());
-  /// }
-  /// '''
-  IsolateFunctionHandler<dynamic>? handleFunctionInIsolate;
-
-  /// To ensure order of map from native iOS is saved properly it is saved as
-  /// json string. Android maps order is saved properly when passed to Flutter.
-  ///
-  /// On Flutter side it is decoded with [jsonDecode] which may cause UI lags
-  /// when string is big.
-  ///
-  /// This callback allows to move parsing to Isolate provided by the app itself.
-  ///
-  /// If callback not provided json string is parsed in main isolate
-  ///
-  /// E.g. with worker_manager package https://pub.dev/packages/worker_manager:
-  ///
-  /// '''dart
-  /// Future<void> main() async {
-  ///   // Call this first if main function is async
-  ///   WidgetsFlutterBinding.ensureInitialized();
-  ///
-  ///   await Executor().warmUp();
-  ///
-  ///   CRLoggerInitializer.instance.parseiOSJsonStringInIsolate = (fun, data) {
-  ///     return await Executor().execute(
-  ///       arg1: data,
-  ///       fun1: fun,
-  ///     );
-  ///   };
-  ///   runApp(const MyApp());
-  /// }
-  /// '''
-  IsolateFunctionHandler<String>? parseiOSJsonStringInIsolate;
-
   OverlayEntry? _buttonEntry;
   OverlayEntry? _loggerEntry;
 
   /// Allows you to listen to local logs and, for example,
   /// send them to a third-party logging service
-  Stream<LogBean> get localLogs => LocalLogManager.instance.localLogs.stream;
-
-  /// Whether logs will be printed in isolate
-  set isIsolateHttpLogsPrinting(bool value) =>
-      PrettyCRLogger.isIsolatePrinting = value;
-
-  /// Whether logs will be printed in isolate
-  bool get isIsolateHttpLogsPrinting => PrettyCRLogger.isIsolatePrinting;
+  Stream<LogBean> get localLogs => LogManager.instance.localLogs.stream;
 
   bool get isDebugButtonDisplayed => _buttonEntry != null;
 
-  bool get shouldPrintLogs => _shouldPrintLogs;
+  bool get printLogs => _printLogs;
 
-  bool get shouldPrintInReleaseMode => _shouldPrintInReleaseMode;
+  bool get useCrLoggerInReleaseBuild => _useCrLoggerInReleaseBuild;
+
+  bool get useDB => _useDB;
+
+  int get maxCurrentLogsCount => _maxCurrentLogsCount;
+
+  int get maxDBLogsCount => _maxDBLogsCount;
 
   /// Logger initialization.
   ///
   /// Custom logger [logger], maximum number of logs of each type (http, debug,
-  /// info, error) [maxLogsCount].
+  /// info, error) [maxCurrentLogsCount].
   /// Custom logger theme [theme].
   /// Colors for message types [levelColors] (debug, verbose, info, warning,
   /// error, wtf).
-  /// Prints all logs only if [shouldPrintLogs] is true. Doesn't print logs if
-  /// [kReleaseMode] is true and the [shouldPrintInReleaseMode] parameter is
-  /// false, even if [shouldPrintLogs] parameter is true
+  /// Prints all logs only if [printLogs] is true. Doesn't print logs if
+  /// [kReleaseMode] is true and the [useCrLoggerInReleaseBuild] parameter is
+  /// false, even if [printLogs] parameter is true
+  /// If the [printLogsCompactly] is false, then all logs, except HTTP logs, will have borders,
+  /// with a link to the place where the print is called and the time when the log was created.
+  /// Otherwise it will write only log message
   // ignore: Long-Parameter-List
   Future<void> init({
-    bool shouldPrintLogs = true,
-    bool shouldPrintInReleaseMode = false,
+    bool printLogs = true,
+    bool useCrLoggerInReleaseBuild = false,
+    bool useDatabase = false,
     ThemeData? theme,
     Map<Level, Color>? levelColors,
     List<String>? hiddenFields,
     List<String>? hiddenHeaders,
     String? logFileName,
-    int maxLogsCount = kMaxEachTypeOfLogsCountByDefault,
+    int maxCurrentLogsCount = kDefaultMaxLogsCount,
+    int maxDatabaseLogsCount = kDefaultMaxLogsCount,
+    bool printLogsCompactly = true,
     Logger? logger,
   }) async {
+    _useDB = useDatabase;
+    _maxDBLogsCount = maxDatabaseLogsCount;
+    _maxCurrentLogsCount = maxCurrentLogsCount;
+    _printLogs = printLogs;
+    _useCrLoggerInReleaseBuild = useCrLoggerInReleaseBuild;
+
     if (inited) {
       return;
     }
-
-    HttpLogManager.instance.maxLogsCount = maxLogsCount;
-    LocalLogManager.instance.maxLogsCount = maxLogsCount;
 
     await CRLoggerHelper.instance.init();
 
@@ -204,8 +144,7 @@ class CRLoggerInitializer {
     }
     _httpClientAdapter = CRHttpClientAdapter();
     _httpAdapter = CRHttpAdapter();
-    _shouldPrintLogs = shouldPrintLogs;
-    _shouldPrintInReleaseMode = shouldPrintInReleaseMode;
+
     if (theme != null) {
       CRLoggerHelper.instance.theme =
           theme.copyWithDefaultCardTheme(loggerTheme.cardTheme);
@@ -223,20 +162,19 @@ class CRLoggerInitializer {
             printTime: true,
             printEmojis: false,
             levelColors: levelColors,
+            printLogsCompactly: printLogsCompactly,
           ),
           output: _consoleLogOutput,
-          filter: CRLoggerInitializer.instance.shouldPrintLogs
-              ? shouldPrintInReleaseMode
-                  ? ProductionFilter()
-                  : DevelopmentFilter()
-              : NothingLogFilter(),
-          level: CRLoggerInitializer.instance.shouldPrintLogs
-              ? Level.verbose
-              : Level.nothing,
+          filter: useCrLoggerInReleaseBuild
+              ? ProductionFilter()
+              : DevelopmentFilter(),
+          level: Level.verbose,
         );
 
     _rootBackButtonDispatcher.addCallback(_dispatchBackButton);
-
+    if (!kIsWeb && _useDB && useCrLoggerInReleaseBuild) {
+      await _initDB();
+    }
     inited = true;
   }
 
@@ -247,14 +185,16 @@ class CRLoggerInitializer {
       CRLoggerHelper.instance.getProxyFromSharedPref();
 
   /// Adds a value notifier to the Actions and values page
-  void addValueNotifier(
-    String name,
-    ValueNotifier<dynamic> notifier, {
+  void addValueNotifier({
+    ValueNotifier? notifier,
+    Widget? widget,
+    String? name,
     String? connectedWidgetId,
   }) {
     NotifiersManager.addNotifier(
-      name,
-      notifier,
+      name: name,
+      notifier: notifier,
+      widget: widget,
       connectedWidgetId: connectedWidgetId,
     );
   }
@@ -290,7 +230,7 @@ class CRLoggerInitializer {
   /// Import logs from json map
   /// Attention, all logs are cleared before import
   Future<void> createLogsFromJson(Map<String, dynamic> json) async {
-    await LocalLogManager.instance.createLogsFromJson(json);
+    await TransferManager().createLogsFromJson(json);
   }
 
   /// Show global hover debug buttons
@@ -418,9 +358,7 @@ class CRLoggerInitializer {
       if (logData is Map) {
         final jsonString = logData['jsonString'];
         if (jsonString is String) {
-          data = parseiOSJsonStringInIsolate != null
-              ? await parseiOSJsonStringInIsolate!.call(jsonDecode, jsonString)
-              : jsonDecode(jsonString);
+          data = await IsolateParser().decode(jsonString);
         }
       }
     } else if (Platform.isAndroid) {
@@ -483,294 +421,10 @@ class CRLoggerInitializer {
 
     return false;
   }
+
+  /// Init DB and load logs from it
+  Future<void> _initDB() => SqfliteProvider.instance.init();
 }
 
 /// Run LoggerInitializer.instance.init() before using this
 late Logger log;
-
-class PrettyCRPrinter extends LogPrinter {
-  PrettyCRPrinter({
-    this.methodCount = 2,
-    this.errorMethodCount = 8,
-    this.lineLength = 120,
-    this.colors = true,
-    this.printEmojis = true,
-    this.printTime = false,
-    this.shortVisible = true,
-    Map<Level, Color>? levelColors,
-  }) : levelColors = {
-          Level.nothing:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.verbose]) ??
-                  AnsiColor.fg(AnsiColor.grey(0.5)),
-          Level.verbose:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.verbose]) ??
-                  AnsiColor.fg(AnsiColor.grey(0.5)),
-          Level.debug:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.debug]) ??
-                  AnsiColor.none(),
-          Level.info: AnsiColorExt.fromColorOrNull(levelColors?[Level.info]) ??
-              AnsiColor.fg(12),
-          Level.warning:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.warning]) ??
-                  AnsiColor.fg(208),
-          Level.error:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.error]) ??
-                  AnsiColor.fg(160),
-          Level.wtf: AnsiColorExt.fromColorOrNull(levelColors?[Level.wtf]) ??
-              AnsiColor.fg(199),
-        } {
-    _startTime ??= DateTime.now();
-
-    final doubleDividerLine = StringBuffer();
-    final singleDividerLine = StringBuffer();
-    for (var i = 0; i < lineLength - 1; i++) {
-      doubleDividerLine.write(doubleDivider);
-      singleDividerLine.write(singleDivider);
-    }
-
-    _topBorder = '$topLeftCorner$doubleDividerLine';
-    _middleBorder = '$middleCorner$singleDividerLine';
-    _bottomBorder = '$bottomLeftCorner$doubleDividerLine';
-  }
-
-  static const topLeftCorner = '┌';
-  static const bottomLeftCorner = '└';
-  static const middleCorner = '├';
-  static const verticalLine = '│';
-  static const doubleDivider = '─';
-  static const singleDivider = '┄';
-
-  static final Map<Level, String> levelEmojis = {
-    Level.nothing: '',
-    Level.verbose: '',
-    Level.debug: '🐛 ',
-    Level.info: '💡 ',
-    Level.warning: '⚠️ ',
-    Level.error: '⛔ ',
-    Level.wtf: '👾 ',
-  };
-
-  static final stackTraceRegex = RegExp(r'#[0-9]+[\s]+(.+) \(([^\s]+)\)');
-
-  static DateTime? _startTime;
-
-  final int methodCount;
-  final int errorMethodCount;
-  final int lineLength;
-  final bool colors;
-  final bool printEmojis;
-  final bool printTime;
-  final bool shortVisible;
-  final Map<Level, AnsiColor> levelColors;
-
-  String _topBorder = '';
-  String _middleBorder = '';
-  String _bottomBorder = '';
-
-  @override
-  List<String> log(LogEvent event) {
-    final messageStr = stringifyMessage(event.message);
-
-    String? stackTraceStr;
-    if (event.stackTrace == null) {
-      if (methodCount > 0) {
-        stackTraceStr = formatStackTrace(StackTrace.current, methodCount);
-      }
-    } else if (errorMethodCount > 0) {
-      stackTraceStr = formatStackTrace(event.stackTrace, errorMethodCount);
-    }
-
-    final errorStr = event.error?.toString();
-
-    String? timeStr;
-    if (printTime) {
-      timeStr = getTime();
-    }
-    _addToLogWidget(
-      event.level,
-      event.message,
-      timeStr,
-    );
-
-    return _formatAndPrint(
-      event.level,
-      messageStr,
-      timeStr,
-      errorStr,
-      stackTraceStr,
-    );
-  }
-
-  String? formatStackTrace(StackTrace? stackTrace, int methodCount) {
-    final lines = stackTrace.toString().split('\n');
-    if (lines.isNotEmpty) {
-      lines.removeAt(0);
-    }
-    final formatted = <String>[];
-    var count = 0;
-    for (final line in lines) {
-      final match = stackTraceRegex.matchAsPrefix(line);
-      if (match != null) {
-        if (match.group(2)?.startsWith(kLoggerPackage) ?? false) {
-          continue;
-        }
-        final newLine = '#$count   ${match.group(1)} (${match.group(2)})';
-        formatted.add(newLine.replaceAll('<anonymous closure>', '()'));
-        if (++count == methodCount) {
-          break;
-        }
-      } else {
-        formatted.add(line);
-      }
-    }
-
-    return formatted.isEmpty ? null : formatted.join('\n');
-  }
-
-  String getTime() {
-    String _threeDigits(int n) {
-      if (n >= 100) {
-        return '$n';
-      }
-      if (n >= 10) {
-        return '0$n';
-      }
-
-      return '00$n';
-    }
-
-    String _twoDigits(int n) {
-      if (n >= 10) {
-        return '$n';
-      }
-
-      return '0$n';
-    }
-
-    final now = DateTime.now();
-    final h = _twoDigits(now.hour);
-    final min = _twoDigits(now.minute);
-    final sec = _twoDigits(now.second);
-    final ms = _threeDigits(now.millisecond);
-    String? timeSinceStart;
-    if (_startTime != null) {
-      timeSinceStart = now.difference(_startTime!).toString();
-    }
-
-    return '$h:$min:$sec.$ms (+$timeSinceStart)';
-  }
-
-  String stringifyMessage(Object? message) {
-    if (message is Map || message is Iterable) {
-      const encoder = JsonEncoder.withIndent('  ');
-
-      return encoder.convert(message);
-    } else {
-      return message.toString();
-    }
-  }
-
-  AnsiColor _getLevelColor(Level level) {
-    return colors ? levelColors[level] ?? AnsiColor.none() : AnsiColor.none();
-  }
-
-  AnsiColor _getErrorColor(Level level) {
-    return colors
-        ? level == Level.wtf
-            ? levelColors[Level.wtf] ?? AnsiColor.none()
-            : levelColors[Level.error] ?? AnsiColor.none()
-        : AnsiColor.none();
-  }
-
-  // ignore: Long-Parameter-List
-  void _addToLogWidget(
-    Level level,
-    message,
-    String? stacktrace,
-  ) {
-    final logModel = LogBean(
-      message: message ?? '',
-      time: DateTime.now(),
-      stackTrace: stacktrace ?? '',
-    );
-    switch (level) {
-      case Level.verbose:
-      case Level.debug:
-        logModel.color = CRLoggerColors.orange;
-        LocalLogManager.instance.addDebug(logModel);
-        break;
-      case Level.info:
-      case Level.warning:
-        logModel.color = CRLoggerColors.blueAccent;
-        LocalLogManager.instance.addInfo(logModel);
-        break;
-      case Level.error:
-      case Level.wtf:
-        logModel.color = CRLoggerColors.red;
-        LocalLogManager.instance.addError(logModel);
-        break;
-      case Level.nothing:
-        break;
-    }
-  }
-
-  String _getEmoji(Level level) {
-    return printEmojis ? levelEmojis[level] ?? '' : '';
-  }
-
-  // ignore: Long-Parameter-List
-  List<String> _formatAndPrint(
-    Level level,
-    String? message,
-    String? time,
-    String? error,
-    String? stacktrace,
-  ) {
-    final buffer = <String>[];
-    final color =
-        kIsWeb || Platform.isAndroid ? _getLevelColor(level) : AnsiColor.none();
-    buffer.add(color(_topBorder));
-
-    if (error != null) {
-      final errorColor = kIsWeb || Platform.isAndroid
-          ? _getErrorColor(level)
-          : AnsiColor.none();
-      for (final line in error.split('\n')) {
-        buffer.add(
-          color('$verticalLine ') +
-              errorColor.resetForeground +
-              errorColor(line) +
-              errorColor.resetBackground,
-        );
-      }
-      if (!shortVisible) {
-        buffer.add(color(_middleBorder));
-      }
-    }
-
-    if (stacktrace != null) {
-      for (final line in stacktrace.split('\n')) {
-        buffer.add('$color$verticalLine $line');
-      }
-      if (!shortVisible) {
-        buffer.add(color(_middleBorder));
-      }
-    }
-
-    if (time != null && !shortVisible) {
-      buffer
-        ..add(color('$verticalLine $time'))
-        ..add(color(_middleBorder));
-    }
-
-    final emoji = _getEmoji(level);
-    if (message != null) {
-      for (final line in message.split('\n')) {
-        buffer.add(color('$verticalLine $emoji$line'));
-      }
-      buffer.add(color(_bottomBorder));
-    }
-
-    return buffer;
-  }
-}

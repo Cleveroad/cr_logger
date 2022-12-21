@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 class ExpandArrowButton extends StatelessWidget {
   const ExpandArrowButton({
     required this.isExpanded,
-    required this.onTap,
+    this.onTap,
     super.key,
   });
 
   final bool isExpanded;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

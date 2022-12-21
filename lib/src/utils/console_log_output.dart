@@ -1,4 +1,3 @@
-import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/js/console_output_worker.dart';
@@ -7,6 +6,7 @@ import 'package:cr_logger/src/utils/html_stub.dart'
     if (dart.library.js) 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
+import 'package:worker_manager/worker_manager.dart';
 
 class ConsoleLogOutput extends LogOutput {
   ConsoleLogOutput() {
@@ -29,12 +29,7 @@ class ConsoleLogOutput extends LogOutput {
           event.lines.forEach(print);
         }
       } else {
-        if (CRLoggerInitializer.instance.handleFunctionInIsolate != null) {
-          await CRLoggerInitializer.instance.handleFunctionInIsolate!
-              .call(isolatePrintLog, event.lines);
-        } else {
-          isolatePrintLog(event.lines);
-        }
+        await Executor().execute(fun1: isolatePrintLog, arg1: event.lines);
       }
     });
   }
@@ -49,7 +44,7 @@ class ConsoleLogOutput extends LogOutput {
   }
 }
 
-Object isolatePrintLog(dynamic data) {
+Object isolatePrintLog(dynamic data, _) {
   if (data is List) {
     // ignore: avoid_print
     data.forEach(print);
