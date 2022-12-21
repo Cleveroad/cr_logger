@@ -1,10 +1,10 @@
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
-import 'package:cr_logger/src/page/actions_and_values/actions_managed.dart';
+import 'package:cr_logger/src/page/actions_and_values/actions_manager.dart';
 import 'package:cr_logger/src/page/actions_and_values/notifiers_manager.dart';
 import 'package:cr_logger/src/page/actions_and_values/widgets/action_item.dart';
 import 'package:cr_logger/src/page/actions_and_values/widgets/value_notifier_item.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/colors.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/cr_app_bar.dart';
 import 'package:flutter/material.dart';
 

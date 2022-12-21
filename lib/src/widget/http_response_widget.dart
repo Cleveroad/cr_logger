@@ -1,5 +1,5 @@
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/expand_arrow_button.dart';
 import 'package:cr_logger/src/widget/headers_expansion_tile.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
@@ -36,7 +36,7 @@ class HttpResponseWidgetState extends State<HttpResponseWidget>
 
     final request = widget.httpBean.request;
     final response = widget.httpBean.response;
-    final data = response?.data ?? 'No response';
+    final data = response?.data;
 
     return SingleChildScrollView(
       child: Padding(
@@ -49,7 +49,7 @@ class HttpResponseWidgetState extends State<HttpResponseWidget>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// Headers
-            HeadersExpansionTile(request: request),
+            HeadersExpansionTile(headers: response?.headers),
             const SizedBox(height: 12),
 
             /// URL
@@ -80,23 +80,24 @@ class HttpResponseWidgetState extends State<HttpResponseWidget>
                             'Data',
                             style: CRStyle.subtitle1BlackSemiBold16,
                           ),
-                          ExpandArrowButton(
-                            isExpanded: isAllNodesExpanded,
-                            onTap: () => _allExpandedNodesNotifier.value =
-                                !isAllNodesExpanded,
-                          ),
+                          if (data != null)
+                            ExpandArrowButton(
+                              isExpanded: isAllNodesExpanded,
+                              onTap: () => _allExpandedNodesNotifier.value =
+                                  !isAllNodesExpanded,
+                            ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       if (data is Map<String, dynamic> || data is List)
                         JsonWidget(
-                          {'': data},
+                          data,
                           allExpandedNodes: isAllNodesExpanded,
                           key: _jsonWidgetValueKey,
                         )
                       else
                         Text(
-                          data.toString(),
+                          data?.toString() ?? 'No response',
                           style: CRStyle.bodyBlackMedium14,
                         ),
                     ],

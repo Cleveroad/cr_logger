@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:cr_logger/src/bean/error_bean.dart';
-import 'package:cr_logger/src/bean/request_bean.dart';
-import 'package:cr_logger/src/bean/response_bean.dart';
 import 'package:cr_logger/src/constants.dart';
-import 'package:cr_logger/src/cr_logger.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
+import 'package:cr_logger/src/data/bean/error_bean.dart';
+import 'package:cr_logger/src/data/bean/request_bean.dart';
+import 'package:cr_logger/src/data/bean/response_bean.dart';
 import 'package:cr_logger/src/js/console_output_worker.dart';
 import 'package:cr_logger/src/js/error_worker_scripts.dart';
 import 'package:cr_logger/src/js/http_pretty_output_scripts.dart';
@@ -16,6 +15,7 @@ import 'package:cr_logger/src/utils/html_stub.dart'
     if (dart.library.js) 'dart:html' as html;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:worker_manager/worker_manager.dart';
 
 // ignore_for_file: member-ordering-extended
 class PrettyCRLogger {
@@ -36,9 +36,6 @@ class PrettyCRLogger {
   /// Width size per logPrint
   static int maxWidth = 90;
 
-  /// Whether logs will be printed in isolate
-  static bool isIsolatePrinting = true;
-
   /// Log printer; defaults logPrint log to console.
   /// In flutter, you'd better use debugPrint.
   /// you can also write log in a file.
@@ -46,98 +43,78 @@ class PrettyCRLogger {
 
   Future<void> onRequest(RequestBean requestBean) async {
     await CRLoggerHelper.instance.lock.synchronized(() async {
-      if (isIsolatePrinting) {
-        if (kIsWeb) {
-          if (kReleaseMode || kProfileMode) {
-            final src = html.ScriptElement()..text = printRequestLogScript;
-            html.document.body?.append(src);
-            final requestHeaders = <String, dynamic>{}
-              ..addAll(requestBean.headers ?? <String, dynamic>{});
-            requestHeaders['contentType'] = requestBean.contentType?.toString();
-            requestHeaders['followRedirects'] = requestBean.followRedirects;
-            requestHeaders['connectTimeout'] = requestBean.connectTimeout;
-            requestHeaders['receiveTimeout'] = requestBean.receiveTimeout;
-            printRequestLog(jsonEncode(requestBean
-              ..headers = requestHeaders
-              ..toJson()));
-            src.remove();
-          } else {
-            _printRequest(requestBean);
-          }
+      if (kIsWeb) {
+        if (kReleaseMode || kProfileMode) {
+          final src = html.ScriptElement()..text = printRequestLogScript;
+          html.document.body?.append(src);
+          final requestHeaders = <String, dynamic>{}
+            ..addAll(requestBean.headers ?? <String, dynamic>{});
+          requestHeaders['contentType'] = requestBean.contentType?.toString();
+          requestHeaders['followRedirects'] = requestBean.followRedirects;
+          requestHeaders['connectTimeout'] = requestBean.connectTimeout;
+          requestHeaders['receiveTimeout'] = requestBean.receiveTimeout;
+          printRequestLog(jsonEncode(requestBean
+            ..headers = requestHeaders
+            ..toJson()));
+          src.remove();
         } else {
-          if (CRLoggerInitializer.instance.handleFunctionInIsolate != null) {
-            await CRLoggerInitializer.instance.handleFunctionInIsolate!.call(
-              isolatePrintRequest,
-              requestBean..adaptForIsolatePrinting(),
-            );
-          } else {
-            _printRequest(requestBean);
-          }
+          _printRequest(requestBean);
         }
       } else {
-        _printRequest(requestBean);
+        await Executor().execute(
+          fun1: isolatePrintRequest,
+          arg1: requestBean..adaptForIsolatePrinting(),
+        );
       }
     });
   }
 
   Future<void> onError(ErrorBean errorBean) async {
     await CRLoggerHelper.instance.lock.synchronized(() async {
-      if (isIsolatePrinting) {
-        if (kIsWeb) {
-          if (kReleaseMode || kProfileMode) {
-            final src = html.ScriptElement()..text = printErrorLogScript;
-            html.document.body?.append(src);
-            final responseHeaders = <String, dynamic>{}
-              ..addAll(errorBean.responseBean?.headers ?? <String, dynamic>{});
+      if (kIsWeb) {
+        if (kReleaseMode || kProfileMode) {
+          final src = html.ScriptElement()..text = printErrorLogScript;
+          html.document.body?.append(src);
+          final responseHeaders = <String, dynamic>{}
+            ..addAll(errorBean.responseBean?.headers ?? <String, dynamic>{});
 
-            printErrorLog(jsonEncode(errorBean
-              ..responseBean?.headers = responseHeaders
-              ..toJson()));
-            src.remove();
-          } else {
-            _printError(errorBean);
-          }
+          printErrorLog(jsonEncode(errorBean
+            ..responseBean?.headers = responseHeaders
+            ..toJson()));
+          src.remove();
         } else {
-          if (CRLoggerInitializer.instance.handleFunctionInIsolate != null) {
-            await CRLoggerInitializer.instance.handleFunctionInIsolate!
-                .call(isolatePrintError, errorBean);
-          } else {
-            _printError(errorBean);
-          }
+          _printError(errorBean);
         }
       } else {
-        _printError(errorBean);
+        await Executor().execute(
+          fun1: isolatePrintError,
+          arg1: errorBean,
+        );
       }
     });
   }
 
   Future<void> onResponse(ResponseBean responseBean) async {
     await CRLoggerHelper.instance.lock.synchronized(() async {
-      if (isIsolatePrinting) {
-        if (kIsWeb) {
-          if (kReleaseMode || kProfileMode) {
-            final src = html.ScriptElement()..text = printResponseLogScript;
-            html.document.body?.append(src);
-            final responseHeaders = <String, dynamic>{}
-              ..addAll(responseBean.headers ?? <String, dynamic>{});
+      if (kIsWeb) {
+        if (kReleaseMode || kProfileMode) {
+          final src = html.ScriptElement()..text = printResponseLogScript;
+          html.document.body?.append(src);
+          final responseHeaders = <String, dynamic>{}
+            ..addAll(responseBean.headers ?? <String, dynamic>{});
 
-            printResponseLog(jsonEncode(responseBean
-              ..headers = responseHeaders
-              ..toJson()));
-            src.remove();
-          } else {
-            _printResponse(responseBean);
-          }
+          printResponseLog(jsonEncode(responseBean
+            ..headers = responseHeaders
+            ..toJson()));
+          src.remove();
         } else {
-          if (CRLoggerInitializer.instance.handleFunctionInIsolate != null) {
-            await CRLoggerInitializer.instance.handleFunctionInIsolate!
-                .call(isolatePrintResponse, responseBean);
-          } else {
-            _printResponse(responseBean);
-          }
+          _printResponse(responseBean);
         }
       } else {
-        _printResponse(responseBean);
+        await Executor().execute(
+          fun1: isolatePrintResponse,
+          arg1: responseBean,
+        );
       }
     });
   }
@@ -211,7 +188,7 @@ class PrettyCRLogger {
     html.document.body?.append(srcCreateWorker);
   }
 
-  Future<Object> isolatePrintRequest(dynamic requestBean) async {
+  Future<Object> isolatePrintRequest(dynamic requestBean, _) async {
     _printRequest(requestBean);
     // Return some result needed for pakage worker_manager.
     // If no result isolate job will crash when getting Null object in response
@@ -220,7 +197,7 @@ class PrettyCRLogger {
     return '';
   }
 
-  Future<Object> isolatePrintResponse(dynamic responseBean) async {
+  Future<Object> isolatePrintResponse(dynamic responseBean, _) async {
     _printResponse(responseBean);
     // Return some result needed for pakage worker_manager.
     // If no result isolate job will crash when getting Null object in response
@@ -230,7 +207,7 @@ class PrettyCRLogger {
   }
 }
 
-Future<Object> isolatePrintError(dynamic errorBean) async {
+Future<Object> isolatePrintError(dynamic errorBean, _) async {
   _printError(errorBean);
 
   // Return some result needed for pakage worker_manager.

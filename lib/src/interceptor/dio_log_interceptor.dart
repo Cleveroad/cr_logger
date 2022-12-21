@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:dio/dio.dart';
 
 typedef ParserError = Map<String, dynamic> Function(Object? data);
 
-///log Format request time
+/// log Format request time
 class DioLogInterceptor implements Interceptor {
   DioLogInterceptor({this.parserError});
 
@@ -18,10 +17,6 @@ class DioLogInterceptor implements Interceptor {
     DioError err,
     ErrorInterceptorHandler handler,
   ) {
-    if (!CRLoggerHelper.instance.doPrintLogs) {
-      return handler.next(err);
-    }
-
     dynamic json;
     try {
       if (err.error is Map) {
@@ -85,10 +80,6 @@ class DioLogInterceptor implements Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (!CRLoggerHelper.instance.doPrintLogs) {
-      return handler.next(options);
-    }
-
     final reqOpt = RequestBean()
       ..id = options.hashCode
       ..url = options.uri.toString()
@@ -107,10 +98,6 @@ class DioLogInterceptor implements Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    if (!CRLoggerHelper.instance.doPrintLogs) {
-      return handler.next(response);
-    }
-
     final resOpt = ResponseBean()
       ..id = response.requestOptions.hashCode
       ..responseTime = DateTime.now()

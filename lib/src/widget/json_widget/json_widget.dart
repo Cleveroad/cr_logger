@@ -1,6 +1,5 @@
-import 'package:cr_json_widget/cr_json_widget.dart';
+import 'package:cr_json_widget/cr_json_recycler.dart';
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/widget/json_widget/json_node_content.dart';
 import 'package:flutter/material.dart';
 
 class JsonWidget extends StatefulWidget {
@@ -24,14 +23,9 @@ class JsonWidget extends StatefulWidget {
 }
 
 class JsonWidgetState extends State<JsonWidget> {
-  final double _iconSize = 14;
+  late final _jsonCtr = JsonRecyclerController(isExpanded: true);
 
-  late final _jsonController = JsonController(
-    allNodesExpanded: widget.allExpandedNodes,
-    uncovered: widget.uncovered,
-  );
-
-  List<JsonNode>? _listNodes;
+  Map<String, dynamic>? _jsonWithHiddenParameters;
 
   @override
   void initState() {
@@ -44,22 +38,21 @@ class JsonWidgetState extends State<JsonWidget> {
     super.didUpdateWidget(oldWidget);
     _updateNodes();
     if (oldWidget.allExpandedNodes != widget.allExpandedNodes) {
-      if (widget.allExpandedNodes) {
-        _jsonController.expandAll();
-      } else {
-        _jsonController.collapseAll();
-      }
+      _jsonCtr.changeState();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.jsonObj == null
+    final jsonObj = widget.jsonObj;
+
+    return jsonObj == null || jsonObj.isEmpty
         ? const SizedBox()
         : Padding(
             padding:
                 EdgeInsets.only(left: (widget.notRoot ?? false) ? 14.0 : 0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (widget.caption != null)
@@ -69,85 +62,36 @@ class JsonWidgetState extends State<JsonWidget> {
                   ),
 
                 /// JsonTreeView
-                CrJsonWidget(
-                  iconOpened: Icon(
-                    Icons.arrow_drop_down,
-                    size: _iconSize,
-                  ),
-                  iconClosed: Icon(
-                    Icons.arrow_right,
-                    size: _iconSize,
-                  ),
-                  indentHeight: 5,
-                  indentLeftEndJsonNode: _iconSize,
-                  jsonNodes: _listNodes!,
-                  jsonController: _jsonController,
+                CustomScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  slivers: [
+                    CrJsonRecyclerSliver(
+                      jsonController: _jsonCtr,
+                      json: _jsonWithHiddenParameters,
+                    ),
+                  ],
                 ),
               ],
             ),
           );
   }
 
-  /// Create Nodes
-  List<JsonNode> _toTreeNodes(parsedJson) {
-    /// Create Map Nodes
-    if (parsedJson is Map) {
-      return parsedJson.entries.map((k) {
-        final isHidden =
-            CRLoggerInitializer.instance.hiddenFields.contains(k.key);
-        List<JsonNode>? children;
-
-        /// If the item is a List or a Map then create a node
-        /// with nesting otherwise create a node without nesting
-        children = parsedJson[k.key] is Map || parsedJson[k.key] is List
-            ? _toTreeNodes(parsedJson[k.key])
-            : null;
-
-        return JsonNode(
-          content: JsonNodeContent(
-            keyValue: '${k.key}: ',
-            value: k.value,
-            isHidden: isHidden,
-          ),
-          children: isHidden ? null : children,
-        );
-      }).toList();
+  /// Create Nodes3 = {map entry} "Test3" -> "Hidden"4 = {map entry} "Test4" -3 = {map entry} "Test3" -> "Hidden"> [_InternalLinkedHashMap]
+  Map<String, dynamic>? _toTreeJson(Map<String, dynamic> jsonObj) {
+    for (final obj in jsonObj.keys) {
+      final isHidden = CRLoggerInitializer.instance.hiddenFields.contains(obj);
+      if (isHidden) {
+        jsonObj[obj] = 'Hidden';
+      }
     }
 
-    /// Create List Nodes
-    if (parsedJson is List) {
-      return parsedJson
-          .asMap()
-          .map((i, element) {
-            List<JsonNode>? children;
-
-            /// If the item is a List or a Map then create a node
-            /// with nesting otherwise create a node without nesting
-            children = element is Map || element is List
-                ? _toTreeNodes(element)
-                : null;
-
-            return MapEntry(
-              i,
-              JsonNode(
-                content: JsonNodeContent(
-                  keyValue: '[$i]:  ',
-                  value: element,
-                ),
-                children: children,
-              ),
-            );
-          })
-          .values
-          .toList();
-    }
-
-    return [JsonNode(content: Text(parsedJson.toString()))];
+    return jsonObj;
   }
 
   void _updateNodes() {
     if (widget.jsonObj != null) {
-      _listNodes = _toTreeNodes(widget.jsonObj!);
+      _jsonWithHiddenParameters = _toTreeJson(widget.jsonObj!);
     }
   }
 }

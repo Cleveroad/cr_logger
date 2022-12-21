@@ -1,4 +1,38 @@
-## 1.1.0+1
+## 2.0.0
+
+### Added
+
+- There was added ability to use database to save logs, if `useDatabase` and `useCrLoggerInReleaseBuild`is **true**
+- Added search for all logs from the database or from the current session.
+- Added option to delete all logs or logs of a certain type from the database
+- Added ability to switch between logs from the database or from the current session
+- Added an option to set the maximum count of logs (use `maxDatabaseLogsCount`) that will be saved
+  to the database
+- With `printLogsCompactly`, logs can be printed more compactly in the console
+- Added `widget` to `addValueNotifier` method. Check in the example app how to use it
+
+### Changed
+
+- Updated UI for searching logs
+- The path in http logs has been shortened
+- Changed the title for the app bar. Now it shows which logs are displayed: from the database or
+  from the current session
+- Renamed `shouldPrintLogs` (use `printLogs`)
+- Renamed `shouldPrintInReleaseMode` (use `useCrLoggerInReleaseBuild`)
+- Updated UI for HTTP log details
+- Improved logic for showing parameters and body in https logs details
+
+### Removed
+
+- Removed `handleFunctionInIsolate`, `parseiOSJsonStringInIsolate` and `isIsolateHttpLogsPrinting`.
+  Now all logs will be printed to isolates if the logger is not running in the web
+- Removed `LogoutFromAppCallback`. Deleted the app logout feature completely. (use `addAction`)
+
+### Fixed
+
+- Fixed request headers in response tab 
+
+## 1.1.0
 
 - Small UI updates for headers, link and error preview
 - Proxy settings are now stored in the logger. `onProxyChanged` and `onGetProxyFromDB` replaced

@@ -1,4 +1,4 @@
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:flutter/material.dart';
 
 class AppInfoItem extends StatelessWidget {

@@ -1,5 +1,4 @@
 const kLoggerPackage = 'package:logger';
-const kVersion = '1.1.0+1';
 const kLogFileName = 'log';
 
 const kMethodPost = 'POST';
@@ -16,4 +15,6 @@ const kMs = 'ms';
 const kSending = 'Sending';
 
 /// Maximum number of each type of logs (http, debug, info, error) by default
-const kMaxEachTypeOfLogsCountByDefault = 50;
+const kDefaultMaxLogsCount = 50;
+
+const kDefaultOfUrlCount = 4;

@@ -1,7 +1,7 @@
-import 'package:cr_logger/src/bean/log_bean.dart';
-import 'package:cr_logger/src/bean/log_type.dart';
+import 'package:cr_logger/src/data/bean/log_bean.dart';
+import 'package:cr_logger/src/data/models/log_type.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
 import 'package:cr_logger/src/widget/expand_arrow_button.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
@@ -14,6 +14,7 @@ class LocalLogItem extends StatelessWidget {
     required this.logType,
     required this.logBean,
     required this.onSelected,
+    this.onLongTap,
     this.useWebLayout = false,
     super.key,
   });
@@ -21,13 +22,16 @@ class LocalLogItem extends StatelessWidget {
   final LogType logType;
   final LogBean logBean;
   final bool useWebLayout;
-  final Function(LogBean logBean) onSelected;
+  final ValueChanged<LogBean> onSelected;
+  final ValueChanged<LogBean>? onLongTap;
+
   final _allExpandedNodesNotifier = ValueNotifier<bool>(false);
 
   @override
   Widget build(BuildContext context) {
     final stackTrace = logBean.stackTrace?.split('\n') ?? [];
     final isJsonData = logBean.message is Map<String, dynamic>;
+    final logTap = onLongTap;
 
     return RoundedCard(
       padding: const EdgeInsets.only(
@@ -37,6 +41,7 @@ class LocalLogItem extends StatelessWidget {
         bottom: 12,
       ),
       onTap: () => onSelected(logBean),
+      onLongTap: logTap != null ? () => logTap(logBean) : null,
       child: isJsonData
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,

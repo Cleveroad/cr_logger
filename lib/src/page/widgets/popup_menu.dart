@@ -1,12 +1,16 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
+import 'package:cr_logger/src/managers/log_manager.dart';
+import 'package:cr_logger/src/managers/transfer_manager.dart';
 import 'package:cr_logger/src/page/actions_and_values/actions_and_values_page.dart';
 import 'package:cr_logger/src/page/app_info_page.dart';
-import 'package:cr_logger/src/page/http_logs_page.dart';
-import 'package:cr_logger/src/page/log_local_page.dart';
-import 'package:cr_logger/src/page/log_search_page.dart';
-import 'package:cr_logger/src/utils/local_log_managed.dart';
+import 'package:cr_logger/src/page/http_logs/http_logs_page.dart';
+import 'package:cr_logger/src/page/logs/log_page.dart';
+import 'package:cr_logger/src/page/search/search_page.dart';
+import 'package:cr_logger/src/page/widgets/clear_logs_content_widget.dart';
+import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/utils/show_info_dialog.dart';
 import 'package:cr_logger/src/widget/proxy_input_dialog.dart';
 import 'package:flutter/foundation.dart';
@@ -29,11 +33,13 @@ class PopupMenu extends StatefulWidget {
 }
 
 class PopupMenuState extends State<PopupMenu> {
-  final crLoggerInitializer = CRLoggerInitializer.instance;
+  final _loggerHelper = CRLoggerHelper.instance;
   final _httpLogKey = GlobalKey<HttpLogsPageState>();
-  final _debugLogKey = GlobalKey<LocalLogsPageState>();
-  final _infoLogKey = GlobalKey<LocalLogsPageState>();
-  final _errorLogKey = GlobalKey<LocalLogsPageState>();
+  final _debugLogKey = GlobalKey<LogPageState>();
+  final _infoLogKey = GlobalKey<LogPageState>();
+  final _errorLogKey = GlobalKey<LogPageState>();
+
+  bool _clearDB = false;
 
   late final List<GlobalKey> _keys;
   late final List<_PopupMenuItem> _menuItems = [
@@ -49,7 +55,7 @@ class PopupMenuState extends State<PopupMenu> {
     ),
     _PopupMenuItem(
       title: ValueListenableBuilder<bool>(
-        valueListenable: CRLoggerHelper.instance.inspectorNotifier,
+        valueListenable: _loggerHelper.inspectorNotifier,
         // ignore: prefer-trailing-comma
         builder: (_, value, __) =>
             Text(value ? 'Hide Inspector' : 'Show Inspector'),
@@ -62,6 +68,21 @@ class PopupMenuState extends State<PopupMenu> {
         title: const Text('Set Charles proxy'),
         icon: Icons.important_devices,
         onTap: _showIpInput,
+      ),
+
+    if (_loggerHelper.isLoggerShowing && _loggerHelper.useDB)
+      _PopupMenuItem(
+        title: ValueListenableBuilder(
+          valueListenable: LogsModeController.instance.logMode,
+          // ignore: prefer-trailing-comma
+          builder: (_, logMode, __) => Text(
+            logMode == LogsMode.fromCurrentSession
+                ? 'Show logs from database'
+                : 'Show logs from current session',
+          ),
+        ),
+        icon: Icons.swap_horiz_outlined,
+        onTap: _switchLogsMode,
       ),
     _PopupMenuItem(
       title: const Text('Search'),
@@ -85,11 +106,6 @@ class PopupMenuState extends State<PopupMenu> {
         icon: Icons.app_settings_alt,
         onTap: _openAppSettings,
       ),
-    _PopupMenuItem(
-      title: const Text('Logout from app'),
-      icon: Icons.logout,
-      onTap: _logOut,
-    ),
   ];
 
   @override
@@ -124,66 +140,54 @@ class PopupMenuState extends State<PopupMenu> {
           data: CRLoggerHelper.instance.theme,
           child: AlertDialog(
             title: const Text('Clear logs'),
-            content: const Text('Do you want to clear all logs?'),
+            content: _loggerHelper.useDB
+                ? ClearLogsContentWidget(
+                    clearLogsFromDB: _onClearDB,
+                  )
+                : null,
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('YES'),
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'СANCEL',
+                  style: TextStyle(color: CRLoggerColors.blue),
+                ),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('CANCEL'),
+                onPressed: () => Navigator.of(context).pop(_clearDB),
+                child: const Text(
+                  'СLEAR',
+                  style: TextStyle(color: CRLoggerColors.blue),
+                ),
               ),
             ],
           ),
         );
       },
-    ).then((deleteLogs) {
-      if (deleteLogs ?? false) {
-        LocalLogManager.instance.clean();
-        HttpLogManager.instance.clear();
-        for (final item in _keys) {
-          // ignore: no-empty-block
-          item.currentState?.setState(() {});
-        }
-      }
-    });
+    ).then(_onClearAll);
   }
 
-  Future<void> _logOut() async {
-    if (crLoggerInitializer.onLogout == null) {
-      CRLoggerHelper.instance.hideLogger();
-
-      return showInfoDialog(
-        context: context,
-        title: const Text('Warning'),
-        content: const Text(
-          'onLogout callback is not defined in CRLoggerInitializer.\n\n'
-          'Please, contact developer.',
-        ),
-      );
-    }
-
-    await crLoggerInitializer.onLogout?.call();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Logged out')));
+  void _switchLogsMode() {
+    LogsModeController.instance.changeMode();
   }
 
+//Sharing logs is not enabled.
+// Please ask Flutter developer to enable it.
   Future<void> _shareLogs() async {
-    if (crLoggerInitializer.onShareLogsFile == null) {
+    if (CRLoggerInitializer.instance.onShareLogsFile == null) {
       CRLoggerHelper.instance.hideLogger();
 
       return showInfoDialog(
         context: context,
         title: const Text('Warning'),
         content: const Text(
-          'onShareLogsFile callback is not defined in CRLoggerInitializer.\n\n'
-          'Please, contact developer.',
+          'Sharing logs is not enabled.\n\n'
+          'Please ask Flutter developer to enable it.',
         ),
       );
+    } else {
+      await TransferManager().createJsonFileAndShare();
     }
-
-    return LocalLogManager.instance.createJsonFileAndShare();
   }
 
   Future<void> _showIpInput() async {
@@ -209,7 +213,7 @@ class PopupMenuState extends State<PopupMenu> {
 
   Future<void> _openSearchPage() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const LogSearchPage()),
+      MaterialPageRoute(builder: (context) => const SearchPage()),
     );
   }
 
@@ -246,6 +250,20 @@ class PopupMenuState extends State<PopupMenu> {
     setState(() {
       CRLoggerHelper.instance.inspectorNotifier.value =
           !CRLoggerHelper.instance.inspectorNotifier.value;
+    });
+  }
+
+  Future<void> _onClearAll(_) async {
+    await LogManager.instance.clean(cleanDB: _clearDB);
+    for (final item in _keys) {
+      // ignore: no-empty-block
+      item.currentState?.setState(() {});
+    }
+  }
+
+  void _onClearDB(bool value) {
+    setState(() {
+      _clearDB = value;
     });
   }
 }

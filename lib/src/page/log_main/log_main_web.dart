@@ -1,14 +1,14 @@
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/extensions/do_post_frame.dart';
-import 'package:cr_logger/src/page/http_log_details_page.dart';
-import 'package:cr_logger/src/page/http_logs_page.dart';
-import 'package:cr_logger/src/page/log_local_detail_page.dart';
-import 'package:cr_logger/src/page/log_local_page.dart';
+import 'package:cr_logger/src/managers/log_manager.dart';
+import 'package:cr_logger/src/page/http_logs/http_log_details_page.dart';
+import 'package:cr_logger/src/page/http_logs/http_logs_page.dart';
 import 'package:cr_logger/src/page/log_main/widgets/cr_web_appbar_widget.dart';
 import 'package:cr_logger/src/page/log_main/widgets/web_header_widget.dart';
-import 'package:cr_logger/src/utils/local_log_managed.dart';
+import 'package:cr_logger/src/page/logs/log_local_detail_page.dart';
+import 'package:cr_logger/src/page/logs/log_page.dart';
+import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/widget/options_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:split_view/split_view.dart';
@@ -19,26 +19,23 @@ class MainLogWebPage extends StatefulWidget {
   final VoidCallback onLoggerClose;
 
   static void cleanLogs() {
-    cleanDebug();
-    cleanError();
-    cleanInfo();
-    cleanHttpLogs();
+    LogManager.instance.clean();
   }
 
   static void cleanHttpLogs() {
-    HttpLogManager.instance.clear();
+    HttpLogManager.instance.cleanAllLogs();
   }
 
   static void cleanDebug() {
-    LocalLogManager.instance.cleanDebug();
+    LogManager.instance.cleanDebug();
   }
 
   static void cleanInfo() {
-    LocalLogManager.instance.cleanInfo();
+    LogManager.instance.cleanInfo();
   }
 
   static void cleanError() {
-    LocalLogManager.instance.cleanError();
+    LogManager.instance.cleanError();
   }
 
   @override
@@ -47,16 +44,16 @@ class MainLogWebPage extends StatefulWidget {
 
 class _MainLogWebPageState extends State<MainLogWebPage> {
   final _pageController = PageController();
-  final _detailsScrollControler = ScrollController();
-  final _pageScrollControler = ScrollController();
+  final _detailsScrollCtr = ScrollController();
+  final _pageScrollCtr = ScrollController();
 
   final _popupKey = GlobalKey<PopupMenuButtonState>();
   final _navKey = GlobalKey<OptionsButtonsState>();
 
   final _httpLogKey = GlobalKey<HttpLogsPageState>();
-  final _debugLogKey = GlobalKey<LocalLogsPageState>();
-  final _infoLogKey = GlobalKey<LocalLogsPageState>();
-  final _errorLogKey = GlobalKey<LocalLogsPageState>();
+  final _debugLogKey = GlobalKey<LogPageState>();
+  final _infoLogKey = GlobalKey<LogPageState>();
+  final _errorLogKey = GlobalKey<LogPageState>();
 
   late List<Widget> tabPages;
 
@@ -74,25 +71,25 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
       HttpLogsPage(
         key: _httpLogKey,
         onHttpBeanSelected: _onHttpBeanSelected,
-        scrollController: _pageScrollControler,
+        scrollController: _pageScrollCtr,
       ),
-      LocalLogsPage(
+      LogPage(
         key: _debugLogKey,
         logType: LogType.debug,
         onLogBeanSelected: _onLogBeanSelected,
-        scrollController: _pageScrollControler,
+        scrollController: _pageScrollCtr,
       ),
-      LocalLogsPage(
+      LogPage(
         key: _infoLogKey,
         logType: LogType.info,
         onLogBeanSelected: _onLogBeanSelected,
-        scrollController: _pageScrollControler,
+        scrollController: _pageScrollCtr,
       ),
-      LocalLogsPage(
+      LogPage(
         key: _errorLogKey,
         logType: LogType.error,
         onLogBeanSelected: _onLogBeanSelected,
-        scrollController: _pageScrollControler,
+        scrollController: _pageScrollCtr,
       ),
     ];
     _pageController.addListener(_onPageChanged);
@@ -101,6 +98,8 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
   @override
   void dispose() {
     _pageController.removeListener(_onPageChanged);
+    _detailsScrollCtr.dispose();
+    _pageScrollCtr.dispose();
     super.dispose();
   }
 
@@ -130,10 +129,10 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
                         key: _navKey,
                         isWeb: true,
                         titles: [
-                          LogType.http.asString(),
-                          LogType.debug.asString(),
-                          LogType.info.asString(),
-                          LogType.error.asString(),
+                          LogType.http.name,
+                          LogType.debug.name,
+                          LogType.info.name,
+                          LogType.error.name,
                         ],
                         onSelected: _onOptionSelected,
                       ),
@@ -197,9 +196,9 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
                             )
                           : _logBean != null
                               ? Scrollbar(
-                                  controller: _detailsScrollControler,
+                                  controller: _detailsScrollCtr,
                                   child: LogLocalDetailPage(
-                                    scrollController: _detailsScrollControler,
+                                    scrollController: _detailsScrollCtr,
                                     logBean: _logBean,
                                     logType: _logType,
                                     isWeb: true,
@@ -220,24 +219,24 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
   }
 
   void _onAllClear() {
-    LocalLogManager.instance.clean();
-    HttpLogManager.instance.clear();
+    LogManager.instance.clean();
+    HttpLogManager.instance.cleanAllLogs();
     _updatePages();
   }
 
   void _onClear() {
     switch (_currentLogType) {
       case LogType.debug:
-        LocalLogManager.instance.logDebug.clear();
+        LogManager.instance.logDebug.clear();
         break;
       case LogType.info:
-        LocalLogManager.instance.logInfo.clear();
+        LogManager.instance.logInfo.clear();
         break;
       case LogType.error:
-        LocalLogManager.instance.logError.clear();
+        LogManager.instance.logError.clear();
         break;
       case LogType.http:
-        HttpLogManager.instance.clear();
+        HttpLogManager.instance.cleanAllLogs();
         break;
     }
     _updatePages();

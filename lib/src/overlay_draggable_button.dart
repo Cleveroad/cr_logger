@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:cr_logger/src/colors.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/page/widgets/popup_menu.dart';
+import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/res/theme.dart';
 import 'package:cr_logger/src/widget/build_number.dart';
 import 'package:flutter/material.dart';
@@ -45,9 +45,9 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
 
-    ///Round
+    /// Round
 
-    ///Calculating offset limits
+    /// Calculating offset limits
 
     left = max(left, 1);
     left = min(screenWidth - widget.btnSize, left);

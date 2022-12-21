@@ -1,5 +1,5 @@
 import 'package:cr_logger/cr_logger.dart';
-import 'package:cr_logger/src/styles.dart';
+import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/error_value_widget.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
 import 'package:cr_logger/src/widget/rounded_card.dart';
@@ -72,9 +72,9 @@ class _HttpErrorWidgetState extends State<HttpErrorWidget>
 
   Map<String, dynamic>? _getJsonObj(ErrorBean? error) {
     if (error?.errorData is List) {
-      return {'[]': error?.errorData};
+      return error?.errorData;
     } else if (error?.errorData is Map<String, dynamic>) {
-      return {'Error': error?.errorData ?? ''};
+      return error?.errorData ?? '';
     } else {
       return {'Error': error?.errorData.toString() ?? ''};
     }
