@@ -11,6 +11,8 @@ class LogsModeController extends ChangeNotifier {
       ValueNotifier(LogsMode.fromCurrentSession);
   final ValueNotifier<bool> progressNotifier = ValueNotifier(false);
 
+  bool get isFromCurrentSession => logMode.value == LogsMode.fromCurrentSession;
+
   bool _logsAreLoaded = false;
 
   Future<void> changeMode() async {

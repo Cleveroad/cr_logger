@@ -20,7 +20,7 @@ class BodyExpansionTile extends StatefulWidget {
 }
 
 class _BodyExpansionTileState extends State<BodyExpansionTile> {
-  bool _expanded = true;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,17 +53,15 @@ class _BodyExpansionTileState extends State<BodyExpansionTile> {
               ),
               const SizedBox(width: 6),
               ExpandArrowButton(
-                isExpanded: _expanded && bodyIsNotEmpty,
-                onTap: bodyIsNotEmpty
-                    ? () => setState(() => _expanded = !_expanded)
-                    : null,
+                isExpanded: _isExpanded && bodyIsNotEmpty,
+                onTap: bodyIsNotEmpty ? _expand : null,
               ),
             ],
           ),
           if (bodyIsNotEmpty)
             JsonWidget(
               _getBody(widget.request),
-              allExpandedNodes: _expanded,
+              allExpandedNodes: _isExpanded,
               key: _jsonWidgetBodyValueKey,
             ),
         ],
@@ -82,4 +80,6 @@ class _BodyExpansionTileState extends State<BodyExpansionTile> {
       return null;
     }
   }
+
+  void _expand() => setState(() => _isExpanded = !_isExpanded);
 }

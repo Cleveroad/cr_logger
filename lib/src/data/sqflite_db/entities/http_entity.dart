@@ -10,7 +10,10 @@ class HttpEntity {
 
   factory HttpEntity.fromJson(Map<String, dynamic> json) {
     return HttpEntity(
-      key: json['key'],
+      /// Here it is checked for type because after importing the logs to the Web,
+      /// in the json file the [key] is saved as a 'String'.
+      /// But in the db the key is stored in 'int'.
+      key: json['key'] is String ? int.tryParse(json['key']) : json['key'],
       request: json['request'],
       response: json['response'],
       error: json['error'],

@@ -163,12 +163,13 @@ class _LogSearchPageState extends State<LogSearchPage> {
   /// Long Clicking on the log copy this log to clipboard
   Future<void> _onItemLongTap(LogBean bean) async {
     try {
-      await Clipboard.setData(ClipboardData(text: bean.message));
+      final beanMessage = bean.message.toString();
+      await Clipboard.setData(ClipboardData(text: beanMessage));
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Copy \n"${bean.message}"',
+            'Copy \n"$beanMessage"',
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
           ),

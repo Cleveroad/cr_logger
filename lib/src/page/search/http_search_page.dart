@@ -115,8 +115,7 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
   /// it will search that path, otherwise it will search the text from the search field
   void _search(String? uriPath) {
     final query = _searchCtrl.text.trim().toLowerCase();
-    final logs =
-        _isCurrentLogMode ? _httpMng.logMapToList() : _httpMng.logsFromDB;
+    final logs = _isCurrentLogMode ? _httpMng.logValues() : _httpMng.logsFromDB;
     final searchedLogs = logs.where((log) {
       final url = log.request?.url;
 

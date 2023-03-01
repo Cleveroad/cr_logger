@@ -11,31 +11,10 @@ class HttpBean {
     this.error,
   });
 
-  factory HttpBean.fromJson(Map<String, dynamic> json) {
-    return HttpBean(
-      key: int.tryParse(json['key']),
-      request: json['request'] != null
-          ? RequestBean.fromJson(json['request'])
-          : null,
-      response: json['response'] != null
-          ? ResponseBean.fromJson(json['response'])
-          : null,
-      error: json['error'] != null ? ErrorBean.fromJson(json['error']) : null,
-    );
-  }
-
   int? key;
   RequestBean? request;
   ResponseBean? response;
-
   ErrorBean? error;
-
-  Map<String, dynamic> toJson() => {
-        'key': key?.toString(),
-        'request': request?.toJson(),
-        'response': response?.toJson(),
-        'errors': error?.toJson(),
-      };
 }
 
 extension HttpBeanExtension on HttpBean {

@@ -1,19 +1,25 @@
 import 'package:cr_logger/cr_logger.dart';
 
 String getUrlWithHiddenParams(String url, {bool showFullPath = false}) {
-  final absolutePath = url.split('://');
+  final uri = Uri.tryParse(url);
+
+  /// Get path without scheme.
+  /// E.g. httpbin/anything instead of https://httpbin/anything
+  final absolutePath = '${uri?.host}${uri?.path}';
 
   /// Get all parameters
-  final parameters = Uri.tryParse(url)?.queryParameters;
+  final parameters = uri?.queryParameters;
 
   /// Separate the base url and parameters to avoid replacing parts of the base url
   final resultUrl = url.split('?');
 
-  final path = showFullPath ? resultUrl.first : absolutePath[1];
+  if (!showFullPath) {
+    resultUrl.first = absolutePath;
+  }
 
-  /// If there is no paramters then nothing to hide and just return url
+  /// If there is no parameters then nothing to hide and just return url
   if (resultUrl.length < 2) {
-    return path;
+    return resultUrl.join();
   }
 
   /// Replace
@@ -27,5 +33,5 @@ String getUrlWithHiddenParams(String url, {bool showFullPath = false}) {
     }
   });
 
-  return '$path?${resultUrl[1]}';
+  return resultUrl.join('?');
 }

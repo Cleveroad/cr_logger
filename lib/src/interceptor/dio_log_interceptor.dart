@@ -87,8 +87,8 @@ class DioLogInterceptor implements Interceptor {
       ..contentType = options.contentType?.toString()
       ..followRedirects = options.followRedirects
       ..requestTime = DateTime.now()
-      ..connectTimeout = options.connectTimeout
-      ..receiveTimeout = options.receiveTimeout
+      ..connectTimeout = options.connectTimeout?.inMilliseconds
+      ..receiveTimeout = options.receiveTimeout?.inMilliseconds
       ..params = options.queryParameters
       ..body = options.data
       ..headers = options.headers;

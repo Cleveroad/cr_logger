@@ -11,7 +11,7 @@ class LogEntityConverter {
     return LogBean(
       id: inObject.id,
       message: await _parser.decode(inObject.message),
-      time: inObject.time,
+      time: inObject.time?.toLocal() ?? DateTime.now(),
       stackTrace: inObject.stackTrace,
       data: data != null ? await _parser.decode(data) : null,
       color: inObject.type.getColor(),
@@ -25,7 +25,7 @@ class LogEntityConverter {
 
     return LogEntity(
       message: await _parser.encode(outObject.message),
-      time: outObject.time,
+      time: outObject.time.toUtc(),
       stackTrace: outObject.stackTrace,
       data: data != null && data.isNotEmpty ? await _parser.encode(data) : null,
       type: outObject.type ?? LogType.info,

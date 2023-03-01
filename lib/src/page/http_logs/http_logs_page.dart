@@ -1,7 +1,6 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/base/base_page_with_progress.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
-import 'package:cr_logger/src/extensions/do_post_frame.dart';
 import 'package:cr_logger/src/page/http_logs/http_log_details_page.dart';
 import 'package:cr_logger/src/page/widgets/http_item.dart';
 import 'package:cr_logger/src/res/styles.dart';
@@ -24,9 +23,8 @@ class HttpLogsPage extends StatefulWidget {
 class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
   final _pageController = PageController();
 
-  var _currentLogs = HttpLogManager.instance.logMapToList();
+  var _currentLogs = HttpLogManager.instance.logValues();
 
-  int currentIndex = 0;
   HttpBean? _selectedHttpBean;
 
   @override
@@ -82,7 +80,7 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
   Future<void> getCurrentLogs() async {
     switch (currentLogsMode) {
       case LogsMode.fromCurrentSession:
-        _currentLogs = List.from(HttpLogManager.instance.logMapToList())
+        _currentLogs = List.from(HttpLogManager.instance.logValues())
             .reversed
             .cast<HttpBean>()
             .toList();
@@ -109,10 +107,10 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
     }
   }
 
-  void _update() => doPostFrame(() {
-        if (mounted) {
-          // ignore: no-empty-block
-          setState(() {});
-        }
-      });
+  void _update() {
+    if (mounted) {
+      // ignore: no-empty-block
+      setState(() {});
+    }
+  }
 }

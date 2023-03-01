@@ -2,15 +2,15 @@ import 'dart:io';
 
 import 'package:chopper/chopper.dart';
 import 'package:cr_logger/cr_logger.dart';
-import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 
 class RestClient {
   RestClient._() {
     dio = Dio()
-      ..options.receiveTimeout = _serverTimeout
-      ..options.connectTimeout = _serverTimeout
-      ..options.sendTimeout = _serverTimeout;
+      ..options.receiveTimeout = const Duration(milliseconds: _serverTimeout)
+      ..options.connectTimeout = const Duration(milliseconds: _serverTimeout)
+      ..options.sendTimeout = const Duration(milliseconds: _serverTimeout);
 
     dio.interceptors.add(
       CRLoggerInitializer.instance.getDioInterceptor(),
@@ -35,7 +35,7 @@ class RestClient {
     final proxyStr = 'PROXY $ip:$port; '
         'PROXY localhost:$port; DIRECT';
     final adapter = dio.httpClientAdapter;
-    if (adapter is DefaultHttpClientAdapter) {
+    if (adapter is IOHttpClientAdapter) {
       adapter.onHttpClientCreate = (HttpClient client) {
         client
           ..findProxy = (uri) {
