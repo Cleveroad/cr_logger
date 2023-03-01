@@ -23,7 +23,7 @@ class JsonWidget extends StatefulWidget {
 }
 
 class JsonWidgetState extends State<JsonWidget> {
-  late final _jsonCtr = JsonRecyclerController(isExpanded: true);
+  late final _jsonCtr = JsonRecyclerController(isExpanded: false);
 
   Map<String, dynamic>? _jsonWithHiddenParameters;
 
@@ -31,15 +31,6 @@ class JsonWidgetState extends State<JsonWidget> {
   void initState() {
     super.initState();
     _updateNodes();
-  }
-
-  @override
-  void didUpdateWidget(covariant JsonWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateNodes();
-    if (oldWidget.allExpandedNodes != widget.allExpandedNodes) {
-      _jsonCtr.changeState();
-    }
   }
 
   @override
@@ -69,12 +60,22 @@ class JsonWidgetState extends State<JsonWidget> {
                     CrJsonRecyclerSliver(
                       jsonController: _jsonCtr,
                       json: _jsonWithHiddenParameters,
+                      rootExpanded: true,
                     ),
                   ],
                 ),
               ],
             ),
           );
+  }
+
+  @override
+  void didUpdateWidget(covariant JsonWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateNodes();
+    if (oldWidget.allExpandedNodes != widget.allExpandedNodes) {
+      _jsonCtr.changeState();
+    }
   }
 
   /// Create Nodes3 = {map entry} "Test3" -> "Hidden"4 = {map entry} "Test4" -3 = {map entry} "Test3" -> "Hidden"> [_InternalLinkedHashMap]

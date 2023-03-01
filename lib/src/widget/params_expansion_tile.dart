@@ -19,7 +19,7 @@ class ParamsExpansionTile extends StatefulWidget {
 }
 
 class _ParamsExpansionTileState extends State<ParamsExpansionTile> {
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +53,7 @@ class _ParamsExpansionTileState extends State<ParamsExpansionTile> {
               const SizedBox(width: 6),
               ExpandArrowButton(
                 isExpanded: _isExpanded && paramsIsNotEmpty,
-                onTap: paramsIsNotEmpty
-                    ? () => setState(() => _isExpanded = !_isExpanded)
-                    : null,
+                onTap: paramsIsNotEmpty ? _expand : null,
               ),
             ],
           ),
@@ -69,4 +67,6 @@ class _ParamsExpansionTileState extends State<ParamsExpansionTile> {
       ),
     );
   }
+
+  void _expand() => setState(() => _isExpanded = !_isExpanded);
 }

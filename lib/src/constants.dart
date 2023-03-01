@@ -18,3 +18,5 @@ const kSending = 'Sending';
 const kDefaultMaxLogsCount = 50;
 
 const kDefaultOfUrlCount = 4;
+
+const kIndentForLoadingLogs = 100;

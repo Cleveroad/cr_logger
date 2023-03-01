@@ -30,6 +30,7 @@ class LogManager {
   Function? onInfoUpdate;
   Function? onErrorUpdate;
   Function? onAllUpdate;
+  Function? onLogsClear;
 
   Future<void> loadLogsFromDB({bool getWithCurrentLogs = false}) =>
       _filterLogByType(getWithCurrentLogs: getWithCurrentLogs);
@@ -114,8 +115,10 @@ class LogManager {
     if (logs.length >= maxLogsCount) {
       logs.removeAt(0);
     }
-    localLogs.add(log);
+
     logs.add(log);
+    localLogs.add(log);
+
     if (_useDB) {
       await saveLog(log);
     }
@@ -162,12 +165,13 @@ class LogManager {
   }
 
   Future<void> _clearLogs(LogType type) async {
-    if (LogsModeController.instance.logMode.value ==
-        LogsMode.fromCurrentSession) {
+    if (LogsModeController.instance.isFromCurrentSession) {
       _clearLogsByType(type);
     } else if (_useDB) {
       await _clearDBLogsByType(type);
     }
+
+    onLogsClear?.call();
   }
 
   void _clearLogsByType(LogType type) {

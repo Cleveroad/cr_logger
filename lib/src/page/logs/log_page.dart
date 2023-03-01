@@ -1,4 +1,5 @@
 import 'package:cr_logger/src/base/base_page_with_progress.dart';
+import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/data/bean/log_bean.dart';
 import 'package:cr_logger/src/data/models/log_type.dart';
@@ -31,21 +32,25 @@ class LogPageState extends BasePageWithProgress<LogPage> {
   @override
   void initState() {
     super.initState();
-    LogManager.instance.onAllUpdate = getCurrentLogs;
-    switch (widget.logType) {
-      case LogType.http:
-        break;
-      case LogType.debug:
-        LogManager.instance.onDebugUpdate = getCurrentLogs;
-        break;
-      case LogType.info:
-        LogManager.instance.onInfoUpdate = getCurrentLogs;
-        break;
-      case LogType.error:
-        LogManager.instance.onErrorUpdate = getCurrentLogs;
-        break;
-    }
-    LogManager.instance.onAllUpdate?.call();
+    doPostFrame(() {
+      LogManager.instance.onAllUpdate = getCurrentLogs;
+      switch (widget.logType) {
+        case LogType.http:
+          break;
+        case LogType.debug:
+          LogManager.instance.onDebugUpdate = getCurrentLogs;
+          break;
+        case LogType.info:
+          LogManager.instance.onInfoUpdate = getCurrentLogs;
+          break;
+        case LogType.error:
+          LogManager.instance.onErrorUpdate = getCurrentLogs;
+          break;
+      }
+
+      LogManager.instance.onLogsClear = _clearCurrentLogs;
+      LogManager.instance.onAllUpdate?.call();
+    });
   }
 
   @override
@@ -72,8 +77,31 @@ class LogPageState extends BasePageWithProgress<LogPage> {
     return Row(
       children: [
         Expanded(
-          child: _currentLogs.isEmpty
-              ? const SizedBox(
+          child: Stack(
+            children: [
+              ListView.separated(
+                controller: widget.scrollController,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.only(
+                  bottom: 24,
+                  left: 16,
+                  right: 16,
+                ),
+                itemCount: _currentLogs.length,
+                itemBuilder: (_, index) {
+                  final item = _currentLogs[index];
+
+                  return LocalLogItem(
+                    key: ValueKey(item.id),
+                    logBean: item,
+                    logType: widget.logType,
+                    onSelected: _onLogBeanSelected,
+                  );
+                },
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+              ),
+              if (_currentLogs.isEmpty)
+                const SizedBox(
                   height: double.infinity,
                   child: Center(
                     child: Text(
@@ -81,34 +109,9 @@ class LogPageState extends BasePageWithProgress<LogPage> {
                       style: CRStyle.bodyGreyMedium14,
                     ),
                   ),
-                )
-              : Column(
-                  children: [
-                    Expanded(
-                      child: ListView.separated(
-                        controller: widget.scrollController,
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.only(
-                          bottom: 24,
-                          left: 16,
-                          right: 16,
-                        ),
-                        itemCount: _currentLogs.length,
-                        itemBuilder: (_, index) {
-                          final item = _currentLogs[index];
-
-                          return LocalLogItem(
-                            key: ValueKey(item.id),
-                            logBean: item,
-                            logType: widget.logType,
-                            onSelected: _onLogBeanSelected,
-                          );
-                        },
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      ),
-                    ),
-                  ],
                 ),
+            ],
+          ),
         ),
       ],
     );
@@ -144,41 +147,54 @@ class LogPageState extends BasePageWithProgress<LogPage> {
   }
 
   void _loadFromCurrentSession() {
-    switch (widget.logType) {
-      case LogType.http:
-        break;
-      case LogType.debug:
-        _currentLogs = LogManager.instance.logDebug.reversed.toList();
-        break;
-      case LogType.info:
-        _currentLogs = LogManager.instance.logInfo.reversed.toList();
-        break;
-      case LogType.error:
-        _currentLogs = LogManager.instance.logError.reversed.toList();
-        break;
+    if ((widget.scrollController?.hasClients ?? false) &&
+        (widget.scrollController?.position.pixels ?? 0) <
+            kIndentForLoadingLogs) {
+      switch (widget.logType) {
+        case LogType.http:
+          break;
+        case LogType.debug:
+          _currentLogs = LogManager.instance.logDebug.reversed.toList();
+          break;
+        case LogType.info:
+          _currentLogs = LogManager.instance.logInfo.reversed.toList();
+          break;
+        case LogType.error:
+          _currentLogs = LogManager.instance.logError.reversed.toList();
+          break;
+      }
     }
   }
 
   void _loadFromDB() {
-    switch (widget.logType) {
-      case LogType.http:
-        break;
-      case LogType.debug:
-        _currentLogs = LogManager.instance.logDebugDB.reversed.toList();
-        break;
-      case LogType.info:
-        _currentLogs = LogManager.instance.logInfoDB.reversed.toList();
-        break;
-      case LogType.error:
-        _currentLogs = LogManager.instance.logErrorDB.reversed.toList();
-        break;
+    if ((widget.scrollController?.hasClients ?? false) &&
+        (widget.scrollController?.position.pixels ?? 0) <
+            kIndentForLoadingLogs) {
+      switch (widget.logType) {
+        case LogType.http:
+          break;
+        case LogType.debug:
+          _currentLogs = LogManager.instance.logDebugDB.reversed.toList();
+          break;
+        case LogType.info:
+          _currentLogs = LogManager.instance.logInfoDB.reversed.toList();
+          break;
+        case LogType.error:
+          _currentLogs = LogManager.instance.logErrorDB.reversed.toList();
+          break;
+      }
     }
   }
 
-  void _update() => doPostFrame(() {
-        if (mounted) {
-          // ignore: no-empty-block
-          setState(() {});
-        }
-      });
+  void _clearCurrentLogs() {
+    _currentLogs.clear();
+    _update();
+  }
+
+  void _update() {
+    if (mounted) {
+      // ignore: no-empty-block
+      setState(() {});
+    }
+  }
 }

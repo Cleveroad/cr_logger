@@ -49,6 +49,7 @@ class MainLogMobilePage extends StatefulWidget {
 
 class _MainLogMobilePageState extends State<MainLogMobilePage> {
   final _pageController = PageController();
+  final _logListScrollController = ScrollController();
   final _logsMode = LogsModeController.instance.logMode;
 
   final _popupKey = GlobalKey<PopupMenuButtonState>();
@@ -68,9 +69,21 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
     super.initState();
     tabPages = [
       HttpLogsPage(key: _httpLogKey),
-      LogPage(key: _debugLogKey, logType: LogType.debug),
-      LogPage(key: _infoLogKey, logType: LogType.info),
-      LogPage(key: _errorLogKey, logType: LogType.error),
+      LogPage(
+        key: _debugLogKey,
+        logType: LogType.debug,
+        scrollController: _logListScrollController,
+      ),
+      LogPage(
+        key: _infoLogKey,
+        logType: LogType.info,
+        scrollController: _logListScrollController,
+      ),
+      LogPage(
+        key: _errorLogKey,
+        logType: LogType.error,
+        scrollController: _logListScrollController,
+      ),
     ];
     _pageController.addListener(_onPageChanged);
   }
@@ -78,7 +91,7 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
   @override
   void dispose() {
     _pageController.removeListener(_onPageChanged);
-
+    _logListScrollController.dispose();
     super.dispose();
   }
 

@@ -162,7 +162,6 @@ linter:
     # - diagnostic_describe_all_properties # DO reference all public properties in debug method implementations. # We don't use this
     - empty_statements # AVOID empty statements.
     - hash_and_equals # DO override hashCode if overriding == and prefer overriding == if overriding hashCode.
-    - invariant_booleans # DON'T test for conditions that can be inferred at compile time or test the same condition twice.
     - iterable_contains_unrelated_type # DON'T invoke contains on Iterable with an instance of different type than the parameter type.
     - list_remove_unrelated_type # DON'T invoke remove on List with an instance of different type than the parameter type.
     - literal_only_boolean_expressions # DON'T test for conditions composed only by literals, since the value can be inferred at compile time.
@@ -237,7 +236,7 @@ dart_code_metrics:
         break-on: 3
     - prefer-conditional-expressions
     - no-equal-then-else
-    - member-ordering-extended:
+    - member-ordering:
         alphabetize: false
         order:
           - constructors
@@ -258,6 +257,42 @@ dart_code_metrics:
           - overridden-nullable-fields
           - public-getters-setters
           - private-getters-setters
+          - public-methods
+          - overridden-methods
+          - protected-methods
+          - private-methods
+        widgets-order:
+          - constructor
+          - public-const-fields
+          - private-const-fields
+          - public-static-fields
+          - private-static-fields
+          - public-final-fields
+          - private-final-fields
+          - public-var-fields
+          - private-var-fields
+          - public-late-fields
+          - private-late-fields
+          - public-nullable-fields
+          - private-nullable-fields
+          - overridden-fields
+          - overridden-var-fields
+          - overridden-nullable-fields
+          - public-getters-setters
+          - private-getters-setters
+          - create-bloc-method
+          - on-argument-extracted-method
+          - init-state-method
+          - dispose-method
+          - did-change-dependencies-method
+          - on-rebuild-method
+          - on-state-listener-method
+          - build-method
+          - body-widget-method
+          - did-update-widget-method
+          - on-action-method
+          - on-error-method
+          - did-change-app-lifecycle-state-method
           - public-methods
           - overridden-methods
           - protected-methods

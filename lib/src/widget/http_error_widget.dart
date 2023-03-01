@@ -71,12 +71,10 @@ class _HttpErrorWidgetState extends State<HttpErrorWidget>
   }
 
   Map<String, dynamic>? _getJsonObj(ErrorBean? error) {
-    if (error?.errorData is List) {
-      return error?.errorData;
-    } else if (error?.errorData is Map<String, dynamic>) {
-      return error?.errorData ?? '';
-    } else {
-      return {'Error': error?.errorData.toString() ?? ''};
-    }
+    final errorData = error?.errorData;
+
+    return errorData is Map<String, dynamic>
+        ? errorData
+        : {'Error': error?.errorData.toString() ?? ''};
   }
 }

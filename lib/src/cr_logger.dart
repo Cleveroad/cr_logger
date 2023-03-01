@@ -347,6 +347,7 @@ class CRLoggerInitializer {
 
     /// Show hover menu
     if (_buttonEntry != null) {
+      //ignore:invalid_null_aware_operator
       Overlay.of(context)?.insert(_buttonEntry!);
     }
   }
@@ -396,12 +397,14 @@ class CRLoggerInitializer {
         ),
       );
       _loggerEntry = newLoggerEntry;
+      //ignore:invalid_null_aware_operator
       Overlay.of(context)?.insert(newLoggerEntry);
 
       /// The button should be above logger
       final buttonEntry = _buttonEntry;
       if (buttonEntry != null) {
         buttonEntry.remove();
+        //ignore:invalid_null_aware_operator
         Overlay.of(context)?.insert(buttonEntry);
       }
     }

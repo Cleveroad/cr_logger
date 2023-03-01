@@ -1,3 +1,4 @@
+import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/data/bean/log_bean.dart';
 import 'package:cr_logger/src/data/models/log_type.dart';
@@ -9,6 +10,7 @@ import 'package:cr_logger/src/widget/cr_app_bar.dart';
 import 'package:cr_logger/src/widget/expand_arrow_button.dart';
 import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
 import 'package:cr_logger/src/widget/rounded_card.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -48,28 +50,24 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
     getStackTraceListWidget();
   }
 
-  /// Needed for the web, since stacktrace is not updated
-  @override
-  void didUpdateWidget(covariant LogLocalDetailPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    getStackTraceListWidget();
-  }
-
   @override
   Widget build(BuildContext context) {
     final logName = logTypes[widget.logType!];
-    final isJsonData = widget.logBean?.message is Map<String, dynamic>;
+    final log = widget.logBean;
+    final isJsonData = log?.message is Map<String, dynamic>;
+
+    /// [!kIsWeb] because the logs may be imported
+    /// and then there is no way to know the date of the logs.
+    final time = LogsModeController.instance.isFromCurrentSession && !kIsWeb
+        ? log?.time.formatTime()
+        : log?.time.formatTimeWithYear();
 
     return Theme(
       data: CRLoggerHelper.instance.theme,
       child: Scaffold(
-        appBar: widget.isWeb
-            ? null
-            : CRAppBar(
-                title: '$logName log',
-              ),
+        appBar: widget.isWeb ? null : CRAppBar(title: '$logName log'),
         backgroundColor: CRLoggerColors.backgroundGrey,
-        body: widget.logBean == null
+        body: log == null
             ? const Text('No log bean')
             : SingleChildScrollView(
                 controller: widget.scrollController,
@@ -89,6 +87,7 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      /// Json data
                       if (isJsonData) ...[
                         ValueListenableBuilder(
                           valueListenable: _allExpandedNodesNotifier,
@@ -102,18 +101,23 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
+                                  /// Json title
                                   const Text(
                                     'JSON data',
                                     style: CRStyle.subtitle1BlackSemiBold16,
                                   ),
+
+                                  /// Json expand button
                                   ExpandArrowButton(
                                     isExpanded: isAllNodesExpanded,
                                     onTap: _onExpandArrowTap,
                                   ),
                                 ],
                               ),
+
+                              /// Json widget
                               JsonWidget(
-                                widget.logBean?.message as Map<String, dynamic>,
+                                log.message as Map<String, dynamic>,
                                 allExpandedNodes: isAllNodesExpanded,
                               ),
                             ]);
@@ -127,9 +131,9 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Message:\n${widget.logBean?.message}',
+                                'Message:\n${log.message.toString()}',
                                 style: CRStyle.bodyBlackMedium14.copyWith(
-                                  color: widget.logBean?.color,
+                                  color: log.color,
                                 ),
                               ),
                             ),
@@ -140,7 +144,7 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
 
                       /// Log time
                       Text(
-                        'Time: ${widget.logBean?.time.formatTime()}',
+                        'Time: $time',
                         style: CRStyle.bodyGreyRegular14,
                       ),
                       const SizedBox(height: 10),
@@ -154,6 +158,13 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
               ),
       ),
     );
+  }
+
+  /// Needed for the web, since stacktrace is not updated
+  @override
+  void didUpdateWidget(covariant LogLocalDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    getStackTraceListWidget();
   }
 
   /// to highlight the stack trace
@@ -207,17 +218,19 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
   }
 
   void _onCopy() {
+    final logMessage = widget.logBean?.message.toString();
+
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Copy \n"${widget.logBean?.message}"',
+          'Copy \n"$logMessage"',
           maxLines: 4,
           overflow: TextOverflow.ellipsis,
         ),
       ),
     );
-    Clipboard.setData(ClipboardData(text: widget.logBean?.message));
+    Clipboard.setData(ClipboardData(text: logMessage));
   }
 
   void _onExpandArrowTap() {

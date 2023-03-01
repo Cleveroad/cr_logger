@@ -251,9 +251,10 @@ class PrettyCRPrinter extends LogPrinter {
     final buffer = <String>[];
     final color =
         kIsWeb || Platform.isAndroid ? _getLevelColor(level) : AnsiColor.none();
-    buffer.add(color(_topBorder));
 
     if (!_printLogsCompactly) {
+      buffer.add(color(_topBorder));
+
       if (error != null) {
         final errorColor = kIsWeb || Platform.isAndroid
             ? _getErrorColor(level)

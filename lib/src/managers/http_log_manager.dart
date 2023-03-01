@@ -124,20 +124,12 @@ class HttpLogManager {
     }
   }
 
-  // TODO: change it later
-  List<HttpBean> logMapToList() {
-    final logModelList = <HttpBean>[];
-    logMap.forEach((key, jsonLog) {
-      logModelList.add(jsonLog);
-    });
-
-    return logModelList;
-  }
+  List<HttpBean> logValues() => logMap.values.toList();
 
   Set<String> getAllRequests() {
     final _logsMode = LogsModeController.instance.logMode.value;
     final logs =
-        _logsMode == LogsMode.fromCurrentSession ? logMapToList() : logsFromDB;
+        _logsMode == LogsMode.fromCurrentSession ? logValues() : logsFromDB;
 
     return logs
         .map((log) {
@@ -185,9 +177,7 @@ class HttpLogManager {
   }
 
   Future<void> _deleteAllHttpLogs({bool clearDB = false}) async {
-    if (LogsModeController.instance.logMode.value ==
-            LogsMode.fromCurrentSession &&
-        !clearDB) {
+    if (LogsModeController.instance.isFromCurrentSession && !clearDB) {
       logMap.clear();
       keys.clear();
     } else if (_useDB && clearDB) {
@@ -197,8 +187,7 @@ class HttpLogManager {
   }
 
   Future<void> _deleteHttpLogs() async {
-    if (LogsModeController.instance.logMode.value ==
-        LogsMode.fromCurrentSession) {
+    if (LogsModeController.instance.isFromCurrentSession) {
       logMap.clear();
       keys.clear();
     } else if (_useDB) {

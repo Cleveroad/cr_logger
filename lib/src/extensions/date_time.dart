@@ -7,5 +7,5 @@ extension DateTimeFormatter on DateTime {
 
   /// The same as [DateFormat('yyyy MM dd hh:mm:ss.SSS').format(this)]
   String formatTimeWithYear() =>
-      '$year ${month.leading} ${day.leading} ${formatTime()}';
+      '$year-${month.leading}-${day.leading} ${formatTime()}';
 }

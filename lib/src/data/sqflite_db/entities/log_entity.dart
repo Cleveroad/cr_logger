@@ -17,7 +17,7 @@ class LogEntity {
     return LogEntity(
       key: json['key'],
       message: json['message'],
-      time: DateTime.tryParse(json['time']) ?? DateTime.now(),
+      time: DateTime.tryParse(json['time'])?.toLocal(),
       stackTrace: json['stacktrace'],
       type: LogType.values.valueOf(json['type']) ?? LogType.info,
       data: json['data'],
@@ -28,7 +28,7 @@ class LogEntity {
   final int? key;
   final String id;
   final String message;
-  final DateTime time;
+  final DateTime? time;
   final String? stackTrace;
   final String? data;
   final LogType type;
@@ -38,8 +38,8 @@ class LogEntity {
     final json = {
       'id': id,
       'message': message.toString(),
-      'time': time.toIso8601String(),
-      'stackTrace': stackTrace?.toString(),
+      'time': time?.toUtc().toString(),
+      'stacktrace': stackTrace?.toString(),
       'data': data?.toString(),
       'type': type.name.toString(),
     };

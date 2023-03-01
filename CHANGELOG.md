@@ -1,8 +1,29 @@
+## 2.1.0
+
+### Changed
+
+- Improved log lists in the Debug, Info and Error tabs. If list of logs scrolled down a little it
+  will not be updated with new logs till list is scrolled back to top
+- Changed the display of json map preview for logs. Now the preview is displayed as text in a few
+  lines not full json view widget. Full json view is still available in log’s details
+- Support for Flutter 3.7
+- Updated JsonWidget. Now when viewing Json data, the first level of data is initially shown
+- Removed empty line between logs
+
+### Fixed
+
+- Fixed some errors in displaying information when copying logs and displaying logs
+- Fixed parsing error information
+- Fixed the time of the logs. Now the full date of log creation is shown
+- Fixed bug with importing logs in Web. Now logs are shown correctly after importing
+- Fixed bug with duplicated query parameters
+
 ## 2.0.0
 
 ### Added
 
-- There was added ability to use database to save logs, if `useDatabase` and `useCrLoggerInReleaseBuild`is **true**
+- There was added ability to use database to save logs, if `useDatabase`
+  and `useCrLoggerInReleaseBuild`is **true**
 - Added search for all logs from the database or from the current session.
 - Added option to delete all logs or logs of a certain type from the database
 - Added ability to switch between logs from the database or from the current session
@@ -30,7 +51,7 @@
 
 ### Fixed
 
-- Fixed request headers in response tab 
+- Fixed request headers in response tab
 
 ## 1.1.0
 

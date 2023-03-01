@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:chopper/chopper.dart';
+import 'package:chopper/chopper.dart' as chopper;
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger_example/generated/assets.dart';
 import 'package:cr_logger_example/rest_client.dart';
@@ -552,10 +552,10 @@ class _MainPageState extends State<MainPage> {
     /// In case there is no internet, the chopper will log a request, then it
     /// will receive a SocketException and will not log a response.
     /// This causes the request to remain in "Sending" status in the logger
-    await RestClient.instance.chopper.send(Request(
+    await RestClient.instance.chopper.send(chopper.Request(
       'POST',
-      'https://httpbin.org/anything',
-      '',
+      Uri.parse('https://httpbin.org/anything'),
+      Uri.parse(''),
       headers: {
         'Authorization': 'qwewrrq',
         'Test3': 'qwewrrq',

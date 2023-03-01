@@ -19,7 +19,7 @@ class ErrorBean {
       id: json['id'],
       errorMessage: json['errorMessage'],
       url: json['url'],
-      time: DateTime.tryParse(json['time'] ?? ''),
+      time: DateTime.tryParse(json['time'] ?? '')?.toLocal(),
       responseBean: ResponseBean.fromJson(json['responseBean']),
       duration: json['duration'],
       errorData: json['errorData'],
@@ -41,11 +41,11 @@ class ErrorBean {
         'id': id,
         'url': url,
         'errorMessage': errorMessage,
-        'time': time?.toIso8601String(),
+        'time': time?.toUtc().toString(),
         'responseBean': responseBean?.toJson(),
         'duration': duration,
         'statusCode': statusCode,
         'statusMessage': statusMessage,
-        'errorData': errorData,
+        'errorData': errorData?.toString(),
       };
 }

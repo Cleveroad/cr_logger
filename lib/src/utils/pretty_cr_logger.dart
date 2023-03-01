@@ -119,6 +119,24 @@ class PrettyCRLogger {
     });
   }
 
+  Future<Object> isolatePrintRequest(dynamic requestBean, _) async {
+    _printRequest(requestBean);
+    // Return some result needed for pakage worker_manager.
+    // If no result isolate job will crash when getting Null object in response
+    // from isolate.
+
+    return '';
+  }
+
+  Future<Object> isolatePrintResponse(dynamic responseBean, _) async {
+    _printResponse(responseBean);
+    // Return some result needed for pakage worker_manager.
+    // If no result isolate job will crash when getting Null object in response
+    // from isolate.
+
+    return '';
+  }
+
   void _createRequestWorker() {
     final srcBuffer = StringBuffer()
       ..writeln(printRequestHeaderScript)
@@ -186,24 +204,6 @@ class PrettyCRLogger {
     final srcCreateWorker = html.ScriptElement()
       ..text = createErrorWorkerScript;
     html.document.body?.append(srcCreateWorker);
-  }
-
-  Future<Object> isolatePrintRequest(dynamic requestBean, _) async {
-    _printRequest(requestBean);
-    // Return some result needed for pakage worker_manager.
-    // If no result isolate job will crash when getting Null object in response
-    // from isolate.
-
-    return '';
-  }
-
-  Future<Object> isolatePrintResponse(dynamic responseBean, _) async {
-    _printResponse(responseBean);
-    // Return some result needed for pakage worker_manager.
-    // If no result isolate job will crash when getting Null object in response
-    // from isolate.
-
-    return '';
   }
 }
 

@@ -1,11 +1,12 @@
+import 'package:cr_json_widget/res/cr_json_color.dart';
+import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/data/bean/log_bean.dart';
 import 'package:cr_logger/src/data/models/log_type.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
-import 'package:cr_logger/src/widget/expand_arrow_button.dart';
-import 'package:cr_logger/src/widget/json_widget/json_widget.dart';
 import 'package:cr_logger/src/widget/rounded_card.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -33,6 +34,12 @@ class LocalLogItem extends StatelessWidget {
     final isJsonData = logBean.message is Map<String, dynamic>;
     final logTap = onLongTap;
 
+    /// [!kIsWeb] because the logs may be imported
+    /// and then there is no way to know the date of the logs.
+    final time = LogsModeController.instance.isFromCurrentSession && !kIsWeb
+        ? logBean.time.formatTime()
+        : logBean.time.formatTimeWithYear();
+
     return RoundedCard(
       padding: const EdgeInsets.only(
         left: 16,
@@ -56,28 +63,23 @@ class LocalLogItem extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'JSON data',
-                              style: CRStyle.subtitle1BlackSemiBold16,
-                            ),
-                            Row(
-                              children: [
-                                CopyWidget(onCopy: () => _onCopy(context)),
-                                ExpandArrowButton(
-                                  isExpanded: isAllNodesExpanded,
-                                  onTap: _onExpandArrowTap,
-                                ),
-                              ],
-                            ),
-                          ],
+                        /// Json title
+                        const Text(
+                          'JSON object',
+                          style: CRStyle.subtitle1BlackSemiBold16,
                         ),
-                        JsonWidget(
-                          logBean.message as Map<String, dynamic>,
-                          allExpandedNodes: isAllNodesExpanded,
+                        const SizedBox(height: 10),
+
+                        /// Json preview as a string
+                        Text(
+                          (logBean.message as Map<String, dynamic>).toString(),
+                          style: const TextStyle(
+                            color: CrJsonColors.objectColor,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
+
                         const SizedBox(height: 10),
 
                         /// Stacktrace
@@ -91,7 +93,7 @@ class LocalLogItem extends StatelessWidget {
 
                         /// Log time
                         Text(
-                          'Time: ${logBean.time.formatTime()}',
+                          'Time: $time',
                           style: CRStyle.bodyGreyRegular14,
                         ),
                       ],
@@ -131,7 +133,7 @@ class LocalLogItem extends StatelessWidget {
 
                 /// Log time
                 Text(
-                  'Time: ${logBean.time.formatTime()}',
+                  'Time: $time',
                   style: CRStyle.bodyGreyRegular14,
                 ),
               ],
@@ -140,20 +142,18 @@ class LocalLogItem extends StatelessWidget {
   }
 
   void _onCopy(BuildContext context) {
+    final logMessage = logBean.message.toString();
+
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Copy \n"${logBean.message}"',
+          'Copy \n"$logMessage"',
           maxLines: 4,
           overflow: TextOverflow.ellipsis,
         ),
       ),
     );
-    Clipboard.setData(ClipboardData(text: logBean.message));
-  }
-
-  void _onExpandArrowTap() {
-    _allExpandedNodesNotifier.value = !_allExpandedNodesNotifier.value;
+    Clipboard.setData(ClipboardData(text: logMessage));
   }
 }
