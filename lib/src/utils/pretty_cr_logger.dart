@@ -239,6 +239,7 @@ void _printRequest(RequestBean requestBean) {
           ..addEntries(data.files);
         _printMapAsTable(formDataMap, header: 'Form data | ${data.boundary}');
       } else {
+        PrettyCRLogger.logPrint('╔ Body ');
         _printBlock(data.toString());
       }
     }
@@ -250,20 +251,22 @@ void _printResponse(ResponseBean responseBean) {
   _printResponseHeader(responseBean);
   _printMapAsTable(responseBean.headers, header: 'Headers');
 
-  PrettyCRLogger.logPrint('╔ Body');
-  PrettyCRLogger.logPrint('║');
-  if (responseBean.data != null) {
-    if (responseBean.data is Map) {
-      _printPrettyMap(responseBean.data as Map);
-    } else if (responseBean.data is List) {
+  final responseData = responseBean.data;
+  if (responseData != null) {
+    PrettyCRLogger.logPrint('╔ Body');
+    PrettyCRLogger.logPrint('║');
+    if (responseData is Map) {
+      _printPrettyMap(responseData);
+    } else if (responseData is List) {
       PrettyCRLogger.logPrint('║${_indent()}[');
-      _printList(responseBean.data as List);
+      _printList(responseData);
       PrettyCRLogger.logPrint('║${_indent()}[');
     } else {
-      _printBlock(responseBean.data.toString());
+      _printBlock(responseData.toString());
     }
+    PrettyCRLogger.logPrint('║');
   }
-  PrettyCRLogger.logPrint('║');
+
   _printLine('╚');
 }
 
