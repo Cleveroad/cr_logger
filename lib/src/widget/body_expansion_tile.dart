@@ -25,7 +25,9 @@ class _BodyExpansionTileState extends State<BodyExpansionTile> {
   @override
   Widget build(BuildContext context) {
     const _jsonWidgetBodyValueKey = ValueKey('RequestPageBody');
-    final bodyLength = _getBody(widget.request)?.length ?? 0;
+    final bodyIsString = widget.request?.body is String;
+    final bodyLength =
+        bodyIsString ? 1 : _tryGetBodyAsMap(widget.request)?.length ?? 0;
     final bodyIsNotEmpty = bodyLength != 0;
 
     return RoundedCard(
@@ -58,18 +60,19 @@ class _BodyExpansionTileState extends State<BodyExpansionTile> {
               ),
             ],
           ),
-          if (bodyIsNotEmpty)
+          if (bodyIsNotEmpty && !bodyIsString)
             JsonWidget(
-              _getBody(widget.request),
+              _tryGetBodyAsMap(widget.request),
               allExpandedNodes: _isExpanded,
               key: _jsonWidgetBodyValueKey,
             ),
+          if (bodyIsString && _isExpanded) Text(widget.request?.body),
         ],
       ),
     );
   }
 
-  Map<String, dynamic>? _getBody(request) {
+  Map<String, dynamic>? _tryGetBodyAsMap(request) {
     if (request?.body is FormData) {
       return request?.getFormData() ?? '';
     } else if (request?.body is List) {

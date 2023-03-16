@@ -51,6 +51,8 @@ class HttpLogManager {
   }
 
   void onRequest(RequestBean options) {
+    _handleStreamInRequestBody(options);
+
     if (_printLogs) {
       _prettyCRLogger.onRequest(options);
     }
@@ -162,6 +164,29 @@ class HttpLogManager {
   }
 
   Future<void> deleteAllHttpLogs() => _provider.deleteAllHttpLogs();
+
+  /// If a Stream (_FileStream, ByteStream etc.) is used as the body of the
+  /// request, this will cause a database conversion error and the body will not
+  /// show up in the logs. This method replaces the stream with text of
+  /// information about that stream
+  void _handleStreamInRequestBody(RequestBean request) {
+    if (request.body is Stream) {
+      final stringBuffer = StringBuffer('Stream (${request.body.runtimeType})');
+
+      final contentType = request.contentType;
+      if (contentType != null) {
+        stringBuffer.write(', type: $contentType');
+      }
+
+      final contentLength = request.headers?['content-length'];
+      if (contentLength != null) {
+        final fileSizeInMB = contentLength / (1024 * 1024);
+        stringBuffer.write(', size: ${fileSizeInMB.toStringAsFixed(2)} MB');
+      }
+
+      request.body = stringBuffer.toString();
+    }
+  }
 
   void _sortLogsByTime() {
     logsFromDB.sort((a, b) {

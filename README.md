@@ -41,7 +41,7 @@ Web [example](https://cleveroad.github.io/cr_logger)
 1. Add plugin to the project:
    ```yaml
    dependencies:
-     cr_logger: ^2.0.0
+     cr_logger: ^2.2.0
    ```
 
 2. Initialize the logger. main.dart:

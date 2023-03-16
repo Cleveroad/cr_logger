@@ -1,3 +1,10 @@
+## 2.2.0
+
+### Fixed
+
+- Fixed "Unhandled Exception: Converting object to an encodable object failed" error if request body
+  is a Stream (when sending file bytes in an http request)
+
 ## 2.1.0
 
 ### Changed
