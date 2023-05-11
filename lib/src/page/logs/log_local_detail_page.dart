@@ -230,7 +230,14 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
         ),
       ),
     );
-    Clipboard.setData(ClipboardData(text: logMessage));
+
+    if (logMessage != null) {
+      Clipboard.setData(
+        ClipboardData(
+          text: logMessage,
+        ),
+      );
+    }
   }
 
   void _onExpandArrowTap() {

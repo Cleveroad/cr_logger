@@ -3,7 +3,7 @@ import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/res/styles.dart';
 import 'package:flutter/material.dart';
 
-class OptionsButtons extends StatefulWidget with PreferredSizeWidget {
+class OptionsButtons extends StatefulWidget implements PreferredSizeWidget {
   const OptionsButtons({
     required this.titles,
     required this.onSelected,
