@@ -1,3 +1,7 @@
+## 2.3.0
+
+- Dart 3 support.
+
 ## 2.2.0
 
 ### Fixed
