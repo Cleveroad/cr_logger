@@ -135,6 +135,13 @@ class HttpItem extends StatelessWidget {
         ),
       ),
     );
-    Clipboard.setData(ClipboardData(text: httpBean.request?.url));
+
+    if (httpBean.request?.url != null) {
+      Clipboard.setData(
+        ClipboardData(
+          text: httpBean.request!.url ?? '',
+        ),
+      );
+    }
   }
 }
