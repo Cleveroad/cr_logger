@@ -33,7 +33,7 @@ dependencies:
   uuid: ^3.0.0
 
   # MIT
-  app_settings: ^4.2.0
+  app_settings: ^5.0.0
 
   # BSD
   path_provider: ^2.0.0
