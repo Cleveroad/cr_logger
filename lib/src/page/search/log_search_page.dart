@@ -178,8 +178,8 @@ class _LogSearchPageState extends State<LogSearchPage> {
     } catch (error, stackTrace) {
       log.e(
         'Internal logger error',
-        error,
-        stackTrace,
+        error: error,
+        stackTrace: stackTrace,
       );
     }
   }

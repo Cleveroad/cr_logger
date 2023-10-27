@@ -26,31 +26,34 @@ class PrettyCRPrinter extends LogPrinter {
     Map<Level, Color>? levelColors,
     bool printLogsCompactly = true,
   }) : levelColors = {
-          Level.nothing:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.verbose]) ??
-                  AnsiColor.fg(AnsiColor.grey(0.5)),
-          Level.verbose:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.verbose]) ??
-                  AnsiColor.fg(057),
+          Level.all: AnsiColorExt.fromColorOrNull(levelColors?[Level.all]) ??
+              AnsiColor.fg(AnsiColor.grey(1)),
+          Level.off: AnsiColorExt.fromColorOrNull(levelColors?[Level.off]) ??
+              AnsiColor.fg(AnsiColor.grey(0.5)),
+          Level.trace:
+              AnsiColorExt.fromColorOrNull(levelColors?[Level.trace]) ??
+                  const AnsiColor.fg(057),
           Level.debug:
               AnsiColorExt.fromColorOrNull(levelColors?[Level.debug]) ??
-                  AnsiColor.fg(010),
+                  const AnsiColor.fg(010),
           Level.info: AnsiColorExt.fromColorOrNull(levelColors?[Level.info]) ??
-              AnsiColor.fg(12),
+              const AnsiColor.fg(12),
           Level.warning:
               AnsiColorExt.fromColorOrNull(levelColors?[Level.warning]) ??
-                  AnsiColor.fg(208),
+                  const AnsiColor.fg(208),
           Level.error:
               AnsiColorExt.fromColorOrNull(levelColors?[Level.error]) ??
-                  AnsiColor.fg(160),
-          Level.wtf: AnsiColorExt.fromColorOrNull(levelColors?[Level.wtf]) ??
-              AnsiColor.fg(199),
+                  const AnsiColor.fg(160),
+          Level.fatal:
+              AnsiColorExt.fromColorOrNull(levelColors?[Level.fatal]) ??
+                  const AnsiColor.fg(199),
         } {
     _startTime ??= DateTime.now();
 
     if (!printLogsCompactly) {
       final doubleDividerLine = StringBuffer();
       final singleDividerLine = StringBuffer();
+
       for (var i = 0; i < lineLength - 1; i++) {
         doubleDividerLine.write(doubleDivider);
         singleDividerLine.write(singleDivider);
@@ -72,13 +75,14 @@ class PrettyCRPrinter extends LogPrinter {
   static const singleDivider = '┄';
 
   static final Map<Level, String> levelEmojis = {
-    Level.nothing: '',
-    Level.verbose: '',
+    Level.off: '',
+    Level.trace: '',
+    Level.all: '',
     Level.debug: '🐛 ',
     Level.info: '💡 ',
     Level.warning: '⚠️ ',
     Level.error: '⛔ ',
-    Level.wtf: '👾 ',
+    Level.fatal: '👾 ',
   };
 
   static final stackTraceRegex = RegExp(r'#[0-9]+[\s]+(.+) \(([^\s]+)\)');
@@ -190,15 +194,17 @@ class PrettyCRPrinter extends LogPrinter {
   }
 
   AnsiColor _getLevelColor(Level level) {
-    return colors ? levelColors[level] ?? AnsiColor.none() : AnsiColor.none();
+    return colors
+        ? levelColors[level] ?? const AnsiColor.none()
+        : const AnsiColor.none();
   }
 
   AnsiColor _getErrorColor(Level level) {
     return colors
-        ? level == Level.wtf
-            ? levelColors[Level.wtf] ?? AnsiColor.none()
-            : levelColors[Level.error] ?? AnsiColor.none()
-        : AnsiColor.none();
+        ? level == Level.fatal
+            ? levelColors[Level.fatal] ?? const AnsiColor.none()
+            : levelColors[Level.error] ?? const AnsiColor.none()
+        : const AnsiColor.none();
   }
 
   // ignore: Long-Parameter-List
@@ -212,26 +218,31 @@ class PrettyCRPrinter extends LogPrinter {
       time: DateTime.now(),
       stackTrace: stacktrace ?? '',
     );
+
     switch (level) {
-      case Level.verbose:
+      case Level.trace:
       case Level.debug:
         logModel.color = CRLoggerColors.orange;
         logModel.type = LogType.debug;
         LogManager.instance.addDebug(logModel);
         break;
+
       case Level.info:
       case Level.warning:
         logModel.color = CRLoggerColors.blueAccent;
         logModel.type = LogType.info;
         LogManager.instance.addInfo(logModel);
         break;
+
       case Level.error:
-      case Level.wtf:
+      case Level.fatal:
         logModel.color = CRLoggerColors.red;
         logModel.type = LogType.error;
         LogManager.instance.addError(logModel);
         break;
-      case Level.nothing:
+
+      case Level.off:
+      case Level.all:
         break;
     }
   }
@@ -249,8 +260,9 @@ class PrettyCRPrinter extends LogPrinter {
     String? stacktrace,
   ) {
     final buffer = <String>[];
-    final color =
-        kIsWeb || Platform.isAndroid ? _getLevelColor(level) : AnsiColor.none();
+    final color = kIsWeb || Platform.isAndroid
+        ? _getLevelColor(level)
+        : const AnsiColor.none();
 
     if (!_printLogsCompactly) {
       buffer.add(color(_topBorder));
@@ -258,7 +270,7 @@ class PrettyCRPrinter extends LogPrinter {
       if (error != null) {
         final errorColor = kIsWeb || Platform.isAndroid
             ? _getErrorColor(level)
-            : AnsiColor.none();
+            : const AnsiColor.none();
         for (final line in error.split('\n')) {
           buffer.add(
             color('$verticalLine ') +

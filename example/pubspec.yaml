@@ -15,9 +15,9 @@ dependencies:
   cr_logger:
     path: ../
 
-  dio: 5.0.0
-  chopper: 6.1.0
-  logger: ^1.1.0
+  dio: ^5.3.3
+  chopper: ^6.1.4
+  logger: ^2.0.2+1
   flutter_dropzone: ^3.0.5
   share_plus: ^7.0.2
 

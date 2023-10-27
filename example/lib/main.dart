@@ -27,11 +27,11 @@ Future<void> main() async {
     levelColors: {
       Level.debug: Colors.lightGreenAccent,
       Level.warning: Colors.orange,
-      Level.verbose: Colors.blueAccent,
+      Level.trace: Colors.blueAccent,
       Level.info: Colors.blueAccent,
       Level.error: Colors.red,
-      Level.wtf: Colors.red.shade900,
-      Level.nothing: Colors.grey.shade300,
+      Level.fatal: Colors.red.shade900,
+      Level.off: Colors.grey.shade300,
     },
     hiddenFields: [
       'Test',
@@ -587,7 +587,7 @@ class _MainPageState extends State<MainPage> {
   void _makeLogDebug() {
     log
       ..d('Debug message at ${DateTime.now().toIso8601String()}')
-      ..v('Verbose message at ${DateTime.now().toIso8601String()}');
+      ..t('Verbose message at ${DateTime.now().toIso8601String()}');
   }
 
   void _makeLogJson() {
@@ -622,9 +622,9 @@ class _MainPageState extends State<MainPage> {
     log
       ..e(
         'Error message at ${DateTime.now().toIso8601String()}',
-        const HttpException('message'),
+        error: const HttpException('message'),
       )
-      ..wtf('Wtf message at ${DateTime.now().toIso8601String()}');
+      ..f('Wtf message at ${DateTime.now().toIso8601String()}');
   }
 
   void _makeLogDebugNative() {
