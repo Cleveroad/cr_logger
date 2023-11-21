@@ -27,7 +27,7 @@ dependencies:
   logger: ^2.0.2+1
 
   # BSD
-  package_info_plus: ^4.0.0
+  package_info_plus: ^5.0.1
 
   # MIT
   uuid: ^3.0.0
