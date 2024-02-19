@@ -1,80 +1,85 @@
 name: cr_logger
 description: Powerful logging plugin. Supports android, ios and web platforms.
 
-version: 2.3.0
+version: 2.4.2
 homepage: https://github.com/Cleveroad/cr_logger
 
+topics:
+  - tool
+  - network
+  - debug
+  - logging
+  - dio
+
 environment:
-  sdk: ">=2.19.2 <4.0.0"
-  flutter: ">=3.7.0"
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.16.0"
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  http: ^0.13.0
+  http: ^1.1.2
 
   # MIT
-  cr_json_widget: ^1.1.0
+  cr_json_widget: ^1.1.1
 
   # Network
   # MIT
-  dio: ^5.0.0
+  dio: ^5.4.0
   # MIT
-  chopper: ^6.1.0
+  chopper: ^7.0.10
   # MIT
-  logger: ^1.1.0
+  logger: ^2.0.2+1
 
   # BSD
-  package_info_plus: ^3.0.0
+  package_info_plus: ^5.0.1
 
   # MIT
-  uuid: ^3.0.0
+  uuid: ^3.0.7
 
   # MIT
-  app_settings: ^4.2.0
+  app_settings: ^5.1.1
 
   # BSD
-  path_provider: ^2.0.0
+  path_provider: ^2.1.2
   # BSD-3-Clause
-  path: ^1.8.2
+  path: ^1.8.3
 
   # MIT
-  inspector: ^1.1.0
+  inspector: ^2.1.0
 
   # BSD-3-Clause
-  shared_preferences: ^2.0.0
+  shared_preferences: ^2.2.2
   # MIT
-  split_view: ^3.2.0
+  split_view: ^3.2.1
 
   # unknown
   # https://pub.dev/packages/synchronized/license
-  synchronized: ^3.0.0
+  synchronized: ^3.1.0
 
   # BSD-3-Clause
-  js: ^0.6.0
+  js: ^0.6.7
 
   # BSD-3-Clause
   # https://stackoverflow.com/a/70757512
-  platform: ^3.1.0
+  platform: ^3.1.2
 
   # Apache-2.0
-  infinite_scroll_pagination: ^3.2.0
+  infinite_scroll_pagination: ^4.0.0
   # MIT
-  worker_manager: ^5.0.0
+  worker_manager: ^6.3.1
 
   # BSD-2-Clause
-  sqflite: ^2.2.0+3
+  sqflite: ^2.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  # MIT
-  dart_code_metrics: ^5.6.0
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
 
-  build_runner: ^2.2.0
+  build_runner: ^2.4.7
 
 flutter:
   uses-material-design: true
