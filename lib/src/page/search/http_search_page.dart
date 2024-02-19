@@ -1,10 +1,13 @@
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/page/http_logs/http_log_details_page.dart';
 import 'package:cr_logger/src/page/search/widgets/path_widget.dart';
 import 'package:cr_logger/src/page/widgets/cupertino_search_field.dart';
 import 'package:cr_logger/src/page/widgets/http_item.dart';
 import 'package:cr_logger/src/res/styles.dart';
+import 'package:cr_logger/src/utils/show_remove_log_bottom_sheet.dart';
+import 'package:cr_logger/src/utils/show_remove_log_snack_bar.dart';
 import 'package:cr_logger/src/utils/unfocus.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +24,8 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
   final _logsMode = LogsModeController.instance.logMode.value;
   final _searchCtrl = TextEditingController();
 
+  String? _uriPath;
+
   bool get _isCurrentLogMode => _logsMode == LogsMode.fromCurrentSession;
 
   Set<String> _urls = {};
@@ -28,13 +33,13 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
   @override
   void initState() {
     super.initState();
-    _httpMng.onUpdate = _search;
     _urls = _httpMng.getAllRequests();
+    _httpMng.updateSearchHttpPage = _search;
   }
 
   @override
   void dispose() {
-    _httpMng.onUpdate = null;
+    _httpMng.updateSearchHttpPage = null;
     _searchCtrl.dispose();
     super.dispose();
   }
@@ -49,7 +54,7 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
           height: 38,
           child: CupertinoSearchField(
             searchController: _searchCtrl,
-            onSearch: () => _search(null),
+            onSearch: _search,
             onClear: _clearResults,
             placeholderText: 'Enter the path of url',
           ),
@@ -66,7 +71,11 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
                   children: _urls
                       .map(
                         (path) => PathWidget(
-                          onSearchUrl: () => _search(path),
+                          //ignore:prefer-extracting-callbacks
+                          onSearchUrl: () {
+                            _uriPath = path;
+                            _search();
+                          },
                           path: path,
                         ),
                       )
@@ -99,6 +108,7 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
                       return HttpItem(
                         httpBean: item,
                         onSelected: _onHttpBeanSelected,
+                        onRemove: _onRemoveLogPressed,
                       );
                     },
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -113,12 +123,13 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
 
   /// To find the correct logs. If user click on the path,
   /// it will search that path, otherwise it will search the text from the search field
-  void _search(String? uriPath) {
+  void _search() {
     final query = _searchCtrl.text.trim().toLowerCase();
     final logs = _isCurrentLogMode ? _httpMng.logValues() : _httpMng.logsFromDB;
     final searchedLogs = logs.where((log) {
       final url = log.request?.url;
 
+      final uriPath = _uriPath;
       if (url != null && uriPath != null) {
         return url.contains(uriPath);
       } else {
@@ -132,7 +143,7 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
       return false;
     }).toList();
 
-    if (query.isNotEmpty || uriPath != null) {
+    if (query.isNotEmpty || _uriPath != null) {
       setState(() {
         _results
           ..clear()
@@ -141,6 +152,8 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
     } else {
       setState(_results.clear);
     }
+
+    HttpLogManager.instance.updateHttpPage?.call();
   }
 
   /// Clicking on the log opens the details page
@@ -160,5 +173,48 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
       _searchCtrl.clear();
       _results.clear();
     });
+  }
+
+  Future<void> _onRemoveLogPressed(HttpBean httpBean) async {
+    final okConfirmation = await showRemoveLogBottomSheet(
+      context,
+      message: httpBean.request?.url ?? '',
+    );
+    if (okConfirmation) {
+      _removeLog(httpBean);
+      showRemoveLogSnackBar(context, () => _insertLog(httpBean));
+    }
+  }
+
+  void _removeLog(HttpBean httpBean) {
+    HttpLogManager.instance.removeLog(httpBean);
+    _update();
+  }
+
+  Future<void> _insertLog(HttpBean httpBean) async {
+    final logMng = HttpLogManager.instance;
+    await logMng.saveHttpLog(httpBean);
+
+    if (_isCurrentLogMode) {
+      final requestID = httpBean.request?.id;
+      if (requestID != null) {
+        logMng.keys.add(requestID.toString());
+        logMng.logMap[requestID.toString()] = httpBean;
+        logMng.logMap = logMng.sortLogsMapByTime(logMng.logMap);
+      }
+    } else {
+      logMng.logsFromDB.add(httpBean);
+      logMng.logsFromDB =
+          HttpLogManager.instance.sortLogsByTime(logMng.logsFromDB);
+    }
+
+    logMng.update();
+  }
+
+  void _update() {
+    if (mounted) {
+      // ignore: no-empty-block
+      setState(() {});
+    }
   }
 }

@@ -2,7 +2,7 @@ import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/utils/hide_values_in_map.dart';
 
-class ResponseBean {
+final class ResponseBean {
   ResponseBean({
     this.id,
     this.statusCode,

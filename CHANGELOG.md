@@ -1,4 +1,34 @@
+## 2.4.2
+
+### Changed
+
+- Updated flutter version to 3.16.5, updated dependencies.
+- Added class modifiers.
+- Possibility to add parameters to the text of the logs. Such parameter value can be copied by the
+  tap on it from log details screen.
+- Added package topics to the pubspec file.
+- Added the ability to create logs with SnackBar. Clicking on the "OPEN" button opens the log
+  details page.
+- Added ability to remove logs. After deleting, it is possible to restore the deleted log in the
+  opened SnackBar by pressing the "UNDO" button.
+- Changed placeholders on pages to view database logs
+
+### Breaking changes
+
+- The error and stackTrace log parameters are now named
+
+### Fixed
+
+- Fixed exception when swiping log tabs
+- Fixed display of new logs when viewing the database list
+- Fixed display of logs when changing the database logs view
+- Fixed errors when the HTTP log search page is open
+- Fixed HTTP tabs update after closing the search page HTTP logs
+- Fixed log list update when scrolling the list to the initial position
+
 ## 2.3.0
+
+### Added
 
 - Dart 3 support.
 

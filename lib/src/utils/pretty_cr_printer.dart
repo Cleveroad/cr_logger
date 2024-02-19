@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/constants.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
+import 'package:cr_logger/src/log_message_wrapper.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
-import 'package:cr_logger/src/res/colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -14,7 +14,7 @@ import 'package:logger/logger.dart';
 /// If the [printLogsCompactly] is false, then all logs, except HTTP logs, will have borders,
 /// with a link to the place where the print is called and the time when the log was created.
 /// Otherwise it will write only log message
-class PrettyCRPrinter extends LogPrinter {
+final class PrettyCRPrinter extends LogPrinter {
   PrettyCRPrinter({
     this.methodCount = 2,
     this.errorMethodCount = 8,
@@ -26,25 +26,27 @@ class PrettyCRPrinter extends LogPrinter {
     Map<Level, Color>? levelColors,
     bool printLogsCompactly = true,
   }) : levelColors = {
-          Level.nothing:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.verbose]) ??
-                  AnsiColor.fg(AnsiColor.grey(0.5)),
-          Level.verbose:
-              AnsiColorExt.fromColorOrNull(levelColors?[Level.verbose]) ??
-                  AnsiColor.fg(057),
+          Level.all: AnsiColorExt.fromColorOrNull(levelColors?[Level.all]) ??
+              AnsiColor.fg(AnsiColor.grey(0.5)),
+          Level.off: AnsiColorExt.fromColorOrNull(levelColors?[Level.off]) ??
+              AnsiColor.fg(AnsiColor.grey(0.5)),
+          Level.trace:
+              AnsiColorExt.fromColorOrNull(levelColors?[Level.trace]) ??
+                  const AnsiColor.fg(057),
           Level.debug:
               AnsiColorExt.fromColorOrNull(levelColors?[Level.debug]) ??
-                  AnsiColor.fg(010),
+                  const AnsiColor.fg(010),
           Level.info: AnsiColorExt.fromColorOrNull(levelColors?[Level.info]) ??
-              AnsiColor.fg(12),
+              const AnsiColor.fg(12),
           Level.warning:
               AnsiColorExt.fromColorOrNull(levelColors?[Level.warning]) ??
-                  AnsiColor.fg(208),
+                  const AnsiColor.fg(208),
           Level.error:
               AnsiColorExt.fromColorOrNull(levelColors?[Level.error]) ??
-                  AnsiColor.fg(160),
-          Level.wtf: AnsiColorExt.fromColorOrNull(levelColors?[Level.wtf]) ??
-              AnsiColor.fg(199),
+                  const AnsiColor.fg(160),
+          Level.fatal:
+              AnsiColorExt.fromColorOrNull(levelColors?[Level.fatal]) ??
+                  const AnsiColor.fg(199),
         } {
     _startTime ??= DateTime.now();
 
@@ -72,13 +74,14 @@ class PrettyCRPrinter extends LogPrinter {
   static const singleDivider = '┄';
 
   static final Map<Level, String> levelEmojis = {
-    Level.nothing: '',
-    Level.verbose: '',
+    Level.all: '',
+    Level.off: '',
+    Level.trace: '',
     Level.debug: '🐛 ',
     Level.info: '💡 ',
     Level.warning: '⚠️ ',
     Level.error: '⛔ ',
-    Level.wtf: '👾 ',
+    Level.fatal: '👾 ',
   };
 
   static final stackTraceRegex = RegExp(r'#[0-9]+[\s]+(.+) \(([^\s]+)\)');
@@ -101,7 +104,8 @@ class PrettyCRPrinter extends LogPrinter {
 
   @override
   List<String> log(LogEvent event) {
-    final messageStr = stringifyMessage(event.message);
+    final logWrapper = event.message as LogMessageWrapper;
+    final messageStr = stringifyMessage(logWrapper.message);
 
     String? stackTraceStr;
     if (event.stackTrace == null) {
@@ -120,7 +124,7 @@ class PrettyCRPrinter extends LogPrinter {
     }
     _addToLogWidget(
       event.level,
-      event.message,
+      logWrapper,
       stackTraceStr,
     );
 
@@ -171,9 +175,10 @@ class PrettyCRPrinter extends LogPrinter {
     final min = _twoDigits(now.minute);
     final sec = _twoDigits(now.second);
     final ms = _threeDigits(now.millisecond);
+    final startTime = _startTime;
     String? timeSinceStart;
-    if (_startTime != null) {
-      timeSinceStart = now.difference(_startTime!).toString();
+    if (startTime != null) {
+      timeSinceStart = now.difference(startTime).toString();
     }
 
     return '$h:$min:$sec.$ms (+$timeSinceStart)';
@@ -190,48 +195,45 @@ class PrettyCRPrinter extends LogPrinter {
   }
 
   AnsiColor _getLevelColor(Level level) {
-    return colors ? levelColors[level] ?? AnsiColor.none() : AnsiColor.none();
+    return colors
+        ? levelColors[level] ?? const AnsiColor.none()
+        : const AnsiColor.none();
   }
 
   AnsiColor _getErrorColor(Level level) {
     return colors
-        ? level == Level.wtf
-            ? levelColors[Level.wtf] ?? AnsiColor.none()
-            : levelColors[Level.error] ?? AnsiColor.none()
-        : AnsiColor.none();
+        ? level == Level.fatal
+            ? levelColors[Level.fatal] ?? const AnsiColor.none()
+            : levelColors[Level.error] ?? const AnsiColor.none()
+        : const AnsiColor.none();
   }
 
   // ignore: Long-Parameter-List
   void _addToLogWidget(
     Level level,
-    message,
+    LogMessageWrapper logWrapper,
     String? stacktrace,
   ) {
     final logModel = LogBean(
-      message: message ?? '',
+      message: logWrapper.message ?? '',
       time: DateTime.now(),
       stackTrace: stacktrace ?? '',
+      type: LogType.getTypeFromLevel(level),
+      showToast: logWrapper.showToast,
     );
-    switch (level) {
-      case Level.verbose:
-      case Level.debug:
-        logModel.color = CRLoggerColors.orange;
-        logModel.type = LogType.debug;
+    switch (logModel.type) {
+      case LogType.http:
+        break;
+      case LogType.debug:
         LogManager.instance.addDebug(logModel);
         break;
-      case Level.info:
-      case Level.warning:
-        logModel.color = CRLoggerColors.blueAccent;
-        logModel.type = LogType.info;
+      case LogType.info:
         LogManager.instance.addInfo(logModel);
         break;
-      case Level.error:
-      case Level.wtf:
-        logModel.color = CRLoggerColors.red;
-        logModel.type = LogType.error;
+      case LogType.error:
         LogManager.instance.addError(logModel);
         break;
-      case Level.nothing:
+      default:
         break;
     }
   }
@@ -249,8 +251,9 @@ class PrettyCRPrinter extends LogPrinter {
     String? stacktrace,
   ) {
     final buffer = <String>[];
-    final color =
-        kIsWeb || Platform.isAndroid ? _getLevelColor(level) : AnsiColor.none();
+    final color = kIsWeb || Platform.isAndroid
+        ? _getLevelColor(level)
+        : const AnsiColor.none();
 
     if (!_printLogsCompactly) {
       buffer.add(color(_topBorder));
@@ -258,7 +261,7 @@ class PrettyCRPrinter extends LogPrinter {
       if (error != null) {
         final errorColor = kIsWeb || Platform.isAndroid
             ? _getErrorColor(level)
-            : AnsiColor.none();
+            : const AnsiColor.none();
         for (final line in error.split('\n')) {
           buffer.add(
             color('$verticalLine ') +

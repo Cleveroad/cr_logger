@@ -17,6 +17,7 @@ import 'package:cr_logger/src/res/theme.dart';
 import 'package:cr_logger/src/utils/console_log_output.dart';
 import 'package:cr_logger/src/utils/parsers/isolate_parser.dart';
 import 'package:cr_logger/src/utils/pretty_cr_printer.dart';
+import 'package:cr_logger/src/utils/show_log_snack_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,7 +28,7 @@ typedef BuildTypeCallback = String Function();
 typedef EndpointCallback = String Function();
 typedef LogoutFromAppCallback = Function();
 
-class CRLoggerInitializer {
+final class CRLoggerInitializer {
   CRLoggerInitializer._();
 
   static const _channel = EventChannel(
@@ -80,8 +81,12 @@ class CRLoggerInitializer {
   /// Hides all headers with keys from list
   List<String> hiddenHeaders = [];
 
+  /// To show logs with toast
+  VoidCallback? _onOpenLogger;
+
   OverlayEntry? _buttonEntry;
   OverlayEntry? _loggerEntry;
+  ScaffoldMessengerState? _scaffoldMessengerState;
 
   /// Allows you to listen to local logs and, for example,
   /// send them to a third-party logging service
@@ -153,7 +158,7 @@ class CRLoggerInitializer {
     this.hiddenFields = hiddenFields ?? [];
     this.hiddenHeaders = hiddenHeaders ?? [];
 
-    log = logger ??
+    log.log = logger ??
         Logger(
           printer: PrettyCRPrinter(
             methodCount: 1,
@@ -168,7 +173,7 @@ class CRLoggerInitializer {
           filter: useCrLoggerInReleaseBuild
               ? ProductionFilter()
               : DevelopmentFilter(),
-          level: Level.verbose,
+          level: Level.trace,
         );
 
     _rootBackButtonDispatcher.addCallback(_dispatchBackButton);
@@ -242,6 +247,12 @@ class CRLoggerInitializer {
     double left = 100,
     double top = 4,
   }) {
+    LogManager.instance.onLogAdded = _showLogToast;
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _scaffoldMessengerState ??= ScaffoldMessenger.of(context),
+    );
+
     dismissDebugButton();
     if (!isDelay) {
       _showMenu(
@@ -344,11 +355,17 @@ class CRLoggerInitializer {
             ),
       ),
     );
+    final buttonEntry = _buttonEntry;
 
     /// Show hover menu
-    if (_buttonEntry != null) {
-      //ignore:invalid_null_aware_operator
-      Overlay.of(context)?.insert(_buttonEntry!);
+    if (buttonEntry != null) {
+      Overlay.of(context).insert(buttonEntry);
+
+      /// Saving the logger opening method with the correct context
+      _onOpenLogger = () {
+        _onLoggerOpen(context);
+        CRLoggerHelper.instance.showLogger();
+      };
     }
   }
 
@@ -397,15 +414,13 @@ class CRLoggerInitializer {
         ),
       );
       _loggerEntry = newLoggerEntry;
-      //ignore:invalid_null_aware_operator
-      Overlay.of(context)?.insert(newLoggerEntry);
+      Overlay.of(context).insert(newLoggerEntry);
 
       /// The button should be above logger
       final buttonEntry = _buttonEntry;
       if (buttonEntry != null) {
         buttonEntry.remove();
-        //ignore:invalid_null_aware_operator
-        Overlay.of(context)?.insert(buttonEntry);
+        Overlay.of(context).insert(buttonEntry);
       }
     }
   }
@@ -413,8 +428,8 @@ class CRLoggerInitializer {
   Future<bool> _dispatchBackButton() async {
     if (CRLoggerHelper.instance.isLoggerShowing) {
       if (_loggerNavigationKey.currentState != null) {
-        final isPopped = await _loggerNavigationKey.currentState!.maybePop();
-        if (!isPopped) {
+        final isPopped = await _loggerNavigationKey.currentState?.maybePop();
+        if (isPopped == false) {
           _onLoggerClose();
         }
       }
@@ -427,7 +442,23 @@ class CRLoggerInitializer {
 
   /// Init DB and load logs from it
   Future<void> _initDB() => SqfliteProvider.instance.init();
+
+  /// Displays a new log if "showToast" is set in it
+  void _showLogToast(LogBean log) {
+    final scaffoldMessengerState = _scaffoldMessengerState;
+
+    if (scaffoldMessengerState != null) {
+      showLogSnackBar(
+        scaffoldMessengerState,
+        () {
+          LogManager.instance.logToastNotifier.value = log;
+          _onOpenLogger?.call();
+        },
+        log.message.toString(),
+      );
+    }
+  }
 }
 
 /// Run LoggerInitializer.instance.init() before using this
-late Logger log;
+CRLoggerWrapper log = CRLoggerWrapper.instance;

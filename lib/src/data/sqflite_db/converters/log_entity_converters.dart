@@ -2,7 +2,7 @@ import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/data/sqflite_db/entities/log_entity.dart';
 import 'package:cr_logger/src/utils/parsers/isolate_parser.dart';
 
-class LogEntityConverter {
+final class LogEntityConverter {
   final _parser = IsolateParser();
 
   Future<LogBean> inToOut(LogEntity inObject) async {
@@ -14,7 +14,6 @@ class LogEntityConverter {
       time: inObject.time?.toLocal() ?? DateTime.now(),
       stackTrace: inObject.stackTrace,
       data: data != null ? await _parser.decode(data) : null,
-      color: inObject.type.getColor(),
       key: inObject.key,
       type: inObject.type,
     );

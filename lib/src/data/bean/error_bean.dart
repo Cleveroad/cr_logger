@@ -1,6 +1,6 @@
 import 'package:cr_logger/src/data/bean/response_bean.dart';
 
-class ErrorBean {
+final class ErrorBean {
   ErrorBean({
     this.id,
     this.errorMessage,

@@ -1,6 +1,7 @@
 library cr_logger;
 
 export 'src/cr_logger.dart';
+export 'src/cr_logger_wrapper.dart';
 export 'src/data/bean/error_bean.dart';
 export 'src/data/bean/http_bean.dart';
 export 'src/data/bean/log_bean.dart';

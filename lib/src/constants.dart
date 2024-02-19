@@ -19,4 +19,7 @@ const kDefaultMaxLogsCount = 50;
 
 const kDefaultOfUrlCount = 4;
 
+/// Used to stop updating log list (if logs come too often)
 const kIndentForLoadingLogs = 100;
+
+final patternOfParamsRegex = RegExp(r'\{\{|\}\}');

@@ -30,7 +30,7 @@ class CRBackButton extends StatelessWidget {
 
   void _onBackPressed(BuildContext context) {
     if (onPressed != null) {
-      onPressed!();
+      onPressed?.call();
     } else {
       Navigator.maybePop(context);
     }

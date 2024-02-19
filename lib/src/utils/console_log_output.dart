@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:worker_manager/worker_manager.dart';
 
-class ConsoleLogOutput extends LogOutput {
+final class ConsoleLogOutput extends LogOutput {
   ConsoleLogOutput() {
     if (kIsWeb) {
       _createWorker();
@@ -29,7 +29,7 @@ class ConsoleLogOutput extends LogOutput {
           event.lines.forEach(print);
         }
       } else {
-        await Executor().execute(fun1: isolatePrintLog, arg1: event.lines);
+        await workerManager.execute(() async => isolatePrintLog(event.lines));
       }
     });
   }
@@ -44,7 +44,7 @@ class ConsoleLogOutput extends LogOutput {
   }
 }
 
-Object isolatePrintLog(dynamic data, _) {
+Object isolatePrintLog(dynamic data) {
   if (data is List) {
     // ignore: avoid_print
     data.forEach(print);

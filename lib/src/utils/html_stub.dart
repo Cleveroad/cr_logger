@@ -1,4 +1,4 @@
-class ScriptElement {
+final class ScriptElement {
   late String text;
   late String id;
   late bool defer;
@@ -9,7 +9,7 @@ class ScriptElement {
 
 late DocStub document;
 
-class DocStub {
+final class DocStub {
   BodyStub? body;
 }
 
@@ -19,7 +19,7 @@ class BodyStub {
   void append(_) {}
 }
 
-class JS {
+final class JS {
   const JS([this.name]);
 
   final String? name;

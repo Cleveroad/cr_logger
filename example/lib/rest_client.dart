@@ -36,8 +36,8 @@ class RestClient {
         'PROXY localhost:$port; DIRECT';
     final adapter = dio.httpClientAdapter;
     if (adapter is IOHttpClientAdapter) {
-      adapter.onHttpClientCreate = (HttpClient client) {
-        client
+      adapter.createHttpClient = () {
+        final client = HttpClient(context: SecurityContext())
           ..findProxy = (uri) {
             return proxyStr;
           }
@@ -48,7 +48,7 @@ class RestClient {
           ) =>
               true;
 
-        return null;
+        return client;
       };
     }
   }

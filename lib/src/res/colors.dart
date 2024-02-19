@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CRLoggerColors {
+final class CRLoggerColors {
   CRLoggerColors._();
 
   static const primaryColor = Color(0xFF151923);
@@ -18,6 +18,7 @@ class CRLoggerColors {
   static const linkBlue = Color(0xFFABCAFF);
   static const linkColor = Color(0xFFBB5BC3);
   static const green = Color(0xFF199B4D);
+  static const greenAccent = Color(0xFF1EB35D);
   static const progressBackground = Color(0xFFB8C7CB);
   static const backgroundGrey = Color(0xFFF3F5F6);
 

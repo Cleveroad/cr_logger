@@ -84,11 +84,18 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           spacing: 2,
                           children: [
-                            Icon(
-                              CRLoggerHelper.instance.isLoggerShowing
-                                  ? Icons.visibility_off
-                                  : Icons.bug_report,
-                              color: Colors.white,
+                            ValueListenableBuilder(
+                              valueListenable:
+                                  CRLoggerHelper.instance.loggerShowingNotifier,
+                              //ignore:prefer-trailing-comma
+                              builder: (context, loggerShowing, child) {
+                                return Icon(
+                                  loggerShowing
+                                      ? Icons.visibility_off
+                                      : Icons.bug_report,
+                                  color: Colors.white,
+                                );
+                              },
                             ),
                             const BuildNumber(),
                           ],
@@ -121,7 +128,7 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
       setState(() {
         isShow = false;
       });
-      popupButtonKey.currentState!.showButtonMenu();
+      popupButtonKey.currentState?.showButtonMenu();
     }
   }
 

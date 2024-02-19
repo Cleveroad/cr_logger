@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cr_logger/cr_logger.dart';
 
-class CRHttpClientAdapter {
+final class CRHttpClientAdapter {
   HttpLogManager logManager = HttpLogManager.instance;
 
   /// Handles httpClientRequest and creates http alice call from it

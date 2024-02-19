@@ -16,7 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// This manager was made for export and import logs.
-class TransferManager {
+final class TransferManager {
   final _httpMng = HttpLogManager.instance;
   final _logMng = LogManager.instance;
 

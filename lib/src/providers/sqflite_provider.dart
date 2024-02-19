@@ -1,7 +1,7 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/data/sqflite_db/log_module.dart';
 
-class SqfliteProvider {
+final class SqfliteProvider {
   SqfliteProvider._();
 
   static final instance = SqfliteProvider._();

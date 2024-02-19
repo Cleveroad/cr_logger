@@ -3,7 +3,7 @@ import 'package:cr_logger/src/data/bean/request_bean.dart' show RequestBean;
 import 'package:cr_logger/src/data/bean/response_bean.dart' show ResponseBean;
 import 'package:cr_logger/src/models/request_status.dart';
 
-class HttpBean {
+final class HttpBean {
   HttpBean({
     this.key,
     this.request,

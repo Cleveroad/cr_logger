@@ -5,8 +5,8 @@ import 'package:chopper/chopper.dart';
 import 'package:cr_logger/cr_logger.dart';
 import 'package:http/http.dart' as http;
 
-class ChopperLogInterceptor extends ResponseInterceptor
-    with RequestInterceptor {
+final class ChopperLogInterceptor
+    implements ResponseInterceptor, RequestInterceptor {
   final logManager = HttpLogManager.instance;
 
   @override
@@ -33,8 +33,8 @@ class ChopperLogInterceptor extends ResponseInterceptor
     } catch (error, stackTrace) {
       log.e(
         'Chopper interceptor error',
-        error,
-        stackTrace,
+        error: error,
+        stackTrace: stackTrace,
       );
     }
 

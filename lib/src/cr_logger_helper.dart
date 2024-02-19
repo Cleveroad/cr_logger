@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 
-class CRLoggerHelper {
+final class CRLoggerHelper {
   CRLoggerHelper._();
 
   static const _proxySharedPrefKey = 'cr_logger_charles_proxy';

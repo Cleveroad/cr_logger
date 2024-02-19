@@ -4,7 +4,7 @@ import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/utils/hide_values_in_map.dart';
 import 'package:dio/dio.dart';
 
-class RequestBean {
+final class RequestBean {
   RequestBean({
     this.id,
     this.connectTimeout,

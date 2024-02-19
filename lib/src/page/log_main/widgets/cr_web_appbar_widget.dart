@@ -21,10 +21,10 @@ class CRWebAppBar extends StatelessWidget {
         children: [
           PopupMenu(
             popupKey: popupKey,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
+            child: const Padding(
+              padding: EdgeInsets.all(8),
               child: Row(
-                children: const [
+                children: [
                   Icon(Icons.view_headline),
                   SizedBox(width: 10),
                   Padding(
@@ -40,10 +40,10 @@ class CRWebAppBar extends StatelessWidget {
           ),
           InkWell(
             onTap: onLoggerClose,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
+            child: const Padding(
+              padding: EdgeInsets.all(8),
               child: Row(
-                children: const [
+                children: [
                   Text(
                     'Close',
                     style: CRStyle.subtitle1BlackSemiBold16,

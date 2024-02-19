@@ -27,11 +27,12 @@ Future<void> main() async {
     levelColors: {
       Level.debug: Colors.lightGreenAccent,
       Level.warning: Colors.orange,
-      Level.verbose: Colors.blueAccent,
+      Level.trace: Colors.blueAccent,
       Level.info: Colors.blueAccent,
       Level.error: Colors.red,
-      Level.wtf: Colors.red.shade900,
-      Level.nothing: Colors.grey.shade300,
+      Level.fatal: Colors.red.shade900,
+      Level.off: Colors.grey.shade300,
+      Level.all: Colors.grey.shade300,
     },
     hiddenFields: [
       'Test',
@@ -97,6 +98,8 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // Third! Initialize debug button
     CRLoggerInitializer.instance.showDebugButton(
       context,
@@ -234,8 +237,6 @@ class _MainPageState extends State<MainPage> {
     /// Actions
     CRLoggerInitializer.instance.addActionButton('Log Hi', () => log.i('Hi'));
     CRLoggerInitializer.instance.addActionButton('Log By', () => log.i('By'));
-
-    super.initState();
   }
 
   @override
@@ -390,7 +391,13 @@ class _MainPageState extends State<MainPage> {
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            const Expanded(child: SizedBox()),
+                            Expanded(
+                              child: ExampleBtn(
+                                text: 'Log debug with params',
+                                assetName: Assets.assetsIcDebug,
+                                onTap: _makeLogDebugWithParam,
+                              ),
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: ExampleBtn(
@@ -399,6 +406,20 @@ class _MainPageState extends State<MainPage> {
                                 onTap: kIsWeb ? null : _makeNativeLogJson,
                               ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ExampleBtn(
+                                text: 'Log debug with toast',
+                                assetName: Assets.assetsIcDebug,
+                                onTap: _makeLogDebugWithToast,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(child: SizedBox()),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -587,7 +608,23 @@ class _MainPageState extends State<MainPage> {
   void _makeLogDebug() {
     log
       ..d('Debug message at ${DateTime.now().toIso8601String()}')
-      ..v('Verbose message at ${DateTime.now().toIso8601String()}');
+      ..t('Trace message at ${DateTime.now().toIso8601String()}');
+  }
+
+  void _makeLogDebugWithToast() {
+    log.d(
+      'Debug message at ${DateTime.now().toIso8601String()}',
+      showToast: true,
+    );
+  }
+
+  void _makeLogDebugWithParam() {
+    const token =
+        'e9U_NJKzXUtNkom7BTlOSn:APA91bF4vFgc8nsFE2SKt7XLDTdpvPPf6xlGicRXR9sxyu6Wfd48Xm00oh-r3TqGaKyEUixlfE7HYfE62V83skQYwzcvxAi34Lp7a9IxCuVBB9Ovxj-xZm5T_RFbtn_7di7v_dTU0fLD';
+
+    log
+      ..d('Debug message with param: {{$token}}')
+      ..t('Trace message with param: {{$token}}');
   }
 
   void _makeLogJson() {
@@ -622,9 +659,9 @@ class _MainPageState extends State<MainPage> {
     log
       ..e(
         'Error message at ${DateTime.now().toIso8601String()}',
-        const HttpException('message'),
+        error: const HttpException('message'),
       )
-      ..wtf('Wtf message at ${DateTime.now().toIso8601String()}');
+      ..f('Fatal message at ${DateTime.now().toIso8601String()}');
   }
 
   void _makeLogDebugNative() {

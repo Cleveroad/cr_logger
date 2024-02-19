@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 /// A web implementation of the CrDownloader plugin.
-class CrLoggerWeb {
+final class CrLoggerWeb {
   static void registerWith(Registrar registrar) {
     final channel = MethodChannel(
       'cr_logger',

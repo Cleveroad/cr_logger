@@ -1,20 +1,20 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/base/base_page_with_progress.dart';
-import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/page/http_logs/http_log_details_page.dart';
 import 'package:cr_logger/src/page/widgets/http_item.dart';
 import 'package:cr_logger/src/res/styles.dart';
+import 'package:cr_logger/src/utils/show_remove_log_bottom_sheet.dart';
+import 'package:cr_logger/src/utils/show_remove_log_snack_bar.dart';
 import 'package:flutter/material.dart';
 
 class HttpLogsPage extends StatefulWidget {
   const HttpLogsPage({
     this.onHttpBeanSelected,
-    this.scrollController,
     super.key,
   });
 
   final Function(HttpBean httpBean)? onHttpBeanSelected;
-  final ScrollController? scrollController;
 
   @override
   State<HttpLogsPage> createState() => HttpLogsPageState();
@@ -25,18 +25,16 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
 
   var _currentLogs = HttpLogManager.instance.logValues();
 
-  HttpBean? _selectedHttpBean;
-
   @override
   void initState() {
     super.initState();
-    HttpLogManager.instance.onUpdate = getCurrentLogs;
-    HttpLogManager.instance.onUpdate?.call();
+    HttpLogManager.instance.updateHttpPage = getCurrentLogs;
+    getCurrentLogs();
   }
 
   @override
   void dispose() {
-    HttpLogManager.instance.onUpdate = null;
+    HttpLogManager.instance.updateHttpPage = null;
     _pageController.dispose();
 
     super.dispose();
@@ -44,19 +42,16 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
 
   @override
   Widget bodyWidget(BuildContext context) {
-    if (_currentLogs.isEmpty) {
-      _selectedHttpBean = null;
-    }
-
     return _currentLogs.isEmpty
-        ? const Center(
+        ? Center(
             child: Text(
-              'No request log',
+              currentLogsMode == LogsMode.fromCurrentSession
+                  ? 'No request logs'
+                  : 'No request logs in previous sessions',
               style: CRStyle.bodyGreyMedium14,
             ),
           )
         : ListView.separated(
-            controller: widget.scrollController,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.only(
               bottom: 24,
@@ -70,6 +65,7 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
               return HttpItem(
                 httpBean: item,
                 onSelected: _onHttpBeanSelected,
+                onRemove: _onRemoveLogPressed,
               );
             },
             separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -93,10 +89,10 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
   }
 
   Future<void> _onHttpBeanSelected(HttpBean httpBean) async {
-    _selectedHttpBean = httpBean;
+    final onHttpBeanSelected = widget.onHttpBeanSelected;
 
-    if (widget.onHttpBeanSelected != null) {
-      widget.onHttpBeanSelected?.call(_selectedHttpBean!);
+    if (onHttpBeanSelected != null) {
+      onHttpBeanSelected(httpBean);
     } else {
       await Navigator.push(
         context,
@@ -105,6 +101,51 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
         ),
       );
     }
+  }
+
+  Future<void> _onRemoveLogPressed(HttpBean httpBean) async {
+    final okConfirmation = await showRemoveLogBottomSheet(
+      context,
+      message: httpBean.request?.url ?? '',
+    );
+    if (okConfirmation) {
+      _removeLog(httpBean);
+      showRemoveLogSnackBar(context, () => _insertLog(httpBean));
+    }
+  }
+
+  void _removeLog(HttpBean httpBean) {
+    HttpLogManager.instance.removeLog(httpBean);
+    _currentLogs.removeWhere(
+      (element) =>
+          element.request?.id == httpBean.request?.id &&
+          element.request?.id != null,
+    );
+  }
+
+  Future<void> _insertLog(HttpBean httpBean) async {
+    final logMng = HttpLogManager.instance;
+    await logMng.saveHttpLog(httpBean);
+
+    _currentLogs.insert(0, httpBean);
+
+    switch (currentLogsMode) {
+      case LogsMode.fromCurrentSession:
+        final requestID = httpBean.request?.id;
+        if (requestID != null) {
+          logMng.keys.add(requestID.toString());
+          logMng.logMap[requestID.toString()] = httpBean;
+          logMng.logMap = logMng.sortLogsMapByTime(logMng.logMap);
+        }
+        break;
+      case LogsMode.fromDB:
+        logMng.logsFromDB.add(httpBean);
+        logMng.logsFromDB =
+            HttpLogManager.instance.sortLogsByTime(logMng.logsFromDB);
+        break;
+    }
+
+    _update();
   }
 
   void _update() {
