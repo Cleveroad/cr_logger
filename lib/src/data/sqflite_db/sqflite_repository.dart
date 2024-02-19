@@ -5,7 +5,7 @@ import 'package:cr_logger/src/data/sqflite_db/entities/log_entity.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class SqfliteRepository {
+final class SqfliteRepository {
   SqfliteRepository._();
 
   /// HTTP Table

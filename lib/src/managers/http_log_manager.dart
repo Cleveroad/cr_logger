@@ -2,12 +2,13 @@ import 'dart:collection';
 
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/constants.dart';
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/providers/sqflite_provider.dart';
 import 'package:cr_logger/src/utils/pretty_cr_logger.dart';
 
-class HttpLogManager {
+final class HttpLogManager {
   HttpLogManager._();
 
   static HttpLogManager instance = HttpLogManager._();
@@ -24,7 +25,8 @@ class HttpLogManager {
 
   List<String> keys = <String>[];
 
-  Function? onUpdate;
+  Function? updateHttpPage;
+  Function? updateSearchHttpPage;
 
   void onError(ErrorBean err) {
     if (_printLogs) {
@@ -46,7 +48,8 @@ class HttpLogManager {
         return value;
       });
 
-      onUpdate?.call();
+      updateSearchHttpPage?.call();
+      updateHttpPage?.call();
     }
   }
 
@@ -70,7 +73,8 @@ class HttpLogManager {
         saveHttpLog(value);
       }
 
-      onUpdate?.call();
+      updateSearchHttpPage?.call();
+      updateHttpPage?.call();
     }
   }
 
@@ -95,22 +99,27 @@ class HttpLogManager {
 
         return value;
       });
-      onUpdate?.call();
+
+      updateSearchHttpPage?.call();
+      updateHttpPage?.call();
     }
   }
 
   Future<void> cleanAllLogs({bool cleanDB = false}) async {
     await _deleteAllHttpLogs(clearDB: cleanDB);
-    onUpdate?.call();
+    updateSearchHttpPage?.call();
+    updateHttpPage?.call();
   }
 
   Future<void> cleanHTTP() async {
     await _deleteHttpLogs();
-    onUpdate?.call();
+    updateSearchHttpPage?.call();
+    updateHttpPage?.call();
   }
 
   void update() {
-    onUpdate?.call();
+    updateSearchHttpPage?.call();
+    updateHttpPage?.call();
   }
 
   Future<void> loadLogsFromDB({bool getWithCurrentLogs = false}) async {
@@ -122,7 +131,7 @@ class HttpLogManager {
           logsFromDB.removeWhere((element) => element.key.toString() == key);
         }
       }
-      _sortLogsByTime();
+      logsFromDB = sortLogsByTime(logsFromDB);
     }
   }
 
@@ -163,7 +172,62 @@ class HttpLogManager {
     }
   }
 
+  Future<void> removeLog(HttpBean httpLog) async {
+    logMap.removeWhere((key, element) =>
+        element.request?.id == httpLog.request?.id &&
+        element.request?.id != null);
+
+    if (_useDB) {
+      logsFromDB.removeWhere((element) =>
+          element.request?.id == httpLog.request?.id &&
+          element.request?.id != null);
+
+      final logs = await _provider.getAllSavedHttpLogs();
+      final savedLogs = logs
+          .where((element) =>
+              element.request?.id == httpLog.request?.id &&
+              element.request?.id != null)
+          .toList();
+      await _provider.deleteHttpLogs(savedLogs);
+    }
+
+    updateSearchHttpPage?.call();
+    updateHttpPage?.call();
+  }
+
   Future<void> deleteAllHttpLogs() => _provider.deleteAllHttpLogs();
+
+  List<HttpBean> sortLogsByTime(List<HttpBean> logs) {
+    logs.sort((a, b) {
+      final aDate = a.request?.requestTime;
+      final bDate = b.request?.requestTime;
+
+      if (aDate != null && bDate != null) {
+        return aDate.compareTo(bDate);
+      }
+
+      return 0;
+    });
+
+    return logs;
+  }
+
+  LinkedHashMap<String, HttpBean> sortLogsMapByTime(
+    LinkedHashMap<String, HttpBean> logs,
+  ) {
+    return LinkedHashMap.fromEntries(
+      logs.entries.toList()..sort((a, b) {
+        final aDate = a.value.request?.requestTime;
+        final bDate = b.value.request?.requestTime;
+
+        if (aDate != null && bDate != null) {
+          return aDate.compareTo(bDate);
+        }
+
+        return 0;
+      }),
+    );
+  }
 
   /// If a Stream (_FileStream, ByteStream etc.) is used as the body of the
   /// request, this will cause a database conversion error and the body will not
@@ -186,19 +250,6 @@ class HttpLogManager {
 
       request.body = stringBuffer.toString();
     }
-  }
-
-  void _sortLogsByTime() {
-    logsFromDB.sort((a, b) {
-      final aDate = a.request?.requestTime;
-      final bDate = b.request?.requestTime;
-
-      if (aDate != null && bDate != null) {
-        return aDate.compareTo(bDate);
-      }
-
-      return 0;
-    });
   }
 
   Future<void> _deleteAllHttpLogs({bool clearDB = false}) async {

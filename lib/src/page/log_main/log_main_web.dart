@@ -45,7 +45,6 @@ class MainLogWebPage extends StatefulWidget {
 class _MainLogWebPageState extends State<MainLogWebPage> {
   final _pageController = PageController();
   final _detailsScrollCtr = ScrollController();
-  final _pageScrollCtr = ScrollController();
 
   final _popupKey = GlobalKey<PopupMenuButtonState>();
   final _navKey = GlobalKey<OptionsButtonsState>();
@@ -71,40 +70,41 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
       HttpLogsPage(
         key: _httpLogKey,
         onHttpBeanSelected: _onHttpBeanSelected,
-        scrollController: _pageScrollCtr,
       ),
       LogPage(
         key: _debugLogKey,
         logType: LogType.debug,
         onLogBeanSelected: _onLogBeanSelected,
-        scrollController: _pageScrollCtr,
       ),
       LogPage(
         key: _infoLogKey,
         logType: LogType.info,
         onLogBeanSelected: _onLogBeanSelected,
-        scrollController: _pageScrollCtr,
       ),
       LogPage(
         key: _errorLogKey,
         logType: LogType.error,
         onLogBeanSelected: _onLogBeanSelected,
-        scrollController: _pageScrollCtr,
       ),
     ];
     _pageController.addListener(_onPageChanged);
+
+    LogManager.instance.logToastNotifier.addListener(_openLogDetails);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openLogDetails());
   }
 
   @override
   void dispose() {
     _pageController.removeListener(_onPageChanged);
+    LogManager.instance.logToastNotifier.removeListener(_openLogDetails);
     _detailsScrollCtr.dispose();
-    _pageScrollCtr.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final httpBean = _httpBean;
+
     return Theme(
       data: CRLoggerHelper.instance.theme,
       child: Scaffold(
@@ -189,9 +189,9 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
                         ),
                       ),
                       padding: const EdgeInsets.all(12),
-                      child: _httpBean != null
+                      child: httpBean != null
                           ? HttpLogDetailsPage(
-                              _httpBean!,
+                              httpBean,
                               isWeb: true,
                             )
                           : _logBean != null
@@ -278,5 +278,28 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
   void _onOptionSelected(int index) {
     _currentLogType = LogType.values[index];
     _pageController.jumpToPage(index);
+  }
+
+  /// Opens a tab according to the type of log
+  /// Opens the log details page
+  Future<void> _openLogDetails() async {
+    final log = LogManager.instance.logToastNotifier.value;
+    final logType = log?.type;
+
+    if (logType != null && log != null) {
+      await Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (ctx) => LogLocalDetailPage(
+            logBean: log,
+            logType: logType,
+          ),
+        ),
+        (Route<dynamic> route) => route.settings.name == '/',
+      );
+
+      _pageController.jumpToPage(logType.index);
+      LogManager.instance.logToastNotifier.value = null;
+    }
   }
 }

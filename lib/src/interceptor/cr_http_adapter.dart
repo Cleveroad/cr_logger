@@ -1,7 +1,7 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:http/http.dart' as http;
 
-class CRHttpAdapter {
+final class CRHttpAdapter {
   HttpLogManager logManager = HttpLogManager.instance;
 
   /// Handles http response. It creates both request and response from http call

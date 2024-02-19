@@ -183,6 +183,20 @@ search for logs from the database.
 
 Share logs with your team
 
+#### Create log with parameter
+
+You can create log with parameters. To do this use {{parameter}} pattern to highlight text needed to be displayed as parameter.
+
+Example:
+   ```dart
+     const parameter = 'PARAMETER';
+     log.d('Debug message with param: {{$parameter}}');
+     log.v('Verbose message with param: {{$parameter}}');
+     log.i('Info message with param: {{$parameter}}');
+     log.e('Error message with param: {{$parameter}}');
+   ```
+Now you can copy the value of this parameter by simply clicking on it in the details of the log.
+
 #### Actions and values
 
 Opens a page that contains action buttons and value notifiers.

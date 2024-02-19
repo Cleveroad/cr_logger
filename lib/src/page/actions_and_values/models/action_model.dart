@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 /// Action data model for [ActionsManager]
-class ActionModel {
+final class ActionModel {
   ActionModel({
     required this.text,
     required this.action,

@@ -6,7 +6,7 @@ import 'package:dio/dio.dart';
 typedef ParserError = Map<String, dynamic> Function(Object? data);
 
 /// log Format request time
-class DioLogInterceptor implements Interceptor {
+final class DioLogInterceptor implements Interceptor {
   DioLogInterceptor({this.parserError});
 
   final logManager = HttpLogManager.instance;
@@ -14,11 +14,12 @@ class DioLogInterceptor implements Interceptor {
 
   @override
   void onError(
-    DioError err,
+    DioException err,
     ErrorInterceptorHandler handler,
   ) {
     dynamic json;
     try {
+      final errorParser = parserError;
       if (err.error is Map) {
         json = err.error;
       } else if (err.error is SocketException) {
@@ -29,8 +30,8 @@ class DioLogInterceptor implements Interceptor {
           'OS Error code': exception.osError?.errorCode,
           'No internet': _isNetworkError(exception),
         };
-      } else if (parserError != null) {
-        json = parserError!(err.error);
+      } else if (errorParser != null) {
+        json = errorParser(err.error);
       } else {
         throw Exception(err);
       }

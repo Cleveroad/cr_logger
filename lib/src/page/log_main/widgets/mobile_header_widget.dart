@@ -1,3 +1,4 @@
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/res/styles.dart';
@@ -18,8 +19,8 @@ class MobileHeaderWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: const [
+        const Row(
+          children: [
             SizedBox(width: 16),
             Text(
               'Logs',

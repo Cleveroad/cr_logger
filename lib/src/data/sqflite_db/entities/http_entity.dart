@@ -1,6 +1,6 @@
 import 'package:cr_logger/src/utils/map_ext.dart';
 
-class HttpEntity {
+final class HttpEntity {
   HttpEntity({
     this.key,
     this.request,

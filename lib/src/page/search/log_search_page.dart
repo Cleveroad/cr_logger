@@ -1,4 +1,5 @@
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
 import 'package:cr_logger/src/page/logs/log_local_detail_page.dart';
@@ -6,6 +7,8 @@ import 'package:cr_logger/src/page/widgets/cupertino_search_field.dart';
 import 'package:cr_logger/src/page/widgets/local_log_item.dart';
 import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/utils/pair.dart';
+import 'package:cr_logger/src/utils/show_remove_log_bottom_sheet.dart';
+import 'package:cr_logger/src/utils/show_remove_log_snack_bar.dart';
 import 'package:cr_logger/src/utils/unfocus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,12 +31,12 @@ class _LogSearchPageState extends State<LogSearchPage> {
   @override
   void initState() {
     super.initState();
-    LogManager.instance.onAllUpdate = _search;
+    LogManager.instance.onSearchPageUpdate = _search;
   }
 
   @override
   void dispose() {
-    LogManager.instance.onAllUpdate = null;
+    LogManager.instance.onSearchPageUpdate = null;
     _searchCtrl.dispose();
 
     super.dispose();
@@ -95,6 +98,7 @@ class _LogSearchPageState extends State<LogSearchPage> {
                     onSelected: (bean) =>
                         _onItemTap(bean, _results[index].first),
                     onLongTap: _onItemLongTap,
+                    onRemove: (_) => _onRemoveLogPressed(_results[index]),
                   ),
                 ],
               ),
@@ -147,6 +151,44 @@ class _LogSearchPageState extends State<LogSearchPage> {
     }
   }
 
+  Future<void> _onRemoveLogPressed(Pair<LogType, LogBean> logPair) async {
+    final logBean = logPair.second;
+
+    final okConfirmation = await showRemoveLogBottomSheet(
+      context,
+      message: logBean.message.toString(),
+      textColor: logBean.color,
+    );
+    if (okConfirmation) {
+      _removeLog(logBean);
+      showRemoveLogSnackBar(
+        context,
+        () => _insertLog(logBean, logPair),
+      );
+    }
+  }
+
+  void _removeLog(LogBean logBean) {
+    LogManager.instance.removeLog(logBean);
+    _update();
+  }
+
+  Future<void> _insertLog(
+    LogBean logBean,
+    Pair<LogType, LogBean> logPair,
+  ) async {
+    final logM = LogManager.instance;
+    await logM.addLogToDB(logBean);
+
+    if (_isCurrentLogMode) {
+      logM.addLogToListByType(logPair.first, logBean);
+    } else {
+      logM.addLogToDBListByType(logPair.first, logBean);
+    }
+
+    _update();
+  }
+
   /// Clicking on the log opens the details page
   Future<void> _onItemTap(LogBean bean, LogType type) async {
     await Navigator.push(
@@ -178,8 +220,8 @@ class _LogSearchPageState extends State<LogSearchPage> {
     } catch (error, stackTrace) {
       log.e(
         'Internal logger error',
-        error,
-        stackTrace,
+        error: error,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -191,5 +233,12 @@ class _LogSearchPageState extends State<LogSearchPage> {
       _searchCtrl.clear();
       _results.clear();
     });
+  }
+
+  void _update() {
+    if (mounted) {
+      // ignore: no-empty-block
+      setState(() {});
+    }
   }
 }

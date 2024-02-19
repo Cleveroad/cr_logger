@@ -7,6 +7,7 @@ import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/utils/parsers/url_parser.dart';
 import 'package:cr_logger/src/widget/copy_widget.dart';
+import 'package:cr_logger/src/widget/remove_log_widget.dart';
 import 'package:cr_logger/src/widget/rounded_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +18,14 @@ class HttpItem extends StatelessWidget {
     required this.httpBean,
     required this.onSelected,
     this.useWebLayout = false,
+    this.onRemove,
     super.key,
   });
 
   final HttpBean httpBean;
   final bool useWebLayout;
   final ValueChanged<HttpBean> onSelected;
+  final ValueChanged<HttpBean>? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +43,8 @@ class HttpItem extends StatelessWidget {
     /// [!kIsWeb] because the logs may be imported
     /// and then there is no way to know the date of the logs.
     final time = LogsModeController.instance.isFromCurrentSession && !kIsWeb
-        ? request?.requestTime?.formatTime()
-        : request?.requestTime?.formatTimeWithYear();
+        ? request?.requestTime?.formatTime(context)
+        : request?.requestTime?.formatTimeWithYear(context);
 
     return RoundedCard(
       padding: const EdgeInsets.only(
@@ -115,9 +118,16 @@ class HttpItem extends StatelessWidget {
           const SizedBox(height: 10),
 
           /// Time and duration
-          Text(
-            '$time duration: ${httpBean.response?.duration ?? httpBean.error?.duration ?? 0}ms',
-            style: CRStyle.bodyGreyRegular14,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '$time duration: ${httpBean.response?.duration ?? httpBean.error?.duration ?? 0}ms',
+                  style: CRStyle.bodyGreyRegular14,
+                ),
+              ),
+              RemoveLogWidget(onRemove: () => onRemove?.call(httpBean)),
+            ],
           ),
         ],
       ),
@@ -135,6 +145,7 @@ class HttpItem extends StatelessWidget {
         ),
       ),
     );
+    Clipboard.setData(ClipboardData(text: httpBean.request?.url ?? ''));
 
     if (httpBean.request?.url != null) {
       Clipboard.setData(

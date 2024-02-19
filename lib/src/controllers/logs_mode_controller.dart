@@ -1,15 +1,15 @@
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
 import 'package:flutter/cupertino.dart';
 
-class LogsModeController extends ChangeNotifier {
+final class LogsModeController extends ChangeNotifier {
   LogsModeController._();
 
   static LogsModeController instance = LogsModeController._();
 
-  final ValueNotifier<LogsMode> logMode =
-      ValueNotifier(LogsMode.fromCurrentSession);
-  final ValueNotifier<bool> progressNotifier = ValueNotifier(false);
+  final logMode = ValueNotifier(LogsMode.fromCurrentSession);
+  final progressNotifier = ValueNotifier(false);
 
   bool get isFromCurrentSession => logMode.value == LogsMode.fromCurrentSession;
 
@@ -37,13 +37,4 @@ class LogsModeController extends ChangeNotifier {
         HttpLogManager.instance.loadLogsFromDB(),
         LogManager.instance.loadLogsFromDB(),
       ]);
-}
-
-enum LogsMode {
-  fromCurrentSession('Current logs'),
-  fromDB('DB logs');
-
-  const LogsMode(this.appBarTitle);
-
-  final String appBarTitle;
 }

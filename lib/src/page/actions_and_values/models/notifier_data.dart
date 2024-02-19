@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Model value notifier
-class NotifierData {
+final class NotifierData {
   NotifierData({
     required this.valueNotifier,
     this.widget,

@@ -3,7 +3,7 @@ import 'package:cr_logger/src/data/sqflite_db/converters/http_enitity_converter.
 import 'package:cr_logger/src/data/sqflite_db/converters/log_entity_converters.dart';
 import 'package:cr_logger/src/data/sqflite_db/sqflite_repository.dart';
 
-class LogModule {
+final class LogModule {
   LogModule._();
 
   static LogModule instance = LogModule._();

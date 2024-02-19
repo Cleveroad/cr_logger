@@ -4,8 +4,9 @@ import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/providers/sqflite_provider.dart';
+import 'package:flutter/cupertino.dart';
 
-class LogManager {
+final class LogManager {
   LogManager._();
 
   static final instance = LogManager._();
@@ -14,9 +15,9 @@ class LogManager {
 
   final localLogs = StreamController<LogBean>.broadcast();
 
-  final logDebug = <LogBean>[];
-  final logInfo = <LogBean>[];
-  final logError = <LogBean>[];
+  List<LogBean> logDebug = [];
+  List<LogBean> logInfo = [];
+  List<LogBean> logError = [];
 
   List<LogBean> logDebugDB = [];
   List<LogBean> logInfoDB = [];
@@ -26,11 +27,15 @@ class LogManager {
   final _useDB = CRLoggerHelper.instance.useDB;
   final _httpMng = HttpLogManager.instance;
 
+  ValueNotifier<LogBean?> logToastNotifier = ValueNotifier<LogBean?>(null);
+
   Function? onDebugUpdate;
   Function? onInfoUpdate;
   Function? onErrorUpdate;
+  Function? onSearchPageUpdate;
   Function? onAllUpdate;
   Function? onLogsClear;
+  ValueChanged<LogBean>? onLogAdded;
 
   Future<void> loadLogsFromDB({bool getWithCurrentLogs = false}) =>
       _filterLogByType(getWithCurrentLogs: getWithCurrentLogs);
@@ -63,42 +68,24 @@ class LogManager {
   }
 
   Future<void> addDebug(LogBean log) async {
-    await _add(
-      log,
-      logDebug,
-    );
+    await _add(log, logDebug);
     onDebugUpdate?.call();
     onAllUpdate?.call();
+    onSearchPageUpdate?.call();
   }
 
   Future<void> addInfo(LogBean log) async {
-    await _add(
-      log,
-      logInfo,
-    );
+    await _add(log, logInfo);
     onInfoUpdate?.call();
     onAllUpdate?.call();
+    onSearchPageUpdate?.call();
   }
 
   Future<void> addError(LogBean log) async {
-    await _add(
-      log,
-      logError,
-    );
+    await _add(log, logError);
     onErrorUpdate?.call();
     onAllUpdate?.call();
-  }
-
-  void updateDebug(Function onUpdated) {
-    onUpdated();
-  }
-
-  void updateInfo(Function onUpdated) {
-    onUpdated();
-  }
-
-  void updateError(Function onUpdated) {
-    onUpdated();
+    onSearchPageUpdate?.call();
   }
 
   Future<void> saveLog(LogBean log) => _provider.saveLog(log);
@@ -108,6 +95,83 @@ class LogManager {
     _clearAllDBLogs();
   }
 
+  Future<void> removeLog(LogBean log) async {
+    logDebug.removeWhere((element) => element.id == log.id);
+    logInfo.removeWhere((element) => element.id == log.id);
+    logError.removeWhere((element) => element.id == log.id);
+
+    if (_useDB) {
+      logDebugDB.removeWhere((element) => element.id == log.id);
+      logInfoDB.removeWhere((element) => element.id == log.id);
+      logErrorDB.removeWhere((element) => element.id == log.id);
+      await _deleteLogFromDB(log);
+    }
+
+    onAllUpdate?.call();
+    onSearchPageUpdate?.call();
+  }
+
+  Future<void> addLogToDB(LogBean log) async {
+    if (_useDB) {
+      await saveLog(log);
+    }
+  }
+
+  void addLogToListByType(LogType type, LogBean log) {
+    switch (type) {
+      case LogType.http:
+        break;
+      case LogType.debug:
+        logDebug.insert(0, log);
+        logDebug = sortLogsByTime(logDebug);
+        break;
+      case LogType.info:
+        logInfo.insert(0, log);
+        logInfo = sortLogsByTime(logInfo);
+        break;
+      case LogType.error:
+        logError.insert(0, log);
+        logError = sortLogsByTime(logError);
+        break;
+    }
+
+    onAllUpdate?.call();
+    onSearchPageUpdate?.call();
+  }
+
+  void addLogToDBListByType(LogType type, LogBean log) {
+    switch (type) {
+      case LogType.http:
+        break;
+      case LogType.debug:
+        logDebugDB.insert(0, log);
+        logDebugDB = sortLogsByTime(logDebugDB);
+        break;
+      case LogType.info:
+        logInfoDB.insert(0, log);
+        logInfoDB = sortLogsByTime(logInfoDB);
+        break;
+      case LogType.error:
+        logErrorDB.insert(0, log);
+        logErrorDB = sortLogsByTime(logErrorDB);
+        break;
+    }
+
+    onAllUpdate?.call();
+    onSearchPageUpdate?.call();
+  }
+
+  List<LogBean> sortLogsByTime(List<LogBean> logs) {
+    logs.sort((a, b) => a.time.compareTo(b.time));
+
+    return logs;
+  }
+
+  /// If the number of logs exceeds the limit, a shift happens.
+  /// The first item is deleted and a new one is added to the end of the list.
+  ///
+  /// When displayed, the list is inverted, thus displaying the new logs at
+  /// the beginning
   Future<void> _add(
     LogBean log,
     List<LogBean> logs,
@@ -119,9 +183,20 @@ class LogManager {
     logs.add(log);
     localLogs.add(log);
 
+    /// Display snack bar
+    if (log.showToast) {
+      onLogAdded?.call(log);
+    }
+
     if (_useDB) {
       await saveLog(log);
     }
+  }
+
+  Future<void> _deleteLogFromDB(LogBean log) async {
+    final logs = await _provider.getAllSavedLogs();
+    final savedLogs = logs.where((element) => element.id == log.id).toList();
+    await _provider.deleteLogs(savedLogs);
   }
 
   Future<void> _filterLogByType({bool getWithCurrentLogs = false}) async {
@@ -158,9 +233,9 @@ class LogManager {
         }
       }
 
-      logDebugDB = _sortLogsByTime(logDebugDB);
-      logInfoDB = _sortLogsByTime(logInfoDB);
-      logErrorDB = _sortLogsByTime(logErrorDB);
+      logDebugDB = sortLogsByTime(logDebugDB);
+      logInfoDB = sortLogsByTime(logInfoDB);
+      logErrorDB = sortLogsByTime(logErrorDB);
     }
   }
 
@@ -217,10 +292,4 @@ class LogManager {
 
   Future<void> _deleteSeveralLogs(List<LogBean> logs) =>
       _provider.deleteLogs(logs);
-
-  List<LogBean> _sortLogsByTime(List<LogBean> logs) {
-    logs.sort((a, b) => a.time.compareTo(b.time));
-
-    return logs;
-  }
 }

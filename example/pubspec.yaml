@@ -5,8 +5,8 @@ version: 1.0.0+1
 publish_to: 'none'
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
-  flutter: ">=3.0.0 <4.0.0"
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.16.0"
 
 dependencies:
   flutter:
@@ -15,11 +15,11 @@ dependencies:
   cr_logger:
     path: ../
 
-  dio: 5.0.0
-  chopper: 6.1.0
-  logger: ^1.1.0
-  flutter_dropzone: ^3.0.5
-  share_plus: 6.3.0
+  dio: 5.4.0
+  chopper: 7.0.10
+  logger: 2.0.2+1
+  flutter_dropzone: 3.0.6
+  share_plus: 7.2.1
 
 
 dev_dependencies:

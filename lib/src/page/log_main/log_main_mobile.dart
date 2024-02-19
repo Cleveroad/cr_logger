@@ -1,5 +1,6 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/generated/assets.dart';
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/extensions/do_post_frame.dart';
@@ -7,6 +8,7 @@ import 'package:cr_logger/src/extensions/extensions.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
 import 'package:cr_logger/src/page/http_logs/http_logs_page.dart';
 import 'package:cr_logger/src/page/log_main/widgets/mobile_header_widget.dart';
+import 'package:cr_logger/src/page/logs/log_local_detail_page.dart';
 import 'package:cr_logger/src/page/logs/log_page.dart';
 import 'package:cr_logger/src/page/widgets/popup_menu.dart';
 import 'package:cr_logger/src/res/colors.dart';
@@ -49,7 +51,6 @@ class MainLogMobilePage extends StatefulWidget {
 
 class _MainLogMobilePageState extends State<MainLogMobilePage> {
   final _pageController = PageController();
-  final _logListScrollController = ScrollController();
   final _logsMode = LogsModeController.instance.logMode;
 
   final _popupKey = GlobalKey<PopupMenuButtonState>();
@@ -69,29 +70,20 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
     super.initState();
     tabPages = [
       HttpLogsPage(key: _httpLogKey),
-      LogPage(
-        key: _debugLogKey,
-        logType: LogType.debug,
-        scrollController: _logListScrollController,
-      ),
-      LogPage(
-        key: _infoLogKey,
-        logType: LogType.info,
-        scrollController: _logListScrollController,
-      ),
-      LogPage(
-        key: _errorLogKey,
-        logType: LogType.error,
-        scrollController: _logListScrollController,
-      ),
+      LogPage(key: _debugLogKey, logType: LogType.debug),
+      LogPage(key: _infoLogKey, logType: LogType.info),
+      LogPage(key: _errorLogKey, logType: LogType.error),
     ];
     _pageController.addListener(_onPageChanged);
+    LogManager.instance.logToastNotifier.addListener(_openLogDetails);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openLogDetails());
   }
 
   @override
   void dispose() {
     _pageController.removeListener(_onPageChanged);
-    _logListScrollController.dispose();
+    LogManager.instance.logToastNotifier.removeListener(_openLogDetails);
+
     super.dispose();
   }
 
@@ -204,5 +196,28 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
   void _onOptionSelected(int index) {
     _currentLogType = LogType.values[index];
     _pageController.jumpToPage(index);
+  }
+
+  /// Opens a tab according to the type of log
+  /// Opens the log details page
+  Future<void> _openLogDetails() async {
+    final log = LogManager.instance.logToastNotifier.value;
+    final logType = log?.type;
+
+    if (logType != null && log != null) {
+      await Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (ctx) => LogLocalDetailPage(
+            logBean: log,
+            logType: logType,
+          ),
+        ),
+        (Route<dynamic> route) => route.settings.name == '/',
+      );
+
+      _pageController.jumpToPage(logType.index);
+      LogManager.instance.logToastNotifier.value = null;
+    }
   }
 }

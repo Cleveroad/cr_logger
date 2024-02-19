@@ -1,7 +1,7 @@
 import 'package:cr_logger/src/res/colors.dart';
 import 'package:flutter/material.dart';
 
-class CRStyle {
+final class CRStyle {
   CRStyle._();
 
   static const h1Black = TextStyle(
@@ -96,6 +96,7 @@ class CRStyle {
     fontWeight: FontWeight.w500,
     fontFamily: 'Epilogue',
     package: 'cr_logger',
+    height: 1.4,
   );
 
   static const bodyGreyMedium14 = TextStyle(
@@ -104,6 +105,7 @@ class CRStyle {
     fontWeight: FontWeight.w500,
     fontFamily: 'Epilogue',
     package: 'cr_logger',
+    height: 1.4,
   );
 
   static const subtitle1BlackSemiBold16 = TextStyle(

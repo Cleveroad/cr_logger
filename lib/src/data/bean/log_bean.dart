@@ -3,17 +3,18 @@ import 'package:cr_logger/src/res/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-class LogBean implements Comparable<LogBean> {
+final class LogBean implements Comparable<LogBean> {
   LogBean({
     required this.message,
     required this.time,
     required this.stackTrace,
+    this.showToast = false,
     this.type,
     this.data = const {},
-    this.color = CRLoggerColors.primaryColor,
     this.key,
     String? id,
-  }) : id = id ?? const Uuid().v4();
+  })  : id = id ?? const Uuid().v4(),
+        color = type?.getColor() ?? CRLoggerColors.primaryColor;
 
   final int? key;
   final String id;
@@ -23,6 +24,7 @@ class LogBean implements Comparable<LogBean> {
   final Map<String, dynamic>? data;
   LogType? type;
   Color color;
+  bool showToast;
 
   @override
   int compareTo(LogBean other) {

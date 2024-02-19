@@ -1,5 +1,6 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
@@ -77,7 +78,7 @@ class PopupMenuState extends State<PopupMenu> {
           // ignore: prefer-trailing-comma
           builder: (_, logMode, __) => Text(
             logMode == LogsMode.fromCurrentSession
-                ? 'Show logs from database'
+                ? 'Show logs from database of previous sessions'
                 : 'Show logs from current session',
           ),
         ),

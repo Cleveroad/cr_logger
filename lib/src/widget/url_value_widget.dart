@@ -66,7 +66,7 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      'Request time: ${requestTime.formatTime()}',
+                      'Request time: ${requestTime.formatTime(context)}',
                       style: CRStyle.bodyGreyRegular14,
                     ),
                   ),
@@ -76,7 +76,7 @@ class _UrlValueWidgetState extends State<UrlValueWidget> {
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      'Response time: ${responseTime.formatTime()}',
+                      'Response time: ${responseTime.formatTime(context)}',
                       style: CRStyle.bodyGreyRegular14,
                     ),
                   ),

@@ -1,26 +1,25 @@
+import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/base/base_page_with_progress.dart';
 import 'package:cr_logger/src/constants.dart';
-import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
-import 'package:cr_logger/src/data/bean/log_bean.dart';
-import 'package:cr_logger/src/data/models/log_type.dart';
+import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/extensions/do_post_frame.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
 import 'package:cr_logger/src/page/logs/log_local_detail_page.dart';
 import 'package:cr_logger/src/page/widgets/local_log_item.dart';
 import 'package:cr_logger/src/res/styles.dart';
+import 'package:cr_logger/src/utils/show_remove_log_bottom_sheet.dart';
+import 'package:cr_logger/src/utils/show_remove_log_snack_bar.dart';
 import 'package:flutter/material.dart';
 
 class LogPage extends StatefulWidget {
   const LogPage({
     required this.logType,
     this.onLogBeanSelected,
-    this.scrollController,
     super.key,
   });
 
   final LogType logType;
   final Function(LogBean logBean, LogType logType)? onLogBeanSelected;
-  final ScrollController? scrollController;
 
   @override
   LogPageState createState() => LogPageState();
@@ -28,29 +27,30 @@ class LogPage extends StatefulWidget {
 
 class LogPageState extends BasePageWithProgress<LogPage> {
   List<LogBean> _currentLogs = [];
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    doPostFrame(() {
-      LogManager.instance.onAllUpdate = getCurrentLogs;
-      switch (widget.logType) {
-        case LogType.http:
-          break;
-        case LogType.debug:
-          LogManager.instance.onDebugUpdate = getCurrentLogs;
-          break;
-        case LogType.info:
-          LogManager.instance.onInfoUpdate = getCurrentLogs;
-          break;
-        case LogType.error:
-          LogManager.instance.onErrorUpdate = getCurrentLogs;
-          break;
-      }
+    LogManager.instance.onAllUpdate = getCurrentLogs;
+    switch (widget.logType) {
+      case LogType.http:
+        break;
+      case LogType.debug:
+        LogManager.instance.onDebugUpdate = getCurrentLogs;
+        break;
+      case LogType.info:
+        LogManager.instance.onInfoUpdate = getCurrentLogs;
+        break;
+      case LogType.error:
+        LogManager.instance.onErrorUpdate = getCurrentLogs;
+        break;
+    }
 
-      LogManager.instance.onLogsClear = _clearCurrentLogs;
-      LogManager.instance.onAllUpdate?.call();
-    });
+    LogManager.instance.onLogsClear = _clearCurrentLogs;
+    _scrollController.addListener(getCurrentLogs);
+
+    getCurrentLogs();
   }
 
   @override
@@ -69,50 +69,53 @@ class LogPageState extends BasePageWithProgress<LogPage> {
         LogManager.instance.onErrorUpdate = null;
         break;
     }
+    _scrollController
+      ..removeListener(getCurrentLogs)
+      ..dispose();
     super.dispose();
   }
 
   @override
   Widget bodyWidget(BuildContext context) {
-    return Row(
+    return Stack(
       children: [
-        Expanded(
-          child: Stack(
-            children: [
-              ListView.separated(
-                controller: widget.scrollController,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(
-                  bottom: 24,
-                  left: 16,
-                  right: 16,
-                ),
-                itemCount: _currentLogs.length,
-                itemBuilder: (_, index) {
-                  final item = _currentLogs[index];
-
-                  return LocalLogItem(
-                    key: ValueKey(item.id),
-                    logBean: item,
-                    logType: widget.logType,
-                    onSelected: _onLogBeanSelected,
-                  );
-                },
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-              ),
-              if (_currentLogs.isEmpty)
-                const SizedBox(
-                  height: double.infinity,
-                  child: Center(
-                    child: Text(
-                      'No logs',
-                      style: CRStyle.bodyGreyMedium14,
-                    ),
-                  ),
-                ),
-            ],
+        /// Log list
+        ListView.separated(
+          controller: _scrollController,
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(
+            bottom: 24,
+            left: 16,
+            right: 16,
           ),
+          itemCount: _currentLogs.length,
+          itemBuilder: (_, index) {
+            final item = _currentLogs[index];
+
+            return LocalLogItem(
+              key: ValueKey(item.id),
+              logBean: item,
+              logType: widget.logType,
+              onSelected: _onLogBeanSelected,
+              onRemove: _onRemoveLogPressed,
+            );
+          },
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
         ),
+
+        /// Placeholder
+        if (_currentLogs.isEmpty)
+          SizedBox(
+            height: double.infinity,
+            child: Center(
+              child: Text(
+                currentLogsMode == LogsMode.fromCurrentSession
+                    ? 'No logs'
+                    : 'No logs of previous sessions',
+                style: CRStyle.bodyGreyMedium14,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -146,43 +149,69 @@ class LogPageState extends BasePageWithProgress<LogPage> {
     }
   }
 
+  /// Refresh logs only when the page is scrolling at the start position
   void _loadFromCurrentSession() {
-    if ((widget.scrollController?.hasClients ?? false) &&
-        (widget.scrollController?.position.pixels ?? 0) <
-            kIndentForLoadingLogs) {
-      switch (widget.logType) {
-        case LogType.http:
-          break;
-        case LogType.debug:
-          _currentLogs = LogManager.instance.logDebug.reversed.toList();
-          break;
-        case LogType.info:
-          _currentLogs = LogManager.instance.logInfo.reversed.toList();
-          break;
-        case LogType.error:
-          _currentLogs = LogManager.instance.logError.reversed.toList();
-          break;
+    var logs = <LogBean>[];
+    switch (widget.logType) {
+      case LogType.http:
+        break;
+      case LogType.debug:
+        logs = LogManager.instance.logDebug.reversed.toList();
+        break;
+      case LogType.info:
+        logs = LogManager.instance.logInfo.reversed.toList();
+        break;
+      case LogType.error:
+        logs = LogManager.instance.logError.reversed.toList();
+        break;
+    }
+
+    _updateContent(logs);
+  }
+
+  /// Refresh logs only when the page is scrolling at the start position
+  void _loadFromDB() {
+    var logs = <LogBean>[];
+    switch (widget.logType) {
+      case LogType.http:
+        break;
+      case LogType.debug:
+        logs = LogManager.instance.logDebugDB.reversed.toList();
+        break;
+      case LogType.info:
+        logs = LogManager.instance.logInfoDB.reversed.toList();
+        break;
+      case LogType.error:
+        logs = LogManager.instance.logErrorDB.reversed.toList();
+        break;
+    }
+
+    _updateContent(logs);
+  }
+
+  void _updateContent(List<LogBean> logs) {
+    if (_scrollController.hasClients) {
+      if (_scrollController.offset < kIndentForLoadingLogs) {
+        _currentLogs = logs;
       }
+    } else {
+      /// doPostFrame is used to make the scrollController get listeners
+      doPostFrame(() {
+        _currentLogs = logs;
+        _update();
+      });
     }
   }
 
-  void _loadFromDB() {
-    if ((widget.scrollController?.hasClients ?? false) &&
-        (widget.scrollController?.position.pixels ?? 0) <
-            kIndentForLoadingLogs) {
-      switch (widget.logType) {
-        case LogType.http:
-          break;
-        case LogType.debug:
-          _currentLogs = LogManager.instance.logDebugDB.reversed.toList();
-          break;
-        case LogType.info:
-          _currentLogs = LogManager.instance.logInfoDB.reversed.toList();
-          break;
-        case LogType.error:
-          _currentLogs = LogManager.instance.logErrorDB.reversed.toList();
-          break;
-      }
+  Future<void> _onRemoveLogPressed(LogBean logBean) async {
+    final okConfirmation = await showRemoveLogBottomSheet(
+      context,
+      message: logBean.message.toString(),
+      textColor: logBean.color,
+    );
+    if (okConfirmation) {
+      _removeLog(logBean);
+      showRemoveLogSnackBar(context, () => _insertLog(logBean));
     }
   }
 
@@ -196,5 +225,32 @@ class LogPageState extends BasePageWithProgress<LogPage> {
       // ignore: no-empty-block
       setState(() {});
     }
+  }
+
+  void _removeLog(LogBean logBean) {
+    LogManager.instance.removeLog(logBean);
+    _currentLogs.removeWhere((element) => element.id == logBean.id);
+  }
+
+  Future<void> _insertLog(LogBean logBean) async {
+    final logM = LogManager.instance;
+    await logM.addLogToDB(logBean);
+
+    if (_scrollController.hasClients &&
+        _scrollController.offset > kIndentForLoadingLogs) {
+      _currentLogs.insert(0, logBean);
+      _currentLogs = logM.sortLogsByTime(_currentLogs);
+    } else {
+      switch (currentLogsMode) {
+        case LogsMode.fromCurrentSession:
+          logM.addLogToListByType(widget.logType, logBean);
+          break;
+        case LogsMode.fromDB:
+          logM.addLogToDBListByType(widget.logType, logBean);
+          break;
+      }
+    }
+
+    _update();
   }
 }

@@ -2,7 +2,7 @@ import 'package:cr_logger/src/page/actions_and_values/models/action_model.dart';
 import 'package:flutter/foundation.dart';
 
 /// Manager through which methods are added to the page
-class ActionsManager {
+final class ActionsManager {
   ActionsManager._();
 
   static final List<ActionModel> actions = [];
