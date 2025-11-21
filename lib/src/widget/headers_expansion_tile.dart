@@ -73,7 +73,7 @@ class _HeadersExpansionTileState extends State<HeadersExpansionTile> {
                     width: 8,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
-                      color: Colors.purpleAccent.withOpacity(0.4),
+                      color: Colors.purpleAccent.withValues(alpha: 0.4),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -86,33 +86,33 @@ class _HeadersExpansionTileState extends State<HeadersExpansionTile> {
                   Expanded(
                     flex: 2,
                     child: CRLoggerInitializer.instance.hiddenHeaders
-                            .contains(header)
+                        .contains(header)
                         ? Row(children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: CRLoggerColors.darkMagenta,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              child: Text(
-                                kHidden.toString(),
-                                style: CRStyle.bodyWhiteSemiBold14,
-                                textAlign: TextAlign.left,
-                              ),
-                            ),
-                          ])
+                      Container(
+                        decoration: BoxDecoration(
+                          color: CRLoggerColors.darkMagenta,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          kHidden.toString(),
+                          style: CRStyle.bodyWhiteSemiBold14,
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ])
                         : GestureDetector(
-                            onLongPress: () =>
-                                copyClipboard(context, value.toString()),
-                            child: Text(
-                              value.toString(),
-                              style: CRStyle.bodyBlackRegular14,
-                              textAlign: TextAlign.left,
-                            ),
-                          ),
+                      onLongPress: () =>
+                          copyClipboard(context, value.toString()),
+                      child: Text(
+                        value.toString(),
+                        style: CRStyle.bodyBlackRegular14,
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
                   ),
                 ]);
               },

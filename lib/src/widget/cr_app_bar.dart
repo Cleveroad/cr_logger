@@ -29,7 +29,8 @@ class CRAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
-  Widget build(BuildContext context) => AppBar(
+  Widget build(BuildContext context) =>
+      AppBar(
         centerTitle: centerTitle,
         automaticallyImplyLeading: false,
         leading: CRBackButton(

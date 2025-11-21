@@ -49,6 +49,7 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+
         /// Search field
         SizedBox(
           height: 38,
@@ -66,11 +67,13 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+
                 /// The last 4 paths
                 Wrap(
                   children: _urls
                       .map(
-                        (path) => PathWidget(
+                        (path) =>
+                        PathWidget(
                           //ignore:prefer-extracting-callbacks
                           onSearchUrl: () {
                             _uriPath = path;
@@ -78,15 +81,18 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
                           },
                           path: path,
                         ),
-                      )
+                  )
                       .toList(),
                 ),
                 const SizedBox(height: 12),
                 if (_results.isEmpty)
 
-                  /// Empty State
+                /// Empty State
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.5,
+                    height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.5,
                     child: const Center(
                       child: Text(
                         'No request log',
@@ -96,7 +102,7 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
                   )
                 else
 
-                  /// List of HTTP request
+                /// List of HTTP request
                   ListView.separated(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
@@ -131,10 +137,10 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
 
       final uriPath = _uriPath;
       if (url != null && uriPath != null) {
-        return url.contains(uriPath);
+        return url.path.contains(uriPath);
       } else {
         if (url != null) {
-          final path = Uri.parse(url).path;
+          final path = url.path;
 
           return path.contains(query);
         }
@@ -178,7 +184,7 @@ class _HttpSearchPageState extends State<HttpSearchPage> {
   Future<void> _onRemoveLogPressed(HttpBean httpBean) async {
     final okConfirmation = await showRemoveLogBottomSheet(
       context,
-      message: httpBean.request?.url ?? '',
+      message: httpBean.request?.url.path ?? '',
     );
     if (okConfirmation) {
       _removeLog(httpBean);

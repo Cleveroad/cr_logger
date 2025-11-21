@@ -8,10 +8,10 @@ final class NotifierData {
     this.name,
     this.connectedWidgetId,
   }) : assert(
-          valueNotifier == null && name == null && widget != null ||
-              valueNotifier != null && name != null && widget == null,
-          "if widget is null, then name and valueNotifier can't be null and conversely",
-        );
+  valueNotifier == null && name == null && widget != null ||
+      valueNotifier != null && name != null && widget == null,
+  "if widget is null, then name and valueNotifier can't be null and conversely",
+  );
 
   final String? name;
   final ValueNotifier? valueNotifier;

@@ -9,8 +9,7 @@ import 'package:flutter/material.dart';
 
 ///Network Request Details
 class HttpLogDetailsPage extends StatefulWidget {
-  const HttpLogDetailsPage(
-    this.netOptions, {
+  const HttpLogDetailsPage(this.netOptions, {
     this.isWeb = false,
     super.key,
   });

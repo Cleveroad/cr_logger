@@ -1,0 +1,11 @@
+query GetLaunches($limit: Int!, $offset: Int!) {
+    launches(limit: $limit, offset: $offset) {
+        id,
+        launch_date_local,
+        upcoming,
+        rocket {
+            rocket_name,
+            rocket_type
+        }
+    }
+}

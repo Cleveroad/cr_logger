@@ -10,12 +10,10 @@ class BuildNumber extends StatelessWidget {
       type: MaterialType.transparency,
       child: FutureBuilder(
         future: PackageInfo.fromPlatform(),
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<PackageInfo> snapshot,
-        ) {
+        builder: (BuildContext context,
+            AsyncSnapshot<PackageInfo> snapshot,) {
           final buildNumber =
-              snapshot.hasData ? snapshot.data?.buildNumber : null;
+          snapshot.hasData ? snapshot.data?.buildNumber : null;
 
           return Text(
             buildNumber ?? '',

@@ -4,7 +4,7 @@ import cr_logger
 
 let CHANNEL = "com.cleveroad.cr_logger_example/logs"
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
     
     

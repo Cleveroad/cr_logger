@@ -78,7 +78,7 @@ class _ProxyInputDialogState extends State<ProxyInputDialog> {
         ),
         TextButton(
           onPressed:
-              iPCtrl.text.isEmpty || portCtrl.text.isEmpty ? null : _saveProxy,
+          iPCtrl.text.isEmpty || portCtrl.text.isEmpty ? null : _saveProxy,
           child: const Text('SAVE'),
         ),
       ],

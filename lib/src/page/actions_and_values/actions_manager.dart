@@ -7,11 +7,10 @@ final class ActionsManager {
 
   static final List<ActionModel> actions = [];
 
-  static void addActionButton(
-    String text,
-    VoidCallback action, {
-    String? connectedWidgetId,
-  }) {
+  static void addActionButton(String text,
+      VoidCallback action, {
+        String? connectedWidgetId,
+      }) {
     actions.add(ActionModel(
       text: text,
       action: action,

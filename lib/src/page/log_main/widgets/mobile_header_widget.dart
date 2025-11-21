@@ -44,12 +44,13 @@ class MobileHeaderWidget extends StatelessWidget {
               child: ValueListenableBuilder(
                 valueListenable: LogsModeController.instance.logMode,
                 //ignore: prefer-trailing-comma
-                builder: (_, value, __) => Text(
-                  value == LogsMode.fromCurrentSession
-                      ? 'Clear logs'
-                      : 'Clear logs from DB',
-                  style: CRStyle.bodyRedMedium14,
-                ),
+                builder: (_, value, __) =>
+                    Text(
+                      value == LogsMode.fromCurrentSession
+                          ? 'Clear logs'
+                          : 'Clear logs from DB',
+                      style: CRStyle.bodyRedMedium14,
+                    ),
               ),
             ),
           ],

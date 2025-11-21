@@ -8,10 +8,13 @@ extension DateTimeFormatter on DateTime {
 
   /// The same as [DateFormat('hh:mm:ss.SSS').format(this)]
   String formatTime(BuildContext context) {
-    final userUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
+    final userUse24HourFormat = MediaQuery
+        .of(context)
+        .alwaysUse24HourFormat;
 
     return userUse24HourFormat
-        ? '${hour.leading}:${minute.leading}:${second.leading}.${millisecond.leading3}'
+        ? '${hour.leading}:${minute.leading}:${second.leading}.${millisecond
+        .leading3}'
         : formatted12HourString;
   }
 
@@ -22,9 +25,9 @@ extension DateTimeFormatter on DateTime {
     final buffer = StringBuffer();
     final hours12hFormat = time.hour - time.periodOffset;
     final hoursStr =
-        hours12hFormat < 10 ? '0$hours12hFormat' : hours12hFormat.toString();
+    hours12hFormat < 10 ? '0$hours12hFormat' : hours12hFormat.toString();
     final minutesStr =
-        time.minute < 10 ? '0${time.minute}' : time.minute.toString();
+    time.minute < 10 ? '0${time.minute}' : time.minute.toString();
     final periodStr = time.period.name;
     buffer.writeAll([
       hoursStr,

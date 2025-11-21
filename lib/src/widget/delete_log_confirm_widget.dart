@@ -42,6 +42,7 @@ class DeleteLogConfirmWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+
                   /// Title
                   const Text(
                     'Remove log from list?',
@@ -71,12 +72,13 @@ class DeleteLogConfirmWidget extends StatelessWidget {
             const Divider(color: Colors.grey),
             Row(
               children: [
+
                 /// Close button
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: buttonStyle.copyWith(
-                      backgroundColor: MaterialStateProperty.all(Colors.grey),
+                      backgroundColor: WidgetStateProperty.all(Colors.grey),
                     ),
                     child: const Text(
                       'Cancel',
@@ -92,7 +94,7 @@ class DeleteLogConfirmWidget extends StatelessWidget {
                     onPressed: () =>
                         Navigator.of(context).pop(DeleteLogConfirmation.ok),
                     style: buttonStyle.copyWith(
-                      backgroundColor: MaterialStateProperty.all(Colors.red),
+                      backgroundColor: WidgetStateProperty.all(Colors.red),
                     ),
                     child: const Text(
                       'Yes, remove',

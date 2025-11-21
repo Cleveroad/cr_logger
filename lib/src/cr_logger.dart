@@ -27,6 +27,7 @@ import 'package:logger/logger.dart';
 typedef BuildTypeCallback = String Function();
 typedef EndpointCallback = String Function();
 typedef LogoutFromAppCallback = Function();
+typedef CRLoggerGraphQLLink = Link;
 
 final class CRLoggerInitializer {
   CRLoggerInitializer._();
@@ -84,6 +85,9 @@ final class CRLoggerInitializer {
   /// To show logs with toast
   VoidCallback? _onOpenLogger;
 
+  /// To show logs from GraphQL
+  bool enableGQLFeature = false;
+
   OverlayEntry? _buttonEntry;
   OverlayEntry? _loggerEntry;
   ScaffoldMessengerState? _scaffoldMessengerState;
@@ -131,18 +135,21 @@ final class CRLoggerInitializer {
     int maxDatabaseLogsCount = kDefaultMaxLogsCount,
     bool printLogsCompactly = true,
     Logger? logger,
+    bool enableGQLFeature = false,
   }) async {
     _useDB = useDatabase;
     _maxDBLogsCount = maxDatabaseLogsCount;
     _maxCurrentLogsCount = maxCurrentLogsCount;
     _printLogs = printLogs;
     _useCrLoggerInReleaseBuild = useCrLoggerInReleaseBuild;
+    this.enableGQLFeature = enableGQLFeature;
 
     if (inited) {
       return;
     }
 
     await CRLoggerHelper.instance.init();
+    CRLoggerHelper.instance.showGQLLogs = enableGQLFeature;
 
     if (!kIsWeb) {
       _channel.receiveBroadcastStream().listen(_receiveNativeLogs);
@@ -215,11 +222,10 @@ final class CRLoggerInitializer {
   }
 
   /// Adds an action button to the Actions and values page
-  void addActionButton(
-    String text,
-    VoidCallback action, {
-    String? connectedWidgetId,
-  }) {
+  void addActionButton(String text,
+      VoidCallback action, {
+        String? connectedWidgetId,
+      }) {
     ActionsManager.addActionButton(
       text,
       action,
@@ -240,8 +246,7 @@ final class CRLoggerInitializer {
 
   /// Show global hover debug buttons
   // ignore: Long-Parameter-List
-  void showDebugButton(
-    BuildContext context, {
+  void showDebugButton(BuildContext context, {
     Widget? button,
     bool isDelay = true,
     double left = 100,
@@ -250,7 +255,7 @@ final class CRLoggerInitializer {
     LogManager.instance.onLogAdded = _showLogToast;
 
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _scaffoldMessengerState ??= ScaffoldMessenger.of(context),
+          (_) => _scaffoldMessengerState ??= ScaffoldMessenger.of(context),
     );
 
     dismissDebugButton();
@@ -278,7 +283,13 @@ final class CRLoggerInitializer {
     return DioLogInterceptor(parserError: parserError);
   }
 
-  /// Get Chopper interceptor which should be applied to Chopper instance.
+  ///
+  CRLoggerGraphQLLink getGraphQLLink() {
+    final link = Link('');
+    return link;
+  }
+
+  // Get Chopper interceptor which should be applied to Chopper instance.
   ChopperLogInterceptor getChopperInterceptor() {
     return ChopperLogInterceptor();
   }
@@ -289,11 +300,9 @@ final class CRLoggerInitializer {
   }
 
   /// Handle response of HttpClient from dart:io library
-  void onHttpClientResponse(
-    HttpClientResponse response,
-    HttpClientRequest request,
-    Object? body,
-  ) {
+  void onHttpClientResponse(HttpClientResponse response,
+      HttpClientRequest request,
+      Object? body,) {
     _httpClientAdapter.onResponse(
       response,
       request,
@@ -339,21 +348,21 @@ final class CRLoggerInitializer {
     _buttonEntry = null;
   }
 
-  void _showMenu(
-    BuildContext context, {
+  void _showMenu(BuildContext context, {
     required double left,
     required double top,
     Widget? button,
   }) {
     _buttonEntry = OverlayEntry(
-      builder: (BuildContext context) => SafeArea(
-        child: button ??
-            DraggableButtonWidget(
-              leftPos: left,
-              topPos: top,
-              onLoggerOpen: _onLoggerOpen,
-            ),
-      ),
+      builder: (BuildContext context) =>
+          SafeArea(
+            child: button ??
+                DraggableButtonWidget(
+                  leftPos: left,
+                  topPos: top,
+                  onLoggerOpen: _onLoggerOpen,
+                ),
+          ),
     );
     final buttonEntry = _buttonEntry;
 
@@ -408,10 +417,11 @@ final class CRLoggerInitializer {
     /// Show logger
     if (_loggerEntry == null) {
       final newLoggerEntry = OverlayEntry(
-        builder: (context) => MainLogPage(
-          navigationKey: _loggerNavigationKey,
-          onLoggerClose: _onLoggerClose,
-        ),
+        builder: (context) =>
+            MainLogPage(
+              navigationKey: _loggerNavigationKey,
+              onLoggerClose: _onLoggerClose,
+            ),
       );
       _loggerEntry = newLoggerEntry;
       Overlay.of(context).insert(newLoggerEntry);
@@ -450,7 +460,7 @@ final class CRLoggerInitializer {
     if (scaffoldMessengerState != null) {
       showLogSnackBar(
         scaffoldMessengerState,
-        () {
+            () {
           LogManager.instance.logToastNotifier.value = log;
           _onOpenLogger?.call();
         },

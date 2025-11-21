@@ -5,7 +5,9 @@ import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/extensions/do_post_frame.dart';
 import 'package:cr_logger/src/extensions/extensions.dart';
+import 'package:cr_logger/src/managers/graphql_log_manager.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
+import 'package:cr_logger/src/page/gql_logs/gql_logs_page.dart';
 import 'package:cr_logger/src/page/http_logs/http_logs_page.dart';
 import 'package:cr_logger/src/page/log_main/widgets/mobile_header_widget.dart';
 import 'package:cr_logger/src/page/logs/log_local_detail_page.dart';
@@ -57,6 +59,7 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
   final _navKey = GlobalKey<OptionsButtonsState>();
 
   final _httpLogKey = GlobalKey<HttpLogsPageState>();
+  final _gqlLogKey = GlobalKey<GQLLogsPageState>();
   final _debugLogKey = GlobalKey<LogPageState>();
   final _infoLogKey = GlobalKey<LogPageState>();
   final _errorLogKey = GlobalKey<LogPageState>();
@@ -70,6 +73,7 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
     super.initState();
     tabPages = [
       HttpLogsPage(key: _httpLogKey),
+      if (CRLoggerHelper.instance.showGQLLogs) GQLLogsPage(key: _gqlLogKey),
       LogPage(key: _debugLogKey, logType: LogType.debug),
       LogPage(key: _infoLogKey, logType: LogType.info),
       LogPage(key: _errorLogKey, logType: LogType.error),
@@ -98,10 +102,11 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
             valueListenable: _logsMode,
 
             //ignore: prefer-trailing-comma
-            builder: (_, __, ___) => Text(
-              _logsMode.value.appBarTitle,
-              style: CRStyle.subtitle1BlackSemiBold17,
-            ),
+            builder: (_, __, ___) =>
+                Text(
+                  _logsMode.value.appBarTitle,
+                  style: CRStyle.subtitle1BlackSemiBold17,
+                ),
           ),
           onBackPressed: widget.onLoggerClose,
           showBackButton: true,
@@ -128,6 +133,8 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
                       key: _navKey,
                       titles: [
                         LogType.http.name,
+                        if (CRLoggerHelper.instance.showGQLLogs)
+                          LogType.gql.name,
                         LogType.debug.name,
                         LogType.info.name,
                         LogType.error.name,
@@ -175,6 +182,9 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
       case LogType.http:
         HttpLogManager.instance.cleanHTTP();
         break;
+      case LogType.gql:
+        GraphQLLogManager.instance.cleanGQLLogs();
+        break;
     }
     _updatePages();
   }
@@ -183,7 +193,7 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
     doPostFrame(() {
       (tabPages[_currentLogType.index].key as GlobalKey)
           .currentState
-          // ignore: no-empty-block
+      // ignore: no-empty-block
           ?.setState(() {});
     });
   }
@@ -208,12 +218,13 @@ class _MainLogMobilePageState extends State<MainLogMobilePage> {
       await Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (ctx) => LogLocalDetailPage(
-            logBean: log,
-            logType: logType,
-          ),
+          builder: (ctx) =>
+              LogLocalDetailPage(
+                logBean: log,
+                logType: logType,
+              ),
         ),
-        (Route<dynamic> route) => route.settings.name == '/',
+            (Route<dynamic> route) => route.settings.name == '/',
       );
 
       _pageController.jumpToPage(logType.index);

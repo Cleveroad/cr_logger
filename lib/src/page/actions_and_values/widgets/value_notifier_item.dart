@@ -16,34 +16,35 @@ class ValueNotifierItem extends StatelessWidget {
 
     return notifier != null
         ? ValueListenableBuilder(
-            valueListenable: notifier,
-            //ignore: prefer-trailing-comma
-            builder: (_, value, __) {
-              return Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      notifierData.name ?? '',
-                      style: CRStyle.bodyBlackRegular14,
+      valueListenable: notifier,
+      //ignore: prefer-trailing-comma
+      builder: (_, value, __) {
+        return Row(
+          children: [
+            Expanded(
+              child: Text(
+                notifierData.name ?? '',
+                style: CRStyle.bodyBlackRegular14,
+              ),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: GestureDetector(
+                onLongPress: () =>
+                    copyClipboard(
+                      context,
+                      value.toString(),
                     ),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: GestureDetector(
-                      onLongPress: () => copyClipboard(
-                        context,
-                        value.toString(),
-                      ),
-                      child: Text(
-                        value.toString(),
-                        style: CRStyle.bodyBlackRegular14,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          )
+                child: Text(
+                  value.toString(),
+                  style: CRStyle.bodyBlackRegular14,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    )
         : notifierData.widget ?? const SizedBox();
   }
 }

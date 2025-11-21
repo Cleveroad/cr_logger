@@ -42,8 +42,14 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    screenWidth = MediaQuery.of(context).size.width;
-    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
 
     /// Round
 
@@ -86,7 +92,7 @@ class _DraggableButtonWidgetState extends State<DraggableButtonWidget> {
                           children: [
                             ValueListenableBuilder(
                               valueListenable:
-                                  CRLoggerHelper.instance.loggerShowingNotifier,
+                              CRLoggerHelper.instance.loggerShowingNotifier,
                               //ignore:prefer-trailing-comma
                               builder: (context, loggerShowing, child) {
                                 return Icon(

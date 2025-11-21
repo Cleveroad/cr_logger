@@ -10,7 +10,7 @@ import 'package:cr_logger/src/js/console_output_worker.dart';
 import 'package:cr_logger/src/js/scripts.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
 import 'package:cr_logger/src/utils/html_stub.dart'
-    if (dart.library.js) 'dart:html' as html;
+if (dart.library.js) 'dart:html' as html;
 import 'package:cr_logger/src/utils/parsers/isolate_parser.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
@@ -69,8 +69,7 @@ final class TransferManager {
   }
 
   Future<List<Map<String, dynamic>>> _httpLogsToJson(
-    List<HttpBean> logs,
-  ) async {
+      List<HttpBean> logs,) async {
     final httpLogs = <Map<String, dynamic>>[];
     for (final log in logs) {
       final httpEntity = await _httpCnv.outToIn(log);
@@ -140,8 +139,7 @@ final class TransferManager {
   }
 
   Future<List<Map<String, dynamic>>> _logModelsToJson(
-    List<LogBean> logs,
-  ) async {
+      List<LogBean> logs,) async {
     final jsonData = <Map<String, dynamic>>[];
     for (final log in logs) {
       final logEntity = await _logCnv.outToIn(log);
@@ -152,8 +150,7 @@ final class TransferManager {
   }
 
   Future<List<LogBean>> _logModelsFromJson(
-    List<Map<String, dynamic>> json,
-  ) async {
+      List<Map<String, dynamic>> json,) async {
     final listOfLogBean = <LogBean>[];
 
     for (final data in json) {

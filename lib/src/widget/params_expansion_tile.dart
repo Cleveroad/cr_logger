@@ -1,4 +1,4 @@
-import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/data/bean/http/http_request_bean.dart';
 import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/expand_arrow_button.dart';
@@ -12,7 +12,7 @@ class ParamsExpansionTile extends StatefulWidget {
     super.key,
   });
 
-  final RequestBean? request;
+  final HttpRequestBean? request;
 
   @override
   State<ParamsExpansionTile> createState() => _ParamsExpansionTileState();
@@ -59,7 +59,8 @@ class _ParamsExpansionTileState extends State<ParamsExpansionTile> {
           ),
           if (paramsIsNotEmpty)
             JsonWidget(
-              widget.request?.params,
+              // widget.request?.params,
+              const {},
               key: _jsonWidgetParamsValueKey,
               allExpandedNodes: _isExpanded,
             ),

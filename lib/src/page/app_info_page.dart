@@ -25,6 +25,7 @@ class AppInfoPage extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           children: [
+
             /// Package name
             RichText(
               text: TextSpan(
@@ -60,7 +61,7 @@ class AppInfoPage extends StatelessWidget {
             if (customInfoItems.isNotEmpty) ...[
               const Divider(),
               ...customInfoItems.map(
-                (item) {
+                    (item) {
                   return AppInfoItem(
                     name: item.key,
                     value: item.value,

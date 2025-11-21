@@ -1,4 +1,4 @@
-package com.cleveroad.cr_logger.cr_logger_example
+package com.cleveroad.cr_logger_example
 
 import androidx.annotation.NonNull
 import com.cleveroad.cr_logger.cr_logger.CrLogger

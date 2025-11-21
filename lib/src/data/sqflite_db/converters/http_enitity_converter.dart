@@ -12,9 +12,9 @@ final class HttpEntityConverter {
 
     return HttpBean(
       key: inObject.key,
-      request: request != null ? RequestBean.fromJson(request) : null,
-      response: response != null ? ResponseBean.fromJson(response) : null,
-      error: error != null ? ErrorBean.fromJson(error) : null,
+      request: request != null ? HttpRequestBean.fromJson(request) : null,
+      response: response != null ? HttpResponseBean.fromJson(response) : null,
+      error: error != null ? HttpErrorBean.fromJson(error) : null,
     );
   }
 

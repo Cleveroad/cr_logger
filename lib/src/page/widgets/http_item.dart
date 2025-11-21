@@ -36,15 +36,15 @@ class HttpItem extends StatelessWidget {
     final statusCode =
         httpBean.response?.statusCode ?? httpBean.error?.statusCode;
     final urlWithHiddenParams =
-        getUrlWithHiddenParams(httpBean.request?.url ?? '');
+    getUrlWithHiddenParams(httpBean.request?.url.path ?? '');
 
     final request = httpBean.request;
 
     /// [!kIsWeb] because the logs may be imported
     /// and then there is no way to know the date of the logs.
     final time = LogsModeController.instance.isFromCurrentSession && !kIsWeb
-        ? request?.requestTime?.formatTime(context)
-        : request?.requestTime?.formatTimeWithYear(context);
+        ? request?.requestTime.formatTime(context)
+        : request?.requestTime.formatTimeWithYear(context);
 
     return RoundedCard(
       padding: const EdgeInsets.only(
@@ -59,12 +59,13 @@ class HttpItem extends StatelessWidget {
         children: [
           Row(
             children: [
+
               /// Request method
               SizedBox(
                 child: Text(
                   request?.method ?? '',
                   style:
-                      CRStyle.bodyBlackSemiBold14.copyWith(color: methodColor),
+                  CRStyle.bodyBlackSemiBold14.copyWith(color: methodColor),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -75,7 +76,7 @@ class HttpItem extends StatelessWidget {
                 height: 28,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: status.color.withOpacity(0.06),
+                  color: status.color.withValues(alpha: 0.06),
                 ),
                 padding: const EdgeInsets.symmetric(
                   vertical: 6,
@@ -83,20 +84,20 @@ class HttpItem extends StatelessWidget {
                 ),
                 child: statusCode != null || status == RequestStatus.sending
                     ? FittedBox(
-                        child: Text(
-                          statusCode != null ? statusCode.toString() : kSending,
-                          style: CRStyle.bodyBlackSemiBold14
-                              .copyWith(color: status.color),
-                          maxLines: 1,
-                        ),
-                      )
+                  child: Text(
+                    statusCode != null ? statusCode.toString() : kSending,
+                    style: CRStyle.bodyBlackSemiBold14
+                        .copyWith(color: status.color),
+                    maxLines: 1,
+                  ),
+                )
                     : Icon(
-                        status == RequestStatus.noInternet
-                            ? Icons.wifi_off
-                            : Icons.error,
-                        color: status.color,
-                        size: 14,
-                      ),
+                  status == RequestStatus.noInternet
+                      ? Icons.wifi_off
+                      : Icons.error,
+                  color: status.color,
+                  size: 14,
+                ),
               ),
               const Expanded(child: SizedBox(width: 10)),
 
@@ -122,7 +123,8 @@ class HttpItem extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '$time duration: ${httpBean.response?.duration ?? httpBean.error?.duration ?? 0}ms',
+                  '$time duration: ${httpBean.response?.duration ??
+                      httpBean.error?.duration ?? 0}ms',
                   style: CRStyle.bodyGreyRegular14,
                 ),
               ),
@@ -145,12 +147,12 @@ class HttpItem extends StatelessWidget {
         ),
       ),
     );
-    Clipboard.setData(ClipboardData(text: httpBean.request?.url ?? ''));
+    Clipboard.setData(ClipboardData(text: httpBean.request?.url.path ?? ''));
 
     if (httpBean.request?.url != null) {
       Clipboard.setData(
         ClipboardData(
-          text: httpBean.request!.url ?? '',
+          text: httpBean.request?.url.path ?? '',
         ),
       );
     }

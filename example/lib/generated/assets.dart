@@ -12,4 +12,7 @@ class Assets {
   static const String assetsIcWarning = 'assets/ic_warning.png';
   static const String assetsIcWarningAndroid = 'assets/ic_warning_android.png';
   static const String assetsIcWarningIos = 'assets/ic_warning_ios.png';
+  static const String fontsEpilogueMedium = 'fonts/Epilogue-Medium.ttf';
+  static const String fontsEpilogueRegular = 'fonts/Epilogue-Regular.ttf';
+
 }

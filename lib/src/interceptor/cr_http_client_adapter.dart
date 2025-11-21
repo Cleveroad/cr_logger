@@ -18,24 +18,22 @@ final class CRHttpClientAdapter {
       contentType = headers['Content-Type'] as String?;
     }
 
-    final reqOpt = RequestBean()
-      ..id = request.hashCode
-      ..url = request.uri.toString()
-      ..method = request.method
-      ..contentType = contentType
-      ..requestTime = DateTime.now()
-      ..body = body
-      ..headers = headers;
-
+    final reqOpt = HttpRequestBean(
+      id: request.hashCode,
+      url: Uri(path: request.uri.toString()),
+      method: request.method,
+      contentType: contentType,
+      requestTime: DateTime.now(),
+      body: body,
+      headers: headers,
+    );
     logManager.onRequest(reqOpt);
   }
 
   /// Handles httpClientRequest and adds response to http alice call
-  void onResponse(
-    HttpClientResponse response,
-    HttpClientRequest request,
-    Object? body,
-  ) {
+  void onResponse(HttpClientResponse response,
+      HttpClientRequest request,
+      Object? body,) {
     final headers = <String, dynamic>{};
 
     response.headers.forEach((header, value) {
@@ -45,27 +43,29 @@ final class CRHttpClientAdapter {
     final statusCode = response.statusCode;
     final isError = statusCode < 200 || statusCode >= 300;
 
-    final resOpt = ResponseBean()
-      ..id = request.hashCode
-      ..responseTime = DateTime.now()
-      ..url = request.uri.toString()
-      ..method = request.method
-      ..statusCode = response.statusCode
-      ..statusMessage = response.reasonPhrase
+    final resOpt = HttpResponseBean(
+      id: request.hashCode,
+      responseTime: DateTime.now(),
+      url: Uri(path: request.uri.toString()),
+      method: request.method,
+      statusCode: response.statusCode,
+      statusMessage: response.reasonPhrase,
 
       /// In error case, do not put data in ResponseBean.
-      ..data = isError ? null : body
-      ..headers = headers;
+      data: isError ? null : body,
+      headers: headers,
+    );
     logManager.onResponse(resOpt);
 
     /// On error
     if (isError) {
-      final errorBean = ErrorBean()
-        ..id = request.hashCode
-        ..url = request.uri.toString()
-        ..time = DateTime.now()
-        ..statusCode = response.statusCode
-        ..statusMessage = response.reasonPhrase;
+      final errorBean = HttpErrorBean(
+        id: request.hashCode,
+        url: Uri(path: request.uri.toString()),
+        errorTime: DateTime.now(),
+        statusCode: response.statusCode,
+        statusMessage: response.reasonPhrase,
+      );
       logManager.onError(errorBean);
     }
   }

@@ -10,8 +10,7 @@ import 'package:cr_logger/src/widget/url_value_widget.dart';
 import 'package:flutter/material.dart';
 
 class HttpRequestWidget extends StatefulWidget {
-  const HttpRequestWidget(
-    this.httpBean, {
+  const HttpRequestWidget(this.httpBean, {
     super.key,
   });
 
@@ -67,6 +66,7 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
+
                   /// Request method
                   Expanded(
                     child: Column(
@@ -149,7 +149,7 @@ class HttpRequestWidgetState extends State<HttpRequestWidget>
 
             /// URL
             UrlValueWidget(
-              url: request?.url,
+              url: request?.url.path,
               requestTime: request?.requestTime,
               responseTime: response?.responseTime,
             ),

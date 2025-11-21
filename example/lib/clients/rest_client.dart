@@ -15,9 +15,11 @@ class RestClient {
     dio.interceptors.add(
       CRLoggerInitializer.instance.getDioInterceptor(),
     );
-    chopper = ChopperClient(interceptors: [
-      CRLoggerInitializer.instance.getChopperInterceptor(),
-    ]);
+    chopper = ChopperClient(
+      interceptors: [
+        CRLoggerInitializer.instance.getChopperInterceptor(),
+      ],
+    );
   }
 
   static const _serverTimeout = 15000;

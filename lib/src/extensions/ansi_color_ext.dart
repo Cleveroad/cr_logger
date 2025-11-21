@@ -9,16 +9,20 @@ extension AnsiColorExt on AnsiColor {
 
   /// Return [AnsiColor] from provided [color]
   static AnsiColor fromColor(Color color) {
-    var xtermColor = ((color.red / 255).clamp(0.0, 1.0) * 5).toInt() * 36 +
-        ((color.green / 255).clamp(0.0, 1.0) * 5).toInt() * 6 +
-        ((color.blue / 255).clamp(0.0, 1.0) * 5).toInt() +
+    final r = color.r;
+    final g = color.g;
+    final b = color.b;
+
+    var xtermColor = (r.clamp(0.0, 1.0) * 5).toInt() * 36 +
+        (g.clamp(0.0, 1.0) * 5).toInt() * 6 +
+        (b.clamp(0.0, 1.0) * 5).toInt() +
         16;
 
     xtermColor = xtermColor < 0
         ? 0
         : xtermColor > 255
-            ? 255
-            : xtermColor;
+        ? 255
+        : xtermColor;
 
     return AnsiColor.fg(xtermColor);
   }

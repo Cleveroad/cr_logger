@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 extension ThemeDataExt on ThemeData {
   /// Return ThemeData with default values of [cardTheme] fields
-  ThemeData copyWithDefaultCardTheme(CardTheme defaultCardTheme) {
+  ThemeData copyWithDefaultCardTheme(CardThemeData defaultCardTheme) {
     return copyWith(
       cardTheme: cardTheme.copyWith(
         clipBehavior: cardTheme.clipBehavior ?? defaultCardTheme.clipBehavior,

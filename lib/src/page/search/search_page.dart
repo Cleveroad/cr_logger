@@ -33,7 +33,8 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Theme(
+  Widget build(BuildContext context) =>
+      Theme(
         data: CRLoggerHelper.instance.theme,
         child: SafeArea(
           child: Scaffold(
@@ -72,6 +73,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
             body: Column(
               children: [
+
                 /// Correct page dependens on the tab. HTTP page or Logs page
                 Expanded(
                   child: PageView(

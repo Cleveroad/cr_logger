@@ -46,6 +46,7 @@ class _LogSearchPageState extends State<LogSearchPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+
         /// Search field
         SizedBox(
           height: 38,
@@ -59,7 +60,7 @@ class _LogSearchPageState extends State<LogSearchPage> {
         const SizedBox(height: 24),
         if (_results.isEmpty)
 
-          /// Empty state
+        /// Empty state
           const Expanded(
             child: Center(
               child: Text(
@@ -70,7 +71,7 @@ class _LogSearchPageState extends State<LogSearchPage> {
           )
         else
 
-          /// List of logs
+        /// List of logs
           Expanded(
             child: ListView.separated(
               shrinkWrap: true,
@@ -81,27 +82,29 @@ class _LogSearchPageState extends State<LogSearchPage> {
                 right: 16,
                 left: 16,
               ),
-              itemBuilder: (_, index) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// Log type label
-                  Text(
-                    _results[index].first.name,
-                    style: CRStyle.bodyGreyRegular14,
-                  ),
-                  const SizedBox(height: 4),
+              itemBuilder: (_, index) =>
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
 
-                  /// Log
-                  LocalLogItem(
-                    logBean: _results[index].second,
-                    logType: _results[index].first,
-                    onSelected: (bean) =>
-                        _onItemTap(bean, _results[index].first),
-                    onLongTap: _onItemLongTap,
-                    onRemove: (_) => _onRemoveLogPressed(_results[index]),
+                      /// Log type label
+                      Text(
+                        _results[index].first.name,
+                        style: CRStyle.bodyGreyRegular14,
+                      ),
+                      const SizedBox(height: 4),
+
+                      /// Log
+                      LocalLogItem(
+                        logBean: _results[index].second,
+                        logType: _results[index].first,
+                        onSelected: (bean) =>
+                            _onItemTap(bean, _results[index].first),
+                        onLongTap: _onItemLongTap,
+                        onRemove: (_) => _onRemoveLogPressed(_results[index]),
+                      ),
+                    ],
                   ),
-                ],
-              ),
               separatorBuilder: (_, __) => const SizedBox(height: 18),
             ),
           ),
@@ -123,27 +126,25 @@ class _LogSearchPageState extends State<LogSearchPage> {
             logsDebug.reversed
                 .where(
                   (log) => log.message.toString().toLowerCase().contains(query),
-                )
+            )
                 .map(
                   (e) => Pair(first: LogType.debug, second: e),
-                ),
-          )
-          ..addAll(
-            logsInfo.reversed
-                .where((log) =>
-                    log.message.toString().toLowerCase().contains(query))
-                .map(
-                  (e) => Pair(first: LogType.info, second: e),
-                ),
-          )
-          ..addAll(
-            logsError.reversed
-                .where((log) =>
-                    log.message.toString().toLowerCase().contains(query))
-                .map(
-                  (e) => Pair(first: LogType.error, second: e),
-                ),
-          )
+            ),
+          )..addAll(
+          logsInfo.reversed
+              .where((log) =>
+              log.message.toString().toLowerCase().contains(query))
+              .map(
+                (e) => Pair(first: LogType.info, second: e),
+          ),
+        )..addAll(
+          logsError.reversed
+              .where((log) =>
+              log.message.toString().toLowerCase().contains(query))
+              .map(
+                (e) => Pair(first: LogType.error, second: e),
+          ),
+        )
           ..sort((a, b) => a.second.compareTo(b.second));
       });
     } else {
@@ -163,7 +164,7 @@ class _LogSearchPageState extends State<LogSearchPage> {
       _removeLog(logBean);
       showRemoveLogSnackBar(
         context,
-        () => _insertLog(logBean, logPair),
+            () => _insertLog(logBean, logPair),
       );
     }
   }
@@ -173,10 +174,8 @@ class _LogSearchPageState extends State<LogSearchPage> {
     _update();
   }
 
-  Future<void> _insertLog(
-    LogBean logBean,
-    Pair<LogType, LogBean> logPair,
-  ) async {
+  Future<void> _insertLog(LogBean logBean,
+      Pair<LogType, LogBean> logPair,) async {
     final logM = LogManager.instance;
     await logM.addLogToDB(logBean);
 
@@ -194,10 +193,11 @@ class _LogSearchPageState extends State<LogSearchPage> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (ctx) => LogLocalDetailPage(
-          logBean: bean,
-          logType: type,
-        ),
+        builder: (ctx) =>
+            LogLocalDetailPage(
+              logBean: bean,
+              logType: type,
+            ),
       ),
     );
   }

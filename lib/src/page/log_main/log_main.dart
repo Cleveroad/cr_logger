@@ -51,27 +51,29 @@ class _MainLogPageState extends State<MainLogPage> {
       child: ValueListenableBuilder<bool>(
         valueListenable: CRLoggerHelper.instance.loggerShowingNotifier,
         // ignore: prefer-trailing-comma
-        builder: (_, showLogger, __) => Offstage(
-          offstage: !showLogger,
-          child: Navigator(
-            key: widget.navigationKey,
-            onGenerateRoute: _onGenerateRoute,
-          ),
-        ),
+        builder: (_, showLogger, __) =>
+            Offstage(
+              offstage: !showLogger,
+              child: Navigator(
+                key: widget.navigationKey,
+                onGenerateRoute: _onGenerateRoute,
+              ),
+            ),
       ),
     );
   }
 
   Route? _onGenerateRoute(RouteSettings settings) {
     return MaterialPageRoute<dynamic>(
-      builder: (context) => AdaptiveLayoutWidget(
-        mobileLayoutWidget: MainLogMobilePage(
-          onLoggerClose: widget.onLoggerClose,
-        ),
-        webLayoutWidget: MainLogWebPage(
-          onLoggerClose: widget.onLoggerClose,
-        ),
-      ),
+      builder: (context) =>
+          AdaptiveLayoutWidget(
+            mobileLayoutWidget: MainLogMobilePage(
+              onLoggerClose: widget.onLoggerClose,
+            ),
+            webLayoutWidget: MainLogWebPage(
+              onLoggerClose: widget.onLoggerClose,
+            ),
+          ),
       settings: settings,
     );
   }

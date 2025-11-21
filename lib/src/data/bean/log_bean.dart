@@ -13,7 +13,8 @@ final class LogBean implements Comparable<LogBean> {
     this.data = const {},
     this.key,
     String? id,
-  })  : id = id ?? const Uuid().v4(),
+  })
+      : id = id ?? const Uuid().v4(),
         color = type?.getColor() ?? CRLoggerColors.primaryColor;
 
   final int? key;

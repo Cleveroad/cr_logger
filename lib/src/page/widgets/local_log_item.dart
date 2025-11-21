@@ -56,6 +56,7 @@ class LocalLogItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isJsonData) ...[
+
             /// Json title
             const Text(
               'JSON object',
@@ -77,12 +78,13 @@ class LocalLogItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+
                 /// Title
                 Expanded(
                   child: Text(
                     logMessage.toString().replaceAll(patternOfParamsRegex, ''),
                     style:
-                        CRStyle.bodyGreyMedium14.copyWith(color: logBean.color),
+                    CRStyle.bodyGreyMedium14.copyWith(color: logBean.color),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -96,6 +98,7 @@ class LocalLogItem extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
+
               /// Log time
               Expanded(
                 child: Text(
@@ -115,7 +118,7 @@ class LocalLogItem extends StatelessWidget {
 
   void _onCopy(BuildContext context) {
     final logMessage =
-        logBean.message.toString().replaceAll(patternOfParamsRegex, '');
+    logBean.message.toString().replaceAll(patternOfParamsRegex, '');
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(

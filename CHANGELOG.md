@@ -1,8 +1,28 @@
+## 2.6.1
+
+### Changed
+
+- Bumped minimum Flutter SDK to 3.32.0
+- Updated dependencies
+- Updated platform dependencies in the example project
+- Fixed minor compatibility issue after the upgrade
+
 ## 2.4.2
 
 ### Changed
 
-- Updated flutter version to 3.16.5, updated dependencies.
+- Updated flutter version to 3.16.5, updated dependencies, removed dart_code_metrics
+
+## 2.4.1
+
+### Changed
+
+- Updated dependencies
+
+## 2.4.0
+
+### Added
+
 - Added class modifiers.
 - Possibility to add parameters to the text of the logs. Such parameter value can be copied by the
   tap on it from log details screen.
@@ -11,11 +31,14 @@
   details page.
 - Added ability to remove logs. After deleting, it is possible to restore the deleted log in the
   opened SnackBar by pressing the "UNDO" button.
-- Changed placeholders on pages to view database logs
 
 ### Breaking changes
 
 - The error and stackTrace log parameters are now named
+
+### Changed
+
+- Changed placeholders on pages to view database logs
 
 ### Fixed
 

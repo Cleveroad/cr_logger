@@ -136,7 +136,7 @@ final class SqfliteRepository {
       where: 'type = ?',
       whereArgs: [logType.name],
     ).then(
-      (value) => value.map((e) => logs.add(LogEntity.fromJson(e))).toList(),
+          (value) => value.map((e) => logs.add(LogEntity.fromJson(e))).toList(),
     );
     if (logs.length > _maxLogsCount) {
       final key = logs.first.key;

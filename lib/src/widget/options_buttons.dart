@@ -54,61 +54,62 @@ class OptionsButtonsState extends State<OptionsButtons> {
       child: Row(
         children: List.generate(
           _selected.length,
-          (index) => widget.isWeb
+              (index) =>
+          widget.isWeb
               ? InkWell(
-                  onTap: () => _onTap(index),
-                  borderRadius: BorderRadius.circular(21),
-                  child: Container(
-                    width: 130,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: _isSelected(index)
-                          ? widget.activeColor
-                          : widget.disableColor ?? widget.backgroundColor,
-                      borderRadius: BorderRadius.circular(21),
-                    ),
-                    child: Center(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          widget.titles[index],
-                          style: _isSelected(index)
-                              ? CRStyle.subtitle1WhiteSemiBold16
-                              : CRStyle.subtitle1BlackMedium16,
-                        ),
-                      ),
-                    ),
+            onTap: () => _onTap(index),
+            borderRadius: BorderRadius.circular(21),
+            child: Container(
+              width: 130,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              height: 40,
+              decoration: BoxDecoration(
+                color: _isSelected(index)
+                    ? widget.activeColor
+                    : widget.disableColor ?? widget.backgroundColor,
+                borderRadius: BorderRadius.circular(21),
+              ),
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    widget.titles[index],
+                    style: _isSelected(index)
+                        ? CRStyle.subtitle1WhiteSemiBold16
+                        : CRStyle.subtitle1BlackMedium16,
                   ),
-                )
+                ),
+              ),
+            ),
+          )
               : Flexible(
-                  child: InkWell(
-                    onTap: () => _onTap(index),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                      ),
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: _isSelected(index)
-                            ? widget.activeColor
-                            : widget.disableColor ?? widget.backgroundColor,
-                        borderRadius: BorderRadius.circular(21),
-                      ),
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            widget.titles[index],
-                            style: _isSelected(index)
-                                ? CRStyle.subtitle1WhiteSemiBold16
-                                : CRStyle.subtitle1BlackMedium16,
-                          ),
-                        ),
-                      ),
+            child: InkWell(
+              onTap: () => _onTap(index),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                ),
+                height: 38,
+                decoration: BoxDecoration(
+                  color: _isSelected(index)
+                      ? widget.activeColor
+                      : widget.disableColor ?? widget.backgroundColor,
+                  borderRadius: BorderRadius.circular(21),
+                ),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      widget.titles[index],
+                      style: _isSelected(index)
+                          ? CRStyle.subtitle1WhiteSemiBold16
+                          : CRStyle.subtitle1BlackMedium16,
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -123,7 +124,7 @@ class OptionsButtonsState extends State<OptionsButtons> {
   void _onTap(int index) {
     change(index);
     doPostFrame(
-      () => widget.onSelected(index),
+          () => widget.onSelected(index),
     );
   }
 
