@@ -29,16 +29,15 @@ class _JsonDetailsWidgetState extends State<JsonDetailsWidget> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: _allExpandedNodesNotifier,
-      builder: (
-        BuildContext context,
-        bool isAllNodesExpanded,
-        Widget? child,
-      ) {
+      builder: (BuildContext context,
+          bool isAllNodesExpanded,
+          Widget? child,) {
         return Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+
                 /// Json title
                 const Text(
                   'JSON data',

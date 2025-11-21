@@ -4,8 +4,10 @@ import 'dart:io';
 
 import 'package:chopper/chopper.dart' as chopper;
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger_example/clients/graphql_client.dart';
+import 'package:cr_logger_example/clients/rest_client.dart';
 import 'package:cr_logger_example/generated/assets.dart';
-import 'package:cr_logger_example/rest_client.dart';
+import 'package:cr_logger_example/graphql/queries/__generated__/get_launches.req.gql.dart';
 import 'package:cr_logger_example/widgets/example_btn.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/foundation.dart';
@@ -24,6 +26,7 @@ Future<void> main() async {
   await CRLoggerInitializer.instance.init(
     useDatabase: true,
     theme: ThemeData.light(),
+    enableGQLFeature: true,
     levelColors: {
       Level.debug: Colors.lightGreenAccent,
       Level.warning: Colors.orange,
@@ -65,7 +68,7 @@ Future<void> main() async {
   }
 
   CRLoggerInitializer.instance.onShareLogsFile = (String path) async {
-    await Share.shareXFiles([XFile(path)]);
+    await SharePlus.instance.share(ShareParams(files: [XFile(path)]));
   };
   runApp(const MyApp());
 }
@@ -87,7 +90,7 @@ class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
   @override
-  _MainPageState createState() => _MainPageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
@@ -268,7 +271,7 @@ class _MainPageState extends State<MainPage> {
                             height: 200,
                             decoration: BoxDecoration(
                               color: _dragging
-                                  ? Colors.white.withOpacity(0.4)
+                                  ? Colors.white.withValues(alpha: 0.4)
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -284,23 +287,10 @@ class _MainPageState extends State<MainPage> {
                                     ),
                                   ),
                                 ),
-
-                                ///TODO Check it later
-                                /// For some reason, the Inspector package cannot
-                                /// get the color if there is a [DropzoneView]
-                                /// on the screen and throws an error
-                                /// (probably due to the flatter)
-                                /// if the [DropzoneView] is not assigned
-                                /// a new key each time.
-                                /// Because of this, frequent rebuilds
-                                /// of the widget and constant firing
-                                /// of callbacks can occur.
-                                /// For this reason, a debouncer is now used to avoid this.
                                 DropzoneView(
-                                  key: UniqueKey(),
                                   operation: DragOperation.move,
                                   onCreated: (ctrl) => _dropCtrl = ctrl,
-                                  onDrop: _onDrop,
+                                  onDropFile: _onDropFile,
                                   onHover: _onHover,
                                   onLeave: _onLeave,
                                 ),
@@ -326,6 +316,20 @@ class _MainPageState extends State<MainPage> {
                                 onTap: _makeLogJson,
                               ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ExampleBtn(
+                                text: 'Make GQL request',
+                                assetName: Assets.assetsIcHttp,
+                                onTap: _makeGQLRequest,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(child: SizedBox()),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -479,13 +483,23 @@ class _MainPageState extends State<MainPage> {
     await _makeDioHttpRequest();
 
     /// Request example for chopper package
-    //await _makeChopperHttpRequest();
+    // await _makeChopperHttpRequest();
 
     /// Request example for http package
-    //await _makeRegularHttpRequest();
+    // await _makeRegularHttpRequest();
 
     /// Request example for dart:io library
-    //await _makeHttpClientRequest();
+    // await _makeHttpClientRequest();
+  }
+
+  Future<void> _makeGQLRequest() async {
+    final client = await createGraphQLClient();
+    final req = GGetLaunchesReq(
+      (b) => b.vars
+        ..limit = 10
+        ..offset = 0,
+    );
+    await client.request(req).first;
   }
 
   Future<void> _makeDioHttpRequest() async {
@@ -680,26 +694,23 @@ class _MainPageState extends State<MainPage> {
     platform.invokeMethod('logJson');
   }
 
-  Future<void> _onDrop(dynamic value) async {
+  Future<void> _onDropFile(DropzoneFileInterface value) async {
     final bytes = await _dropCtrl.getFileData(value);
     try {
       final json = await compute(jsonDecode, utf8.decode(bytes));
       await CRLoggerInitializer.instance.createLogsFromJson(json);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Logs successfully imported'),
-        ),
-      );
+      _showSnackBarMessage('Logs successfully imported');
     } catch (ex) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unsupported file'),
-        ),
-      );
+      _showSnackBarMessage('Unsupported file');
     }
     setState(() {
       _dragging = false;
     });
+  }
+
+  void _showSnackBarMessage(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }
 

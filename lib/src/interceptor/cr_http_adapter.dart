@@ -22,14 +22,15 @@ final class CRHttpAdapter {
       contentType = requestHeaders['Content-Type'] as String?;
     }
 
-    final requestBean = RequestBean()
-      ..id = request.hashCode
-      ..url = request.url.toString()
-      ..method = request.method
-      ..contentType = contentType
-      ..requestTime = DateTime.now()
-      ..body = body
-      ..headers = requestHeaders;
+    final requestBean = HttpRequestBean(
+      id: request.hashCode,
+      url: Uri(path: request.url.toString()),
+      method: request.method,
+      contentType: contentType,
+      requestTime: DateTime.now(),
+      body: body,
+      headers: requestHeaders,
+    );
     logManager.onRequest(requestBean);
 
     final responseHeaders = <String, dynamic>{};
@@ -41,27 +42,30 @@ final class CRHttpAdapter {
     final statusCode = response.statusCode;
     final isError = statusCode < 200 || statusCode >= 300;
 
-    final responseBean = ResponseBean()
-      ..id = request.hashCode
-      ..responseTime = DateTime.now()
-      ..url = request.url.toString()
-      ..method = request.method
-      ..statusCode = response.statusCode
-      ..statusMessage = response.reasonPhrase
+    final responseBean = HttpResponseBean(
+      id: request.hashCode,
+      responseTime: DateTime.now(),
+      url: Uri(path: request.url.toString()),
+      method: request.method,
+      statusCode: response.statusCode,
+      statusMessage: response.reasonPhrase,
 
       /// In error case, do not put data in ResponseBean.
-      ..data = isError ? null : body
-      ..headers = responseHeaders;
+      data: isError ? null : body,
+      headers: responseHeaders,
+    );
+
     logManager.onResponse(responseBean);
 
     /// On error
     if (isError) {
-      final errorBean = ErrorBean()
-        ..id = request.hashCode
-        ..url = request.url.toString()
-        ..time = DateTime.now()
-        ..statusCode = response.statusCode
-        ..statusMessage = response.reasonPhrase;
+      final errorBean = HttpErrorBean(
+        id: request.hashCode,
+        url: Uri(path: request.url.toString()),
+        errorTime: DateTime.now(),
+        statusCode: response.statusCode,
+        statusMessage: response.reasonPhrase,
+      );
       logManager.onError(errorBean);
     }
   }

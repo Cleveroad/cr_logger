@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 
 enum LogType {
   http('HTTP'),
+  gql('GQL'),
   debug('Debug'),
   info('Info'),
   error('Error');
@@ -14,6 +15,8 @@ enum LogType {
     switch (this) {
       case LogType.http:
         return CRLoggerColors.blueAccent;
+      case LogType.gql:
+        return CRLoggerColors.darkMagenta;
       case LogType.debug:
         return CRLoggerColors.greenAccent;
       case LogType.info:

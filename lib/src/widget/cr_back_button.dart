@@ -17,14 +17,18 @@ class CRBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return (showBackButton == null
-            ? ModalRoute.of(context)?.canPop == true
-            : (showBackButton ?? false))
+        ? ModalRoute
+        .of(context)
+        ?.canPop == true
+        : (showBackButton ?? false))
         ? IconButton(
-            icon: ImageExt.fromPackage(CRLoggerAssets.assetsIcBack),
-            color: color,
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: () => _onBackPressed(context),
-          )
+      icon: ImageExt.fromPackage(CRLoggerAssets.assetsIcBack),
+      color: color,
+      tooltip: MaterialLocalizations
+          .of(context)
+          .backButtonTooltip,
+      onPressed: () => _onBackPressed(context),
+    )
         : const SizedBox();
   }
 

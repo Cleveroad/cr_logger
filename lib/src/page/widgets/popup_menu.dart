@@ -76,11 +76,12 @@ class PopupMenuState extends State<PopupMenu> {
         title: ValueListenableBuilder(
           valueListenable: LogsModeController.instance.logMode,
           // ignore: prefer-trailing-comma
-          builder: (_, logMode, __) => Text(
-            logMode == LogsMode.fromCurrentSession
-                ? 'Show logs from database of previous sessions'
-                : 'Show logs from current session',
-          ),
+          builder: (_, logMode, __) =>
+              Text(
+                logMode == LogsMode.fromCurrentSession
+                    ? 'Show logs from database of previous sessions'
+                    : 'Show logs from current session',
+              ),
         ),
         icon: Icons.swap_horiz_outlined,
         onTap: _switchLogsMode,
@@ -143,8 +144,8 @@ class PopupMenuState extends State<PopupMenu> {
             title: const Text('Clear logs'),
             content: _loggerHelper.useDB
                 ? ClearLogsContentWidget(
-                    clearLogsFromDB: _onClearDB,
-                  )
+              clearLogsFromDB: _onClearDB,
+            )
                 : null,
             actions: [
               TextButton(
@@ -183,7 +184,7 @@ class PopupMenuState extends State<PopupMenu> {
         title: const Text('Warning'),
         content: const Text(
           'Sharing logs is not enabled.\n\n'
-          'Please ask Flutter developer to enable it.',
+              'Please ask Flutter developer to enable it.',
         ),
       );
     } else {
@@ -195,10 +196,11 @@ class PopupMenuState extends State<PopupMenu> {
     CRLoggerHelper.instance.hideLogger();
     await showDialog(
       context: context,
-      builder: (_) => Theme(
-        data: CRLoggerHelper.instance.theme,
-        child: const ProxyInputDialog(),
-      ),
+      builder: (_) =>
+          Theme(
+            data: CRLoggerHelper.instance.theme,
+            child: const ProxyInputDialog(),
+          ),
     );
   }
 
@@ -242,15 +244,15 @@ class PopupMenuState extends State<PopupMenu> {
         title: const Text('Warning'),
         content: const Text(
           'There is no CrInspector find in widget tree. '
-          'Wrap your page with CrInspector.\n\n'
-          'Please, contact developer.',
+              'Wrap your page with CrInspector.\n\n'
+              'Please, contact developer.',
         ),
       );
     }
 
     setState(() {
       CRLoggerHelper.instance.inspectorNotifier.value =
-          !CRLoggerHelper.instance.inspectorNotifier.value;
+      !CRLoggerHelper.instance.inspectorNotifier.value;
     });
   }
 
@@ -276,15 +278,15 @@ class _PopupMenuItem extends PopupMenuItem<VoidCallback> {
     VoidCallback? onTap,
     super.key,
   }) : super(
-          value: onTap,
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(
-              icon,
-              color: CRLoggerHelper.instance.theme.iconTheme.color,
-            ),
-            title: title,
-            key: key,
-          ),
-        );
+    value: onTap,
+    child: ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        icon,
+        color: CRLoggerHelper.instance.theme.iconTheme.color,
+      ),
+      title: title,
+      key: key,
+    ),
+  );
 }

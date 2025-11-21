@@ -8,7 +8,7 @@ class ProgressWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      color: CRLoggerColors.backgroundGrey.withOpacity(0.8),
+      color: CRLoggerColors.backgroundGrey.withValues(alpha: 0.8),
       child: const CircularProgressIndicator(strokeWidth: 2),
     );
   }

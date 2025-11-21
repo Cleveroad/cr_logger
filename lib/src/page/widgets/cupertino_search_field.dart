@@ -35,6 +35,7 @@ class _CupertinoSearchFieldState extends State<CupertinoSearchField> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
+
           /// Cupertino search field
           Expanded(
             child: CupertinoTextField(

@@ -44,39 +44,40 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
   Widget bodyWidget(BuildContext context) {
     return _currentLogs.isEmpty
         ? Center(
-            child: Text(
-              currentLogsMode == LogsMode.fromCurrentSession
-                  ? 'No request logs'
-                  : 'No request logs in previous sessions',
-              style: CRStyle.bodyGreyMedium14,
-            ),
-          )
+      child: Text(
+        currentLogsMode == LogsMode.fromCurrentSession
+            ? 'No request logs'
+            : 'No request logs in previous sessions',
+        style: CRStyle.bodyGreyMedium14,
+      ),
+    )
         : ListView.separated(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(
-              bottom: 24,
-              left: 16,
-              right: 16,
-            ),
-            itemCount: _currentLogs.length,
-            itemBuilder: (_, index) {
-              final item = _currentLogs[index];
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.only(
+        bottom: 24,
+        left: 16,
+        right: 16,
+      ),
+      itemCount: _currentLogs.length,
+      itemBuilder: (_, index) {
+        final item = _currentLogs[index];
 
-              return HttpItem(
-                httpBean: item,
-                onSelected: _onHttpBeanSelected,
-                onRemove: _onRemoveLogPressed,
-              );
-            },
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-          );
+        return HttpItem(
+          httpBean: item,
+          onSelected: _onHttpBeanSelected,
+          onRemove: _onRemoveLogPressed,
+        );
+      },
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+    );
   }
 
   @override
   Future<void> getCurrentLogs() async {
     switch (currentLogsMode) {
       case LogsMode.fromCurrentSession:
-        _currentLogs = List.from(HttpLogManager.instance.logValues())
+        _currentLogs = List
+            .from(HttpLogManager.instance.logValues())
             .reversed
             .cast<HttpBean>()
             .toList();
@@ -106,7 +107,7 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
   Future<void> _onRemoveLogPressed(HttpBean httpBean) async {
     final okConfirmation = await showRemoveLogBottomSheet(
       context,
-      message: httpBean.request?.url ?? '',
+      message: httpBean.request?.url.path ?? '',
     );
     if (okConfirmation) {
       _removeLog(httpBean);
@@ -117,8 +118,8 @@ class HttpLogsPageState extends BasePageWithProgress<HttpLogsPage> {
   void _removeLog(HttpBean httpBean) {
     HttpLogManager.instance.removeLog(httpBean);
     _currentLogs.removeWhere(
-      (element) =>
-          element.request?.id == httpBean.request?.id &&
+          (element) =>
+      element.request?.id == httpBean.request?.id &&
           element.request?.id != null,
     );
   }

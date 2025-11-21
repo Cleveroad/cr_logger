@@ -65,62 +65,63 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
         body: log == null
             ? const Text('No log bean')
             : SingleChildScrollView(
-                controller: widget.scrollController,
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  top: 8,
-                  right: 16,
-                  bottom: 16,
-                ),
-                child: RoundedCard(
-                  padding: EdgeInsets.only(
-                    left: 16,
-                    top: isJsonData ? 10 : 16,
-                    right: 16,
-                    bottom: 16,
-                  ),
-                  child: Column(
+          controller: widget.scrollController,
+          padding: const EdgeInsets.only(
+            left: 16,
+            top: 8,
+            right: 16,
+            bottom: 16,
+          ),
+          child: RoundedCard(
+            padding: EdgeInsets.only(
+              left: 16,
+              top: isJsonData ? 10 : 16,
+              right: 16,
+              bottom: 16,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                /// Json data
+                if (isJsonData)
+                  JsonDetailsWidget(logMessage: logMessage)
+                else
+
+                /// Log message with copy widget
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      /// Json data
-                      if (isJsonData)
-                        JsonDetailsWidget(logMessage: logMessage)
-                      else
-
-                        /// Log message with copy widget
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: TextWithParamsWidget(
-                                logMessage,
-                                textColor: log.color,
-                                onParamTap: _onCopy,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            CopyWidget(
-                              onCopy: () => _onCopy(logMessage.toString()),
-                            ),
-                          ],
+                      Expanded(
+                        child: TextWithParamsWidget(
+                          logMessage,
+                          textColor: log.color,
+                          onParamTap: _onCopy,
                         ),
-                      const SizedBox(height: 8),
-
-                      /// Log time
-                      Text(
-                        'Time: $time',
-                        style: CRStyle.bodyGreyRegular14,
                       ),
-                      const SizedBox(height: 10),
-
-                      /// Stacktrace
-                      if (_listWidgetStackTrace.isNotEmpty)
-                        ..._listWidgetStackTrace,
+                      const SizedBox(width: 10),
+                      CopyWidget(
+                        onCopy: () => _onCopy(logMessage.toString()),
+                      ),
                     ],
                   ),
+                const SizedBox(height: 8),
+
+                /// Log time
+                Text(
+                  'Time: $time',
+                  style: CRStyle.bodyGreyRegular14,
                 ),
-              ),
+                const SizedBox(height: 10),
+
+                /// Stacktrace
+                if (_listWidgetStackTrace.isNotEmpty)
+                  ..._listWidgetStackTrace,
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -141,7 +142,9 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
     setState(() {
       if (widget.logBean?.stackTrace != null) {
         final listModelStackTrace = widget.logBean!.stackTrace!.split('\n');
-        final packageName = packageInfo.packageName.split('.').last;
+        final packageName = packageInfo.packageName
+            .split('.')
+            .last;
 
         for (final stackCall in listModelStackTrace) {
           if (stackCall.contains(packageName)) {
@@ -156,7 +159,9 @@ class _LogLocalDetailPageState extends State<LogLocalDetailPage> {
                           .copyWith(color: CRLoggerColors.primaryColor),
                     ),
                     TextSpan(
-                      text: stackTraceParts.last.split(')').first,
+                      text: stackTraceParts.last
+                          .split(')')
+                          .first,
                       style: CRStyle.captionBlackSemiBold12
                           .copyWith(color: CRLoggerColors.linkColor),
                     ),

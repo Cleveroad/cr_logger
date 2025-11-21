@@ -6,7 +6,7 @@ import 'package:cr_logger/src/controllers/logs_mode.dart';
 import 'package:cr_logger/src/controllers/logs_mode_controller.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/providers/sqflite_provider.dart';
-import 'package:cr_logger/src/utils/pretty_cr_logger.dart';
+import 'package:cr_logger/src/utils/pretty_cr_logger/pretty_cr_logger.dart';
 
 final class HttpLogManager {
   HttpLogManager._();
@@ -28,15 +28,15 @@ final class HttpLogManager {
   Function? updateHttpPage;
   Function? updateSearchHttpPage;
 
-  void onError(ErrorBean err) {
+  void onError(HttpErrorBean err) {
     if (_printLogs) {
       _prettyCRLogger.onError(err);
     }
     final key = err.id.toString();
     if (logMap.containsKey(key)) {
       logMap.update(key, (value) {
-        final errTime = err.time?.millisecondsSinceEpoch;
-        final reqTime = value.request?.requestTime?.millisecondsSinceEpoch;
+        final errTime = err.errorTime?.millisecondsSinceEpoch;
+        final reqTime = value.request?.requestTime.millisecondsSinceEpoch;
         if (errTime != null && reqTime != null) {
           err.duration = errTime - reqTime;
         }
@@ -53,7 +53,7 @@ final class HttpLogManager {
     }
   }
 
-  void onRequest(RequestBean options) {
+  void onRequest(HttpRequestBean options) {
     _handleStreamInRequestBody(options);
 
     if (_printLogs) {
@@ -68,34 +68,30 @@ final class HttpLogManager {
       keys.insert(0, key);
       final value = logMap.putIfAbsent(key, () => HttpBean(request: options));
       final id = options.id;
-      if (id != null) {
-        value.key = id;
-        saveHttpLog(value);
-      }
+      value.key = id;
+      saveHttpLog(value);
 
       updateSearchHttpPage?.call();
       updateHttpPage?.call();
     }
   }
 
-  Future<void> onResponse(ResponseBean response) async {
+  Future<void> onResponse(HttpResponseBean response) async {
     if (_printLogs) {
       await _prettyCRLogger.onResponse(response);
     }
     final key = response.id.toString();
     if (logMap.containsKey(key)) {
       logMap.update(key, (value) {
-        final respTime = response.responseTime?.millisecondsSinceEpoch;
-        final requestTime = value.request?.requestTime?.millisecondsSinceEpoch;
-        if (respTime != null && requestTime != null) {
+        final respTime = response.responseTime.millisecondsSinceEpoch;
+        final requestTime = value.request?.requestTime.millisecondsSinceEpoch;
+        if (requestTime != null) {
           response.duration = respTime - requestTime;
         }
         value.response = response;
         final id = response.id;
-        if (id != null) {
-          value.key = id;
-          updateHttpLog(value);
-        }
+        value.key = id;
+        updateHttpLog(value);
 
         return value;
       });
@@ -146,7 +142,7 @@ final class HttpLogManager {
         .map((log) {
           final url = log.request?.url;
           if (url != null) {
-            final path = Uri.parse(url).path;
+            final path = url.path;
 
             return path;
           }
@@ -216,16 +212,17 @@ final class HttpLogManager {
     LinkedHashMap<String, HttpBean> logs,
   ) {
     return LinkedHashMap.fromEntries(
-      logs.entries.toList()..sort((a, b) {
-        final aDate = a.value.request?.requestTime;
-        final bDate = b.value.request?.requestTime;
+      logs.entries.toList()
+        ..sort((a, b) {
+          final aDate = a.value.request?.requestTime;
+          final bDate = b.value.request?.requestTime;
 
-        if (aDate != null && bDate != null) {
-          return aDate.compareTo(bDate);
-        }
+          if (aDate != null && bDate != null) {
+            return aDate.compareTo(bDate);
+          }
 
-        return 0;
-      }),
+          return 0;
+        }),
     );
   }
 
@@ -233,7 +230,7 @@ final class HttpLogManager {
   /// request, this will cause a database conversion error and the body will not
   /// show up in the logs. This method replaces the stream with text of
   /// information about that stream
-  void _handleStreamInRequestBody(RequestBean request) {
+  void _handleStreamInRequestBody(HttpRequestBean request) {
     if (request.body is Stream) {
       final stringBuffer = StringBuffer('Stream (${request.body.runtimeType})');
 

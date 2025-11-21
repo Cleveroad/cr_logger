@@ -26,16 +26,17 @@ abstract class BasePageWithProgress<T extends StatefulWidget> extends State<T> {
     return ValueListenableBuilder(
       valueListenable: _logsModeController.progressNotifier,
       //ignore: prefer-trailing-comma
-      builder: (_, isProgressState, __) => isProgressState
+      builder: (_, isProgressState, __) =>
+      isProgressState
           ? Container(
-              color: CRLoggerColors.backgroundGrey.withOpacity(0.8),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            )
+        color: CRLoggerColors.backgroundGrey.withValues(alpha: 0.8),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      )
           : Builder(
-              builder: (_) => bodyWidget(context),
-            ),
+        builder: (_) => bodyWidget(context),
+      ),
     );
   }
 

@@ -26,6 +26,7 @@ class ActionsAndValuesPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               /// Action buttons
               const Text(
                 'Action buttons',
@@ -37,9 +38,10 @@ class ActionsAndValuesPage extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: ActionsManager.actions.length,
-                  itemBuilder: (_, index) => ActionItem(
-                    actionModel: ActionsManager.actions[index],
-                  ),
+                  itemBuilder: (_, index) =>
+                      ActionItem(
+                        actionModel: ActionsManager.actions[index],
+                      ),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisExtent: 40,
@@ -67,9 +69,10 @@ class ActionsAndValuesPage extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: NotifiersManager.valueNotifiers.length,
-                  itemBuilder: (_, index) => ValueNotifierItem(
-                    notifierData: NotifiersManager.valueNotifiers[index],
-                  ),
+                  itemBuilder: (_, index) =>
+                      ValueNotifierItem(
+                        notifierData: NotifiersManager.valueNotifiers[index],
+                      ),
                   separatorBuilder: (_, __) => const Divider(),
                 )
               else

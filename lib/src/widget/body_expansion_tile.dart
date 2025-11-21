@@ -1,4 +1,5 @@
-import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/data/bean/base/base_request_bean.dart';
+import 'package:cr_logger/src/data/bean/graphql/graphql_request_bean.dart';
 import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/widget/expand_arrow_button.dart';
@@ -13,7 +14,7 @@ class BodyExpansionTile extends StatefulWidget {
     super.key,
   });
 
-  final RequestBean? request;
+  final BaseRequestBean? request;
 
   @override
   State<BodyExpansionTile> createState() => _BodyExpansionTileState();
@@ -25,9 +26,8 @@ class _BodyExpansionTileState extends State<BodyExpansionTile> {
   @override
   Widget build(BuildContext context) {
     const _jsonWidgetBodyValueKey = ValueKey('RequestPageBody');
-    final bodyIsString = widget.request?.body is String;
     final bodyLength =
-        bodyIsString ? 1 : _tryGetBodyAsMap(widget.request)?.length ?? 0;
+        _tryGetBodyAsMap(widget.request)?.length ?? 0;
     final bodyIsNotEmpty = bodyLength != 0;
 
     return RoundedCard(
@@ -60,20 +60,22 @@ class _BodyExpansionTileState extends State<BodyExpansionTile> {
               ),
             ],
           ),
-          if (bodyIsNotEmpty && !bodyIsString)
+          if (bodyIsNotEmpty)
             JsonWidget(
               _tryGetBodyAsMap(widget.request),
               allExpandedNodes: _isExpanded,
               key: _jsonWidgetBodyValueKey,
             ),
-          if (bodyIsString && _isExpanded) Text(widget.request?.body),
+          // if (bodyIsString && _isExpanded) Text(widget.request?.body),
         ],
       ),
     );
   }
 
   Map<String, dynamic>? _tryGetBodyAsMap(request) {
-    if (request?.body is FormData) {
+    if (request is GraphQLRequestBean) {
+      return request.variables;
+    } else if (request?.body is FormData) {
       return request?.getFormData() ?? '';
     } else if (request?.body is List) {
       return request?.body ?? '';

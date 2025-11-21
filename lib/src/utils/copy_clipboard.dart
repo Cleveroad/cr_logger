@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void copyClipboard(
-  BuildContext context,
-  String value, {
-  Color selectValueColor = Colors.white,
-}) {
+void copyClipboard(BuildContext context,
+    String value, {
+      Color selectValueColor = Colors.white,
+    }) {
   final snackBar = SnackBar(
     content: RichText(
       overflow: TextOverflow.ellipsis,

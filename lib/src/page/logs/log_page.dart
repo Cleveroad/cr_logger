@@ -35,6 +35,7 @@ class LogPageState extends BasePageWithProgress<LogPage> {
     LogManager.instance.onAllUpdate = getCurrentLogs;
     switch (widget.logType) {
       case LogType.http:
+      case LogType.gql:
         break;
       case LogType.debug:
         LogManager.instance.onDebugUpdate = getCurrentLogs;
@@ -58,6 +59,7 @@ class LogPageState extends BasePageWithProgress<LogPage> {
     LogManager.instance.onAllUpdate = null;
     switch (widget.logType) {
       case LogType.http:
+      case LogType.gql:
         break;
       case LogType.debug:
         LogManager.instance.onDebugUpdate = null;
@@ -79,6 +81,7 @@ class LogPageState extends BasePageWithProgress<LogPage> {
   Widget bodyWidget(BuildContext context) {
     return Stack(
       children: [
+
         /// Log list
         ListView.separated(
           controller: _scrollController,
@@ -140,10 +143,11 @@ class LogPageState extends BasePageWithProgress<LogPage> {
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (ctx) => LogLocalDetailPage(
-            logBean: logBean,
-            logType: widget.logType,
-          ),
+          builder: (ctx) =>
+              LogLocalDetailPage(
+                logBean: logBean,
+                logType: widget.logType,
+              ),
         ),
       );
     }
@@ -154,6 +158,7 @@ class LogPageState extends BasePageWithProgress<LogPage> {
     var logs = <LogBean>[];
     switch (widget.logType) {
       case LogType.http:
+      case LogType.gql:
         break;
       case LogType.debug:
         logs = LogManager.instance.logDebug.reversed.toList();
@@ -174,6 +179,7 @@ class LogPageState extends BasePageWithProgress<LogPage> {
     var logs = <LogBean>[];
     switch (widget.logType) {
       case LogType.http:
+      case LogType.gql:
         break;
       case LogType.debug:
         logs = LogManager.instance.logDebugDB.reversed.toList();

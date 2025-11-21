@@ -3,7 +3,7 @@ library console_output;
 
 // ignore: avoid_web_libraries_in_flutter
 import 'package:cr_logger/src/utils/html_stub.dart'
-    if (dart.library.js) 'package:js/js.dart';
+if (dart.library.js) 'package:js/js.dart';
 
 @JS('printLogs')
 external void printLogs(List<String> lines);

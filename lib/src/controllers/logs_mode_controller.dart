@@ -33,7 +33,8 @@ final class LogsModeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _loadLogsFromDB() => Future.wait([
+  Future<void> _loadLogsFromDB() =>
+      Future.wait([
         HttpLogManager.instance.loadLogsFromDB(),
         LogManager.instance.loadLogsFromDB(),
       ]);

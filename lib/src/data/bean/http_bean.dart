@@ -1,6 +1,6 @@
-import 'package:cr_logger/src/data/bean/error_bean.dart' show ErrorBean;
-import 'package:cr_logger/src/data/bean/request_bean.dart' show RequestBean;
-import 'package:cr_logger/src/data/bean/response_bean.dart' show ResponseBean;
+import 'package:cr_logger/src/data/bean/http/http_error_bean.dart';
+import 'package:cr_logger/src/data/bean/http/http_request_bean.dart';
+import 'package:cr_logger/src/data/bean/http/http_response_bean.dart';
 import 'package:cr_logger/src/models/request_status.dart';
 
 final class HttpBean {
@@ -12,9 +12,9 @@ final class HttpBean {
   });
 
   int? key;
-  RequestBean? request;
-  ResponseBean? response;
-  ErrorBean? error;
+  HttpRequestBean? request;
+  HttpResponseBean? response;
+  HttpErrorBean? error;
 }
 
 extension HttpBeanExtension on HttpBean {

@@ -10,8 +10,7 @@ class TextWithParamsWidget extends StatefulWidget {
   /// Highlight mentions in text.
   ///
   /// Displays [text] which contains [params].
-  const TextWithParamsWidget(
-    this.text, {
+  const TextWithParamsWidget(this.text, {
     required this.textColor,
     required this.onParamTap,
     super.key,
@@ -55,20 +54,20 @@ class _TextWithParamsWidgetState extends State<TextWithParamsWidget> {
   Widget build(BuildContext context) {
     return _params.isNotEmpty
         ? RichText(
-            text: TextSpan(
-              text: 'Message:\n',
-              children: _generateTextSpans(context),
-              style: CRStyle.bodyBlackMedium14.copyWith(
-                color: widget.textColor.withOpacity(0.8),
-              ),
-            ),
-          )
+      text: TextSpan(
+        text: 'Message:\n',
+        children: _generateTextSpans(context),
+        style: CRStyle.bodyBlackMedium14.copyWith(
+          color: widget.textColor.withValues(alpha: 0.8),
+        ),
+      ),
+    )
         : Text(
-            'Message:\n${widget.text}',
-            style: CRStyle.bodyBlackMedium14.copyWith(
-              color: widget.textColor,
-            ),
-          );
+      'Message:\n${widget.text}',
+      style: CRStyle.bodyBlackMedium14.copyWith(
+        color: widget.textColor,
+      ),
+    );
   }
 
   List<TextSpan> _generateTextSpans(_) {

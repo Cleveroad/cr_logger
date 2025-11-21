@@ -11,8 +11,7 @@ final class CRLoggerWrapper {
   /// It is necessary to be careful with the use of the [showToast] parameter,
   /// because at a high refresh rate the logs with this parameter will be missed
   /// for a detailed view.
-  void t(
-    dynamic message, {
+  void t(dynamic message, {
     dynamic error,
     StackTrace? stackTrace,
     bool showToast = false,
@@ -27,8 +26,7 @@ final class CRLoggerWrapper {
     );
   }
 
-  void d(
-    dynamic message, {
+  void d(dynamic message, {
     dynamic error,
     StackTrace? stackTrace,
     bool showToast = false,
@@ -43,8 +41,7 @@ final class CRLoggerWrapper {
     );
   }
 
-  void i(
-    dynamic message, {
+  void i(dynamic message, {
     dynamic error,
     StackTrace? stackTrace,
     bool showToast = false,
@@ -59,8 +56,7 @@ final class CRLoggerWrapper {
     );
   }
 
-  void w(
-    dynamic message, {
+  void w(dynamic message, {
     dynamic error,
     StackTrace? stackTrace,
     bool showToast = false,
@@ -75,8 +71,7 @@ final class CRLoggerWrapper {
     );
   }
 
-  void e(
-    dynamic message, {
+  void e(dynamic message, {
     dynamic error,
     StackTrace? stackTrace,
     bool showToast = false,
@@ -91,8 +86,7 @@ final class CRLoggerWrapper {
     );
   }
 
-  void f(
-    dynamic message, {
+  void f(dynamic message, {
     dynamic error,
     StackTrace? stackTrace,
     bool showToast = false,

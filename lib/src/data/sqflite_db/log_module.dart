@@ -57,7 +57,8 @@ final class LogModule {
     return logModel;
   }
 
-  Future<void> saveLog(LogBean log) async => _sqlRepository.saveLog(
+  Future<void> saveLog(LogBean log) async =>
+      _sqlRepository.saveLog(
         await _logConverter.outToIn(log),
       );
 

@@ -29,48 +29,48 @@ class _HttpErrorWidgetState extends State<HttpErrorWidget>
 
     return errorBean == null
         ? const Center(
-            child: Text(
-              'No error',
-              style: CRStyle.bodyGreyMedium14,
-            ),
-          )
+      child: Text(
+        'No error',
+        style: CRStyle.bodyGreyMedium14,
+      ),
+    )
         : SingleChildScrollView(
-            padding: const EdgeInsets.only(
-              left: 16,
-              right: 16,
-              bottom: 16,
-            ),
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        bottom: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ErrorValueWidget(errorBean: errorBean),
+          const SizedBox(height: 12),
+
+          /// Error response
+          RoundedCard(
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ErrorValueWidget(errorBean: errorBean),
+                const Text(
+                  'Response:',
+                  style: CRStyle.subtitle1BlackSemiBold16,
+                ),
                 const SizedBox(height: 12),
-
-                /// Error response
-                RoundedCard(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Response:',
-                        style: CRStyle.subtitle1BlackSemiBold16,
-                      ),
-                      const SizedBox(height: 12),
-                      JsonWidget(
-                        _getJsonObj(errorBean),
-                        allExpandedNodes: true,
-                        key: _jsonWidgetErrorValueKey,
-                      ),
-                    ],
-                  ),
+                JsonWidget(
+                  _getJsonObj(errorBean),
+                  allExpandedNodes: true,
+                  key: _jsonWidgetErrorValueKey,
                 ),
               ],
             ),
-          );
+          ),
+        ],
+      ),
+    );
   }
 
-  Map<String, dynamic>? _getJsonObj(ErrorBean? error) {
+  Map<String, dynamic>? _getJsonObj(HttpErrorBean? error) {
     final errorData = error?.errorData;
 
     return errorData is Map<String, dynamic>

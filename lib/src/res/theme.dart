@@ -1,17 +1,17 @@
 import 'package:cr_logger/src/res/colors.dart';
 import 'package:flutter/material.dart';
 
-ThemeData get loggerTheme => ThemeData(
+ThemeData get loggerTheme =>
+    ThemeData(
       primaryColor: CRLoggerColors.primaryColor,
       brightness: Brightness.light,
-      indicatorColor: CRLoggerColors.accentColor,
       iconTheme: const IconThemeData(
         color: CRLoggerColors.primaryColor,
       ),
       textSelectionTheme: const TextSelectionThemeData(
         cursorColor: CRLoggerColors.black,
       ),
-      dialogTheme: const DialogTheme(
+      dialogTheme: const DialogThemeData(
         backgroundColor: Colors.white,
         contentTextStyle: TextStyle(
           color: Colors.black87,
@@ -24,7 +24,7 @@ ThemeData get loggerTheme => ThemeData(
         ),
         shape: Border(),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
         ),
@@ -42,4 +42,6 @@ ThemeData get loggerTheme => ThemeData(
       ),
       scaffoldBackgroundColor: CRLoggerColors.backgroundGrey,
       fontFamily: 'Epilogue',
+      tabBarTheme:
+      const TabBarThemeData(indicatorColor: CRLoggerColors.accentColor),
     );

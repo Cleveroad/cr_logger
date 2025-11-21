@@ -1,6 +1,7 @@
 import 'package:cr_logger/cr_logger.dart';
 import 'package:cr_logger/src/cr_logger_helper.dart';
 import 'package:cr_logger/src/extensions/do_post_frame.dart';
+import 'package:cr_logger/src/managers/graphql_log_manager.dart';
 import 'package:cr_logger/src/managers/log_manager.dart';
 import 'package:cr_logger/src/page/http_logs/http_log_details_page.dart';
 import 'package:cr_logger/src/page/http_logs/http_logs_page.dart';
@@ -191,22 +192,22 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
                       padding: const EdgeInsets.all(12),
                       child: httpBean != null
                           ? HttpLogDetailsPage(
-                              httpBean,
-                              isWeb: true,
-                            )
+                        httpBean,
+                        isWeb: true,
+                      )
                           : _logBean != null
-                              ? Scrollbar(
-                                  controller: _detailsScrollCtr,
-                                  child: LogLocalDetailPage(
-                                    scrollController: _detailsScrollCtr,
-                                    logBean: _logBean,
-                                    logType: _logType,
-                                    isWeb: true,
-                                  ),
-                                )
-                              : const SizedBox(
-                                  height: double.infinity,
-                                ),
+                          ? Scrollbar(
+                        controller: _detailsScrollCtr,
+                        child: LogLocalDetailPage(
+                          scrollController: _detailsScrollCtr,
+                          logBean: _logBean,
+                          logType: _logType,
+                          isWeb: true,
+                        ),
+                      )
+                          : const SizedBox(
+                        height: double.infinity,
+                      ),
                     ),
                   ],
                 ),
@@ -238,6 +239,9 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
       case LogType.http:
         HttpLogManager.instance.cleanAllLogs();
         break;
+      case LogType.gql:
+        GraphQLLogManager.instance.cleanGQLLogs();
+        break;
     }
     _updatePages();
   }
@@ -250,7 +254,7 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
     doPostFrame(() {
       (tabPages[_currentLogType.index].key as GlobalKey)
           .currentState
-          // ignore: no-empty-block
+      // ignore: no-empty-block
           ?.setState(() {});
     });
   }
@@ -290,12 +294,13 @@ class _MainLogWebPageState extends State<MainLogWebPage> {
       await Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (ctx) => LogLocalDetailPage(
-            logBean: log,
-            logType: logType,
-          ),
+          builder: (ctx) =>
+              LogLocalDetailPage(
+                logBean: log,
+                logType: logType,
+              ),
         ),
-        (Route<dynamic> route) => route.settings.name == '/',
+            (Route<dynamic> route) => route.settings.name == '/',
       );
 
       _pageController.jumpToPage(logType.index);

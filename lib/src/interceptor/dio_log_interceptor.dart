@@ -13,10 +13,8 @@ final class DioLogInterceptor implements Interceptor {
   final ParserError? parserError;
 
   @override
-  void onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) {
+  void onError(DioException err,
+      ErrorInterceptorHandler handler,) {
     dynamic json;
     try {
       final errorParser = parserError;
@@ -38,26 +36,32 @@ final class DioLogInterceptor implements Interceptor {
     } catch (e, _) {
       json = err.error;
     }
-    final resOpt = ResponseBean()
-      ..id = err.requestOptions.hashCode
-      ..responseTime = DateTime.now()
-      ..statusCode = err.response?.statusCode ?? 0
-      ..url = err.response?.requestOptions.uri.toString()
-      ..method = err.response?.requestOptions.method
-      ..statusMessage = err.response?.statusMessage
-      ..data = err.response?.data
-      ..headers = err.response?.headers.map;
+    final resOpt = HttpResponseBean(
+      id: err.requestOptions.hashCode,
+      responseTime: DateTime.now(),
+      statusCode: err.response?.statusCode ?? 0,
+      url: Uri(path: err.response?.requestOptions.uri.toString()),
+      method: err.response?.requestOptions.method,
+      statusMessage: err.response?.statusMessage,
+      data: err.response?.data,
+      headers: err.response?.headers.map,
+    );
 
-    final errOptions = ErrorBean()
-      ..id = err.requestOptions.hashCode
-      ..errorMessage = err.message
-      ..errorData = json
-      ..statusCode = err.response?.statusCode
-      ..statusMessage = err.response?.statusMessage
-      ..baseUrl = err.requestOptions.baseUrl
-      ..url = err.requestOptions.uri.toString()
-      ..time = DateTime.now()
-      ..responseBean = resOpt;
+    final errOptions = HttpErrorBean(
+      id: err.requestOptions.hashCode,
+      errorMessage: err.message,
+      errorData: json,
+      statusCode: err.response?.statusCode,
+      statusMessage: err.response?.statusMessage,
+      url: Uri(path: err.requestOptions.uri.toString()),
+      errorTime: DateTime.now(),
+      response: resOpt,
+
+      /// TODO GraphQL: refactor: I dont know, maybe base url is very importent property,
+      /// but now i deleted this field from HttpErrorBean
+      // ..baseUrl = err.requestOptions.baseUrl
+    );
+
     logManager.onError(errOptions);
 
     /// TODO
@@ -81,33 +85,34 @@ final class DioLogInterceptor implements Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final reqOpt = RequestBean()
-      ..id = options.hashCode
-      ..url = options.uri.toString()
-      ..method = options.method
-      ..contentType = options.contentType?.toString()
-      ..followRedirects = options.followRedirects
-      ..requestTime = DateTime.now()
-      ..connectTimeout = options.connectTimeout?.inMilliseconds
-      ..receiveTimeout = options.receiveTimeout?.inMilliseconds
-      ..params = options.queryParameters
-      ..body = options.data
-      ..headers = options.headers;
+    final reqOpt = HttpRequestBean(
+      id: options.hashCode,
+      url: Uri(path: options.uri.toString()),
+      method: options.method,
+      contentType: options.contentType.toString(),
+      headers: {...options.headers, 'followRedirects': options.followRedirects},
+      requestTime: DateTime.now(),
+      connectTimeout: options.connectTimeout?.inMilliseconds,
+      receiveTimeout: options.receiveTimeout?.inMilliseconds,
+      params: options.queryParameters,
+      body: options.data,
+    );
     logManager.onRequest(reqOpt);
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    final resOpt = ResponseBean()
-      ..id = response.requestOptions.hashCode
-      ..responseTime = DateTime.now()
-      ..statusCode = response.statusCode ?? 0
-      ..url = response.requestOptions.uri.toString()
-      ..method = response.requestOptions.method
-      ..statusMessage = response.statusMessage
-      ..data = response.data
-      ..headers = response.headers.map;
+    final resOpt = HttpResponseBean(
+      id: response.requestOptions.hashCode,
+      responseTime: DateTime.now(),
+      statusCode: response.statusCode ?? 0,
+      url: Uri(path: response.requestOptions.uri.toString()),
+      method: response.requestOptions.method,
+      statusMessage: response.statusMessage,
+      data: response.data,
+      headers: response.headers.map,
+    );
     logManager.onResponse(resOpt);
     handler.next(response);
   }

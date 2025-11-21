@@ -19,7 +19,6 @@ class HttpResponseWidget extends StatefulWidget {
 class HttpResponseWidgetState extends State<HttpResponseWidget>
     with AutomaticKeepAliveClientMixin {
   final _allExpandedNodesNotifier = ValueNotifier<bool>(false);
-  final _jsonWidgetValueKey = const ValueKey('ResponsePage');
 
   @override
   bool get wantKeepAlive => true;
@@ -53,7 +52,7 @@ class HttpResponseWidgetState extends State<HttpResponseWidget>
             const SizedBox(height: 12),
 
             /// URL
-            UrlValueWidget(url: request?.url),
+            UrlValueWidget(url: request?.url.path),
             const SizedBox(height: 12),
 
             /// Data
@@ -93,7 +92,7 @@ class HttpResponseWidgetState extends State<HttpResponseWidget>
                         JsonWidget(
                           data,
                           allExpandedNodes: isAllNodesExpanded,
-                          key: _jsonWidgetValueKey,
+                          key: ObjectKey(data),
                         )
                       else
                         Text(

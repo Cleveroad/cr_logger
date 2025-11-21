@@ -1,4 +1,5 @@
 import 'package:cr_logger/cr_logger.dart';
+import 'package:cr_logger/src/data/bean/base/base_error_bean.dart';
 import 'package:cr_logger/src/res/colors.dart';
 import 'package:cr_logger/src/res/styles.dart';
 import 'package:cr_logger/src/utils/parsers/url_parser.dart';
@@ -13,7 +14,7 @@ class ErrorValueWidget extends StatefulWidget {
     super.key,
   });
 
-  final ErrorBean errorBean;
+  final BaseErrorBean errorBean;
 
   @override
   _ErrorValueWidgetState createState() => _ErrorValueWidgetState();
@@ -37,7 +38,7 @@ class _ErrorValueWidgetState extends State<ErrorValueWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Error', style: CRStyle.subtitle1BlackSemiBold16),
-              CopyWidget(onCopy: () => copyClipboard(context, url ?? '')),
+              CopyWidget(onCopy: () => copyClipboard(context, url.path)),
             ],
           ),
           const SizedBox(height: 4),

@@ -15,10 +15,11 @@ class CrInspector extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: CRLoggerHelper.instance.inspectorNotifier,
       // ignore: Prefer-trailing-comma
-      builder: (_, enabled, __) => Inspector(
-        isEnabled: enabled,
-        child: child,
-      ),
+      builder: (_, enabled, __) =>
+          Inspector(
+            isEnabled: enabled,
+            child: child,
+          ),
     );
   }
 }

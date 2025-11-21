@@ -26,6 +26,8 @@ final class CRLoggerHelper {
 
   bool get isLoggerShowing => loggerShowingNotifier.value;
 
+  bool showGQLLogs = false;
+
   bool get useDB {
     final useCrLoggerInReleaseBuild =
         CRLoggerInitializer.instance.useCrLoggerInReleaseBuild;

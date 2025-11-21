@@ -120,6 +120,7 @@ final class LogManager {
   void addLogToListByType(LogType type, LogBean log) {
     switch (type) {
       case LogType.http:
+      case LogType.gql:
         break;
       case LogType.debug:
         logDebug.insert(0, log);
@@ -142,6 +143,7 @@ final class LogManager {
   void addLogToDBListByType(LogType type, LogBean log) {
     switch (type) {
       case LogType.http:
+      case LogType.gql:
         break;
       case LogType.debug:
         logDebugDB.insert(0, log);
@@ -172,10 +174,8 @@ final class LogManager {
   ///
   /// When displayed, the list is inverted, thus displaying the new logs at
   /// the beginning
-  Future<void> _add(
-    LogBean log,
-    List<LogBean> logs,
-  ) async {
+  Future<void> _add(LogBean log,
+      List<LogBean> logs,) async {
     if (logs.length >= maxLogsCount) {
       logs.removeAt(0);
     }
@@ -252,6 +252,7 @@ final class LogManager {
   void _clearLogsByType(LogType type) {
     switch (type) {
       case LogType.http:
+      case LogType.gql:
         break;
       case LogType.debug:
         logDebug.clear();
@@ -268,6 +269,7 @@ final class LogManager {
   Future<void> _clearDBLogsByType(LogType type) async {
     switch (type) {
       case LogType.http:
+      case LogType.gql:
         break;
       case LogType.debug:
         await _deleteSeveralLogs(logDebugDB);
